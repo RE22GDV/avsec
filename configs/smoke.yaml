@@ -1,0 +1,94 @@
+# Shvydkyi lokalnyi progon: perevirka pratsezdatnosti, ne doviv novyzny.
+name: smoke
+seed: 20240909
+key_mode: lab
+frame:
+  width: 256
+  height: 192
+  n_frames: 2
+sources:
+  kind: synthetic
+  patterns: [edges, smooth]
+  n_frames: 2
+  motion: slow
+channel:
+  preset: mild
+budget:
+  rasters_per_frame: 3          # spilne obmezhennia zainiatosti kanalu dlia vsikh metodiv
+  raster_rate_hz: 25.0
+  source_fps: 8.333             # 25 / 3
+  max_accumulation_rows: 300
+  max_virtual_latency_s: 0.8
+  max_receiver_buffer_kb: 512
+  raster_width: 720
+  raster_height: 576
+  active_x0: 24
+  active_x1: 696
+  active_y0: 8
+  active_y1: 568
+  level_low: 40
+  level_high: 216
+methods: [B0a, B0d, B1, B2, B3, B4, P]
+profiles:
+  B0d:
+    stripe_height: 24
+    n_descriptions: 1
+    codec: dct
+    quality: 12
+    max_unit_payload: 640
+    fec_nsym: 96
+    fec_header_nsym: 48
+    modulation: [4, 8, 2]
+    interleaver: [block, 278, 0]
+  B3:
+    stripe_height: 24
+    n_descriptions: 1
+    codec: dct
+    quality: 12
+    max_unit_payload: 640
+    fec_nsym: 96
+    fec_header_nsym: 48
+    modulation: [4, 8, 2]
+    interleaver: [block, 278, 0]
+  B4:
+    stripe_height: 24
+    n_descriptions: 1
+    codec: dct
+    quality: 12
+    max_unit_payload: 640
+    fec_nsym: 96
+    fec_header_nsym: 48
+    modulation: [4, 8, 2]
+    interleaver: [block, 278, 0]
+  P:
+    stripe_height: 24
+    n_descriptions: 2
+    codec: dct
+    quality: 8
+    max_unit_payload: 320
+    fec_nsym: 128
+    fec_header_nsym: 48
+    modulation: [4, 8, 2]
+    interleaver: [bawp, 0, 8]
+lfsr:
+  grid_rows: 12
+  grid_cols: 16
+  width: 16
+  seed: 44257
+  form: fibonacci
+  variant: fisher_yates
+  size_policy: pad
+  per_frame: false
+crypto:
+  algorithm: chacha20poly1305
+  replay_window: 4096
+  direction: uplink
+  stream_id: 0
+b2_grid: [12, 16]
+fill: interpolate
+max_frames_per_source: 2
+channel_realisations: 1
+save_images: true
+notes: >
+  Smoke-progon. Vsi dzherela protsedurno zgenerovani; tse ne dokaz realistychnoi
+  yakosti zviazku i ne doviv novyzny.

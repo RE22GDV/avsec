@@ -1,0 +1,936 @@
+{
+  "kind": "comparison",
+  "summary": [
+    {
+      "method": "B0a",
+      "sequences": 35,
+      "authenticated": false,
+      "psnr_n": 35,
+      "psnr_mean": 14.741696679107475,
+      "psnr_lo": 13.419623690338849,
+      "psnr_hi": 16.0637696678761,
+      "psnr_sd": 3.990555755426613,
+      "coverage_n": 35,
+      "coverage_mean": 1.0,
+      "coverage_lo": 1.0,
+      "coverage_hi": 1.0,
+      "coverage_sd": 0.0
+    },
+    {
+      "method": "B0d",
+      "sequences": 35,
+      "authenticated": false,
+      "psnr_n": 35,
+      "psnr_mean": 20.947457497235256,
+      "psnr_lo": 18.43429704787966,
+      "psnr_hi": 23.46061794659085,
+      "psnr_sd": 7.585743737815405,
+      "coverage_n": 35,
+      "coverage_mean": 0.6883928571428571,
+      "coverage_lo": 0.600239560684525,
+      "coverage_hi": 0.7765461536011893,
+      "coverage_sd": 0.26608261989322735
+    },
+    {
+      "method": "B1",
+      "sequences": 35,
+      "authenticated": false,
+      "psnr_n": 35,
+      "psnr_mean": 16.124832098974593,
+      "psnr_lo": 14.922724801750961,
+      "psnr_hi": 17.326939396198224,
+      "psnr_sd": 3.6284503460312494,
+      "coverage_n": 35,
+      "coverage_mean": 1.0,
+      "coverage_lo": 1.0,
+      "coverage_hi": 1.0,
+      "coverage_sd": 0.0
+    },
+    {
+      "method": "B2",
+      "sequences": 35,
+      "authenticated": false,
+      "psnr_n": 35,
+      "psnr_mean": 14.722407811657481,
+      "psnr_lo": 13.553772186733356,
+      "psnr_hi": 15.891043436581606,
+      "psnr_sd": 3.5274191808283692,
+      "coverage_n": 35,
+      "coverage_mean": 1.0,
+      "coverage_lo": 1.0,
+      "coverage_hi": 1.0,
+      "coverage_sd": 0.0
+    },
+    {
+      "method": "B3",
+      "sequences": 35,
+      "authenticated": true,
+      "psnr_n": 35,
+      "psnr_mean": 21.39170198708213,
+      "psnr_lo": 18.567802933272844,
+      "psnr_hi": 24.215601040891414,
+      "psnr_sd": 8.523679643752677,
+      "coverage_n": 35,
+      "coverage_mean": 0.5214285714285715,
+      "coverage_lo": 0.38761834584551585,
+      "coverage_hi": 0.6552387970116271,
+      "coverage_sd": 0.40389386242036446
+    },
+    {
+      "method": "B4",
+      "sequences": 35,
+      "authenticated": true,
+      "psnr_n": 35,
+      "psnr_mean": 21.27907127856881,
+      "psnr_lo": 19.27027130476844,
+      "psnr_hi": 23.287871252369182,
+      "psnr_sd": 6.0633780169854194,
+      "coverage_n": 35,
+      "coverage_mean": 0.70625,
+      "coverage_lo": 0.6321349265152691,
+      "coverage_hi": 0.7803650734847309,
+      "coverage_sd": 0.2237095346254892
+    },
+    {
+      "method": "P",
+      "sequences": 35,
+      "authenticated": true,
+      "psnr_n": 35,
+      "psnr_mean": 23.590435290824676,
+      "psnr_lo": 21.711374301265025,
+      "psnr_hi": 25.469496280384327,
+      "psnr_sd": 5.671772822216839,
+      "coverage_n": 35,
+      "coverage_mean": 0.7982142857142858,
+      "coverage_lo": 0.7343269480661672,
+      "coverage_hi": 0.8621016233624044,
+      "coverage_sd": 0.19283805441637406
+    }
+  ],
+  "paired": [
+    {
+      "n": 35,
+      "mean": -6.205760818127777,
+      "lo": -8.845852624163406,
+      "hi": -3.565669012092147,
+      "sd": 7.9688743669460935,
+      "significant_at_95": true,
+      "a": "B0a",
+      "b": "B0d",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": -1.3831354198671157,
+      "lo": -2.818665366663632,
+      "hi": 0.05239452692940039,
+      "sd": 4.333015151161702,
+      "significant_at_95": false,
+      "a": "B0a",
+      "b": "B1",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": 0.01928886744999469,
+      "lo": -1.6031997304311356,
+      "hi": 1.641777465331125,
+      "sd": 4.897332649099081,
+      "significant_at_95": false,
+      "a": "B0a",
+      "b": "B2",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": -6.650005307974656,
+      "lo": -9.461720038668886,
+      "hi": -3.8382905772804246,
+      "sd": 8.486902384746696,
+      "significant_at_95": true,
+      "a": "B0a",
+      "b": "B3",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": -6.537374599461338,
+      "lo": -8.848172604012147,
+      "hi": -4.226576594910529,
+      "sd": 6.974931304872436,
+      "significant_at_95": true,
+      "a": "B0a",
+      "b": "B4",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": -8.8487386117172,
+      "lo": -10.960574363743241,
+      "hi": -6.736902859691159,
+      "sd": 6.374382039687877,
+      "significant_at_95": true,
+      "a": "B0a",
+      "b": "P",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": 4.82262539826066,
+      "lo": 2.337768552466819,
+      "hi": 7.307482244054501,
+      "sd": 7.500311912906953,
+      "significant_at_95": true,
+      "a": "B0d",
+      "b": "B1",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": 6.225049685577772,
+      "lo": 3.5782571260944542,
+      "hi": 8.871842245061089,
+      "sd": 7.989099975111093,
+      "significant_at_95": true,
+      "a": "B0d",
+      "b": "B2",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": -0.444244489846878,
+      "lo": -3.447469442334594,
+      "hi": 2.558980462640838,
+      "sd": 9.064958380363716,
+      "significant_at_95": false,
+      "a": "B0d",
+      "b": "B3",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": -0.33161378133356073,
+      "lo": -2.410420052279034,
+      "hi": 1.7471924896119126,
+      "sd": 6.274685588021029,
+      "significant_at_95": false,
+      "a": "B0d",
+      "b": "B4",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": -2.6429777935894245,
+      "lo": -4.808945941993882,
+      "hi": -0.477009645184967,
+      "sd": 6.537775700823123,
+      "significant_at_95": true,
+      "a": "B0d",
+      "b": "P",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": 1.4024242873171104,
+      "lo": -0.06471558724528759,
+      "hi": 2.8695641618795085,
+      "sd": 4.428426811672403,
+      "significant_at_95": false,
+      "a": "B1",
+      "b": "B2",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": -5.2668698881075375,
+      "lo": -8.171966539337589,
+      "hi": -2.361773236877485,
+      "sd": 8.768767125659444,
+      "significant_at_95": true,
+      "a": "B1",
+      "b": "B3",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": -5.154239179594221,
+      "lo": -7.430698201473728,
+      "hi": -2.877780157714714,
+      "sd": 6.871282243059222,
+      "significant_at_95": true,
+      "a": "B1",
+      "b": "B4",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": -7.465603191850084,
+      "lo": -9.738865373920149,
+      "hi": -5.192341009780019,
+      "sd": 6.861632876035524,
+      "significant_at_95": true,
+      "a": "B1",
+      "b": "P",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": -6.669294175424649,
+      "lo": -9.636871611725331,
+      "hi": -3.701716739123967,
+      "sd": 8.957359630449517,
+      "significant_at_95": true,
+      "a": "B2",
+      "b": "B3",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": -6.556663466911331,
+      "lo": -8.767766590743037,
+      "hi": -4.345560343079626,
+      "sd": 6.674011474106715,
+      "significant_at_95": true,
+      "a": "B2",
+      "b": "B4",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": -8.868027479167196,
+      "lo": -11.045360061154462,
+      "hi": -6.690694897179931,
+      "sd": 6.572078198662728,
+      "significant_at_95": true,
+      "a": "B2",
+      "b": "P",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": 0.11263070851331745,
+      "lo": -3.14890302680372,
+      "hi": 3.374164443830355,
+      "sd": 9.844639690513521,
+      "significant_at_95": false,
+      "a": "B3",
+      "b": "B4",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": -2.198733303742546,
+      "lo": -4.788912652667858,
+      "hi": 0.39144604518276616,
+      "sd": 7.818218204479167,
+      "significant_at_95": false,
+      "a": "B3",
+      "b": "P",
+      "metric": "psnr_full"
+    },
+    {
+      "n": 35,
+      "mean": -2.311364012255863,
+      "lo": -4.725519827775326,
+      "hi": 0.10279180326359905,
+      "sd": 7.286907353799518,
+      "significant_at_95": false,
+      "a": "B4",
+      "b": "P",
+      "metric": "psnr_full"
+    }
+  ],
+  "errors": {},
+  "timing": {
+    "B0a.transform": {
+      "total_s": 6.829999938418041e-05,
+      "calls": 80,
+      "mean_ms": 0.0008537499923022551,
+      "median_ms": 0.0008000000661922968,
+      "p95_ms": 0.0010999999631167157,
+      "p99_ms": 0.0017309998656855829,
+      "max_ms": 0.0026000000161729986,
+      "n_samples": 80
+    },
+    "B0a.modulation": {
+      "total_s": 0.0851105000001553,
+      "calls": 80,
+      "mean_ms": 1.0638812500019412,
+      "median_ms": 1.1270499999227468,
+      "p95_ms": 1.3056500000288904,
+      "p99_ms": 1.4913550000005669,
+      "max_ms": 1.5273000001343462,
+      "n_samples": 80
+    },
+    "B0a.demodulation": {
+      "total_s": 0.5562115999996422,
+      "calls": 80,
+      "mean_ms": 6.9526449999955275,
+      "median_ms": 6.8957000000864355,
+      "p95_ms": 7.923759999971479,
+      "p99_ms": 8.499173999955474,
+      "max_ms": 8.506599999918762,
+      "n_samples": 80
+    },
+    "B0a.inverse": {
+      "total_s": 4.150000086156069e-05,
+      "calls": 80,
+      "mean_ms": 0.0005187500107695087,
+      "median_ms": 0.0004999999418942025,
+      "p95_ms": 0.0007999999525054591,
+      "p99_ms": 0.0009420000174031872,
+      "max_ms": 0.0010999999631167157,
+      "n_samples": 80
+    },
+    "tx.source_coding": {
+      "total_s": 1.088701100000435,
+      "calls": 240,
+      "mean_ms": 4.536254583335146,
+      "median_ms": 4.33935000000929,
+      "p95_ms": 7.070740000199292,
+      "p99_ms": 8.38540100002774,
+      "max_ms": 10.27909999993426,
+      "n_samples": 240
+    },
+    "tx.crypto": {
+      "total_s": 7.99078459999987,
+      "calls": 2720,
+      "mean_ms": 2.937788455882305,
+      "median_ms": 2.6405500000237225,
+      "p95_ms": 4.460119999953347,
+      "p99_ms": 5.910647000082462,
+      "max_ms": 7.082999999965978,
+      "n_samples": 2720
+    },
+    "tx.modulation": {
+      "total_s": 0.2896785999826079,
+      "calls": 2720,
+      "mean_ms": 0.1064994852877235,
+      "median_ms": 0.09690000013051758,
+      "p95_ms": 0.1875999999015221,
+      "p99_ms": 0.27690599995594295,
+      "max_ms": 0.45999999974810635,
+      "n_samples": 2720
+    },
+    "tx.raster": {
+      "total_s": 1.404605200007154,
+      "calls": 560,
+      "mean_ms": 2.5082235714413463,
+      "median_ms": 2.420100000108505,
+      "p95_ms": 3.233285000010254,
+      "p99_ms": 3.6580170002048336,
+      "max_ms": 3.9770999997017498,
+      "n_samples": 560
+    },
+    "rx.demodulation": {
+      "total_s": 13.386138500001607,
+      "calls": 560,
+      "mean_ms": 23.90381875000287,
+      "median_ms": 22.1751999999924,
+      "p95_ms": 34.03083499974853,
+      "p99_ms": 44.12447999992308,
+      "max_ms": 55.16920000036407,
+      "n_samples": 560
+    },
+    "rx.deinterleave": {
+      "total_s": 0.15430180000566907,
+      "calls": 2500,
+      "mean_ms": 0.06172072000226763,
+      "median_ms": 0.053999999863663106,
+      "p95_ms": 0.1071000001502398,
+      "p99_ms": 0.15431599985049577,
+      "max_ms": 0.2603000000362954,
+      "n_samples": 2500
+    },
+    "rx.fec_header": {
+      "total_s": 3.452220299998544,
+      "calls": 2500,
+      "mean_ms": 1.3808881199994176,
+      "median_ms": 1.341049999837196,
+      "p95_ms": 2.264820000345935,
+      "p99_ms": 2.929374999780519,
+      "max_ms": 3.7658000001101755,
+      "n_samples": 2500
+    },
+    "rx.fec_payload": {
+      "total_s": 56.47234920000119,
+      "calls": 2339,
+      "mean_ms": 24.143800427533645,
+      "median_ms": 25.154700000257435,
+      "p95_ms": 37.61263999992934,
+      "p99_ms": 45.12653799982672,
+      "max_ms": 56.39130000008663,
+      "n_samples": 2339
+    },
+    "rx.aead": {
+      "total_s": 0.04470770000352786,
+      "calls": 2081,
+      "mean_ms": 0.021483757810441068,
+      "median_ms": 0.020700000277429353,
+      "p95_ms": 0.028700000257231295,
+      "p99_ms": 0.041639999835751916,
+      "max_ms": 0.12060000017299899,
+      "n_samples": 2081
+    },
+    "rx.source_decoding": {
+      "total_s": 0.6812677000004896,
+      "calls": 1940,
+      "mean_ms": 0.3511689175260256,
+      "median_ms": 0.3143500000533095,
+      "p95_ms": 0.5550700000640063,
+      "p99_ms": 0.7289319999472343,
+      "max_ms": 1.6394999997828563,
+      "n_samples": 1940
+    },
+    "B0d.assembly": {
+      "total_s": 0.10090809999792327,
+      "calls": 80,
+      "mean_ms": 1.261351249974041,
+      "median_ms": 1.1444000000437882,
+      "p95_ms": 2.4130799998943075,
+      "p99_ms": 2.8447410000239852,
+      "max_ms": 3.0912999998236046,
+      "n_samples": 80
+    },
+    "B1.transform": {
+      "total_s": 0.005511000002570654,
+      "calls": 80,
+      "mean_ms": 0.06888750003213318,
+      "median_ms": 0.07110000001375738,
+      "p95_ms": 0.10117500006572296,
+      "p99_ms": 0.17427399990992834,
+      "max_ms": 0.1975000000129512,
+      "n_samples": 80
+    },
+    "B1.modulation": {
+      "total_s": 0.09049199999844859,
+      "calls": 80,
+      "mean_ms": 1.1311499999806074,
+      "median_ms": 0.935799999979281,
+      "p95_ms": 2.15265999991061,
+      "p99_ms": 2.702701000105207,
+      "max_ms": 2.756500000032247,
+      "n_samples": 80
+    },
+    "B1.demodulation": {
+      "total_s": 0.6762352999994619,
+      "calls": 80,
+      "mean_ms": 8.452941249993273,
+      "median_ms": 7.765850000055252,
+      "p95_ms": 12.547520000009623,
+      "p99_ms": 16.031026000302965,
+      "max_ms": 16.64770000002136,
+      "n_samples": 80
+    },
+    "B1.inverse": {
+      "total_s": 0.004917000000659755,
+      "calls": 80,
+      "mean_ms": 0.06146250000824694,
+      "median_ms": 0.055750000115040166,
+      "p95_ms": 0.09129499990194744,
+      "p99_ms": 0.12436800006298654,
+      "max_ms": 0.12500000002546585,
+      "n_samples": 80
+    },
+    "B2.transform": {
+      "total_s": 0.006802699998388562,
+      "calls": 80,
+      "mean_ms": 0.08503374997985702,
+      "median_ms": 0.07090000008247443,
+      "p95_ms": 0.1654699999335207,
+      "p99_ms": 0.3294069999174093,
+      "max_ms": 0.397899999825313,
+      "n_samples": 80
+    },
+    "B2.modulation": {
+      "total_s": 0.0887647000013203,
+      "calls": 80,
+      "mean_ms": 1.1095587500165038,
+      "median_ms": 0.9702500001367298,
+      "p95_ms": 2.1396450001475387,
+      "p99_ms": 2.3847639999848975,
+      "max_ms": 2.4308999995810154,
+      "n_samples": 80
+    },
+    "B2.demodulation": {
+      "total_s": 0.7022508000013659,
+      "calls": 80,
+      "mean_ms": 8.778135000017073,
+      "median_ms": 7.941300000084084,
+      "p95_ms": 13.525409999647307,
+      "p99_ms": 16.73800499985645,
+      "max_ms": 17.57580000003145,
+      "n_samples": 80
+    },
+    "B2.inverse": {
+      "total_s": 0.00460120000070674,
+      "calls": 80,
+      "mean_ms": 0.05751500000883425,
+      "median_ms": 0.04840000019612489,
+      "p95_ms": 0.09490500001447799,
+      "p99_ms": 0.10639999979048291,
+      "max_ms": 0.1142999999501626,
+      "n_samples": 80
+    },
+    "B3.source_coding": {
+      "total_s": 0.29787800000121933,
+      "calls": 80,
+      "mean_ms": 3.7234750000152417,
+      "median_ms": 3.0408000000079483,
+      "p95_ms": 6.391305000101966,
+      "p99_ms": 8.403581000093254,
+      "max_ms": 8.440000000064174,
+      "n_samples": 80
+    },
+    "B3.crypto": {
+      "total_s": 0.0017893000031108386,
+      "calls": 80,
+      "mean_ms": 0.022366250038885482,
+      "median_ms": 0.020200000108161476,
+      "p95_ms": 0.03770500024984357,
+      "p99_ms": 0.06444099985401407,
+      "max_ms": 0.06609999991269433,
+      "n_samples": 80
+    },
+    "B3.aead": {
+      "total_s": 0.0009144999999080028,
+      "calls": 40,
+      "mean_ms": 0.02286249999770007,
+      "median_ms": 0.02210000002378365,
+      "p95_ms": 0.027820000218525816,
+      "p99_ms": 0.03131099992060626,
+      "max_ms": 0.03329999981360743,
+      "n_samples": 40
+    },
+    "B3.assembly": {
+      "total_s": 0.02993419999938851,
+      "calls": 80,
+      "mean_ms": 0.3741774999923564,
+      "median_ms": 0.3775999998651969,
+      "p95_ms": 0.6387950000089404,
+      "p99_ms": 0.7027980000020752,
+      "max_ms": 0.8242999997492007,
+      "n_samples": 80
+    },
+    "B4.assembly": {
+      "total_s": 0.09504680000009103,
+      "calls": 80,
+      "mean_ms": 1.1880850000011378,
+      "median_ms": 0.824500000135231,
+      "p95_ms": 2.6082449996920323,
+      "p99_ms": 3.219757999859211,
+      "max_ms": 3.3696999998937827,
+      "n_samples": 80
+    },
+    "P.assembly": {
+      "total_s": 0.1347533000034673,
+      "calls": 80,
+      "mean_ms": 1.6844162500433413,
+      "median_ms": 1.89200000022538,
+      "p95_ms": 3.5799849998284117,
+      "p99_ms": 4.069047999860231,
+      "max_ms": 4.139199999826815,
+      "n_samples": 80
+    }
+  },
+  "record": {
+    "config_id": "comparison_bursty",
+    "config": {
+      "name": "comparison_bursty",
+      "seed": 20240909,
+      "frame": {
+        "width": 256,
+        "height": 192,
+        "n_frames": 4
+      },
+      "sources": {
+        "kind": "synthetic",
+        "n_frames": 4
+      },
+      "channel": {
+        "preset": "bursty",
+        "overrides": {}
+      },
+      "budget": {
+        "rasters_per_frame": 3,
+        "raster_rate_hz": 25.0,
+        "source_fps": 8.333,
+        "effective_display_fps": 8.333333333333334,
+        "max_accumulation_rows": 300,
+        "max_virtual_latency_s": 0.8,
+        "max_receiver_buffer_kb": 512,
+        "raster": "720x576",
+        "active_window": [
+          24,
+          8,
+          696,
+          568
+        ],
+        "amplitude_window": [
+          40,
+          216
+        ],
+        "note": "однакові геометрія растру, частота растрів і амплітудне вікно для всіх методів; порядок модуляції та розмір комірки символу входять до простору пошуку, тому жодна схема не отримує непомітно додаткового часу, смуги чи потужності сигналу"
+      },
+      "methods": [
+        "B0a",
+        "B0d",
+        "B1",
+        "B2",
+        "B3",
+        "B4",
+        "P"
+      ],
+      "profiles": {
+        "B0d": {
+          "stripe_height": 24,
+          "n_descriptions": 1,
+          "codec": "dct",
+          "quality": 12,
+          "max_unit_payload": 640,
+          "fec_nsym": 96,
+          "fec_header_nsym": 48,
+          "modulation": [
+            4,
+            8,
+            2
+          ],
+          "interleaver": [
+            "block",
+            278,
+            0
+          ]
+        },
+        "B3": {
+          "stripe_height": 24,
+          "n_descriptions": 1,
+          "codec": "dct",
+          "quality": 12,
+          "max_unit_payload": 640,
+          "fec_nsym": 96,
+          "fec_header_nsym": 48,
+          "modulation": [
+            4,
+            8,
+            2
+          ],
+          "interleaver": [
+            "block",
+            278,
+            0
+          ]
+        },
+        "B4": {
+          "stripe_height": 24,
+          "n_descriptions": 1,
+          "codec": "dct",
+          "quality": 12,
+          "max_unit_payload": 640,
+          "fec_nsym": 96,
+          "fec_header_nsym": 48,
+          "modulation": [
+            4,
+            8,
+            2
+          ],
+          "interleaver": [
+            "block",
+            278,
+            0
+          ]
+        },
+        "P": {
+          "stripe_height": 24,
+          "n_descriptions": 2,
+          "codec": "dct",
+          "quality": 8,
+          "max_unit_payload": 320,
+          "fec_nsym": 128,
+          "fec_header_nsym": 48,
+          "modulation": [
+            4,
+            8,
+            2
+          ],
+          "interleaver": [
+            "bawp",
+            0,
+            8
+          ]
+        }
+      },
+      "crypto": {
+        "algorithm": "chacha20poly1305",
+        "tag_bytes": 16,
+        "key_bytes": 32,
+        "nonce_bytes": 12,
+        "nonce_layout": "prefix(4B, HKDF per session+direction+stream) || counter(8B BE)",
+        "kdf": "HKDF-SHA256(salt=session_id, info=label|direction|stream|alg)",
+        "replay_window": 4096,
+        "direction": "uplink",
+        "stream_id": 0
+      },
+      "lfsr": {
+        "grid_rows": 12,
+        "grid_cols": 16,
+        "n_blocks": 192,
+        "variant": "fisher_yates",
+        "size_policy": "pad",
+        "per_frame": false,
+        "frame_seed_mode": null,
+        "block_order": "row-major (raster) over the block grid",
+        "lfsr": {
+          "width": 16,
+          "taps": [
+            16,
+            15,
+            13,
+            4
+          ],
+          "polynomial": "x^16 + x^15 + x^13 + x^4 + 1",
+          "form": "fibonacci",
+          "seed": 44257,
+          "zero_state_policy": "force_one",
+          "state_space": 65535,
+          "note": "reconstruction: the 2021 paper does not specify these parameters"
+        }
+      },
+      "b2_grid": [
+        12,
+        16
+      ],
+      "fill": "interpolate",
+      "key_mode": "lab",
+      "max_frames_per_source": 4,
+      "channel_realisations": 5,
+      "notes": "Vyrishalnyi progon hipotezy: kanal z dovhymy paketamy poshkodzhen. SYNTHETIC DATA: vsi poslidovnosti protsedurno zgenerovani v tsomu repozytorii. Vysnovky stosuiutsia synthetychnoho stenda, a ne vymiriv realnoho videotraktu.\n [loaded from comparison_bursty.yaml]"
+    },
+    "environment": {
+      "python": "3.12.10",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "machine": "AMD64",
+      "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+      "cpu_count": 32,
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.16.0",
+        "cv2": "4.13.0",
+        "cryptography": "50.0.1",
+        "reedsolo": "unknown",
+        "PIL": "11.0.0",
+        "matplotlib": "3.9.2",
+        "yaml": "6.0.2"
+      },
+      "avsec_version": "0.1.0",
+      "git_commit": null
+    },
+    "inputs": {
+      "still_smooth": "aecff91783ba0a19fd60471dc708ff3d288491a3523a105d111c52e7d1a70b0a",
+      "still_text": "bdd407726c3dd0992469663f46de6113855d6d8e27ae41b84f6c552306991075",
+      "still_texture": "6958fb2759fa2528aff1e6e7fd8a83674516b06eabcd27657edacb548e9e9e86",
+      "still_edges": "19aff06a9dd99feb7a2f09b4348412a69f363121a138d03fb281998773e60c21",
+      "seq_illumination_slow": "4a52fa3f2bb70cbe01764c8fc76dffe0f3995316c78c75f01704337b857b0b5d",
+      "seq_edges_slow": "0f8df5f7e012319afb7618ff413593d476788105b3f16d42bc972a00b950f12c",
+      "seq_texture_fast": "b057f3b37e2ef4e8e46a2144186d96d65d3b5104298c7df9cac111e226559782"
+    },
+    "counters": {
+      "ok": 560,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "sources": [
+    {
+      "name": "still_smooth",
+      "provenance": "synthetic",
+      "description": "procedurally generated still pattern 'smooth' (256x192)",
+      "n_frames": 1,
+      "height": 192,
+      "width": 256,
+      "content_sha256": "aecff91783ba0a19fd60471dc708ff3d288491a3523a105d111c52e7d1a70b0a"
+    },
+    {
+      "name": "still_text",
+      "provenance": "synthetic",
+      "description": "procedurally generated still pattern 'text' (256x192)",
+      "n_frames": 1,
+      "height": 192,
+      "width": 256,
+      "content_sha256": "bdd407726c3dd0992469663f46de6113855d6d8e27ae41b84f6c552306991075"
+    },
+    {
+      "name": "still_texture",
+      "provenance": "synthetic",
+      "description": "procedurally generated still pattern 'texture' (256x192)",
+      "n_frames": 1,
+      "height": 192,
+      "width": 256,
+      "content_sha256": "6958fb2759fa2528aff1e6e7fd8a83674516b06eabcd27657edacb548e9e9e86"
+    },
+    {
+      "name": "still_edges",
+      "provenance": "synthetic",
+      "description": "procedurally generated still pattern 'edges' (256x192)",
+      "n_frames": 1,
+      "height": 192,
+      "width": 256,
+      "content_sha256": "19aff06a9dd99feb7a2f09b4348412a69f363121a138d03fb281998773e60c21"
+    },
+    {
+      "name": "seq_illumination_slow",
+      "provenance": "synthetic",
+      "description": "procedurally generated sequence 'illumination', motion=slow, 256x192",
+      "n_frames": 4,
+      "height": 192,
+      "width": 256,
+      "content_sha256": "4a52fa3f2bb70cbe01764c8fc76dffe0f3995316c78c75f01704337b857b0b5d",
+      "meta_motion": "slow",
+      "meta_phase_step": 0.02
+    },
+    {
+      "name": "seq_edges_slow",
+      "provenance": "synthetic",
+      "description": "procedurally generated sequence 'edges', motion=slow, 256x192",
+      "n_frames": 4,
+      "height": 192,
+      "width": 256,
+      "content_sha256": "0f8df5f7e012319afb7618ff413593d476788105b3f16d42bc972a00b950f12c",
+      "meta_motion": "slow",
+      "meta_phase_step": 0.02
+    },
+    {
+      "name": "seq_texture_fast",
+      "provenance": "synthetic",
+      "description": "procedurally generated sequence 'texture', motion=fast, 256x192",
+      "n_frames": 4,
+      "height": 192,
+      "width": 256,
+      "content_sha256": "b057f3b37e2ef4e8e46a2144186d96d65d3b5104298c7df9cac111e226559782",
+      "meta_motion": "fast",
+      "meta_phase_step": 0.1
+    }
+  ],
+  "budget": {
+    "rasters_per_frame": 3,
+    "raster_rate_hz": 25.0,
+    "source_fps": 8.333,
+    "effective_display_fps": 8.333333333333334,
+    "max_accumulation_rows": 300,
+    "max_virtual_latency_s": 0.8,
+    "max_receiver_buffer_kb": 512,
+    "raster": "720x576",
+    "active_window": [
+      24,
+      8,
+      696,
+      568
+    ],
+    "amplitude_window": [
+      40,
+      216
+    ],
+    "note": "однакові геометрія растру, частота растрів і амплітудне вікно для всіх методів; порядок модуляції та розмір комірки символу входять до простору пошуку, тому жодна схема не отримує непомітно додаткового часу, смуги чи потужності сигналу"
+  },
+  "n_rows": 560,
+  "provenance_warning": "усі джерела процедурно згенеровані (SYNTHETIC DATA)"
+}

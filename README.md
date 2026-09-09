@@ -1,0 +1,178 @@
+# avsec — захищене відео через наявний аналоговий відеотракт
+
+Дослідницький стенд: відтворення алгоритму зі статті
+Mardiyanto R., Suryoatmojo H., Setiawan F., Irfansyah A. N.
+*Low Cost Analog Video Transmission Security of Unmanned Aerial Vehicle (UAV) based on
+Linear Feedback Shift Register (LFSR)*, ISITIA 2021, с. 414–419,
+DOI [10.1109/ISITIA52817.2021.9502241](https://doi.org/10.1109/ISITIA52817.2021.9502241) —
+та побудова сильнішого захисту на стандартній криптографії з чесним експериментальним
+порівнянням.
+
+## Про яку архітектуру йдеться
+
+**Це не повністю аналоговий шифратор.** Основний напрям проєкту — **гібридна система**:
+
+* дані відео представляються **цифрово** і шифруються стандартним AEAD;
+* захищені дані передаються **через наявний аналоговий композитний відеотракт**
+  (рівні яскравості у видимій частині растру);
+* аналоговими лишаються сигнал на композитному інтерфейсі та сам тракт передавання;
+* уся обробка **до** передавача і **після** приймача — цифрова.
+
+Базові методи `B0a`, `B1`, `B2` навпаки передають саме зображення аналоговим растром —
+це опора для порівняння, а не захищений режим.
+
+## Швидкий старт
+
+```bash
+python -m venv .venv && .venv/Scripts/activate     # Windows; Linux: source .venv/bin/activate
+pip install -e ".[dev]"
+avsec info
+```
+
+Без встановлення пакета все працює і так:
+
+```bash
+set PYTHONPATH=src   &&  python -m avsec.cli info      # Windows cmd
+PYTHONPATH=src python -m avsec.cli info                # bash
+```
+
+### Зручний веб-інтерфейс
+
+```bash
+avsec ui --port 8765
+```
+
+Локальна сторінка на `http://127.0.0.1:8765/` (на stdlib `http.server`, без вебфреймворків).
+Вкладки: демонстрація, перестановка та атаки, порівняння B0–B4/P, залежність від
+спотворень, добір параметрів, абляції, CVBS рівня B, бюджет каналу, звіт.
+Ліворуч — спільна конфігурація: розмір кадру, профіль каналу з повзунками
+(шум, підсилення, зміщення, смуга, довжина й частота пакетів пошкоджень),
+спільний бюджет, набір методів, профілі B4 і P, параметри перестановки.
+Можна завантажити власне зображення та будь-який файл із `configs/`.
+
+### Команди
+
+Усі приклади нижче перевірені на цьому коді.
+
+```bash
+avsec info                                                  # версія і середовище
+avsec gendata --output data/generated                       # створити тестові дані
+avsec budget --config configs/comparison.yaml               # бюджет каналу і затримка
+avsec demo --config configs/smoke.yaml --output runs/demo   # один кадр через усі методи
+avsec scramble --config configs/attack.yaml --output runs/scramble   # B1 і назад
+avsec attack --config configs/attack.yaml --output runs/attack       # атаки + AEAD
+avsec transmit --config configs/comparison.yaml --output runs/comparison
+avsec transmit --config configs/comparison_bursty.yaml --output runs/bursty  # вирішальний прогін гіпотези
+avsec simulate --config configs/cvbs.yaml --preset mild --output runs/cvbs
+avsec sweep --config configs/comparison.yaml --output runs/sweeps
+avsec ablate --config configs/comparison.yaml --output runs/ablations
+avsec tune --config configs/tuning.yaml --quick --output runs/tuning
+avsec benchmark --config configs/comparison.yaml --output runs/benchmark
+avsec report --input runs/benchmark --output reports/benchmark
+avsec hardware --device 0 --output runs/hardware            # тільки з реальним пристроєм
+avsec ui --port 8765
+```
+
+`avsec hardware` **не підмінює** відсутній пристрій синтетичними даними: якщо плати
+захоплення немає, команда повідомляє про це і повертає код 2.
+
+### Бібліотечний API
+
+CLI і UI — тонкі оболонки над бібліотекою; той самий код можна вбудувати:
+
+```python
+from avsec.config import config_from_dict
+from avsec.experiments import build_methods, build_sources
+from avsec.utils import experiment_rng
+
+cfg = config_from_dict({"methods": ["B4"], "channel": {"preset": "bursty"}})
+method = build_methods(cfg)["B4"]
+frame = build_sources(cfg)[0].frames[0]
+result = method.process(frame, 0, experiment_rng(cfg.seed, "demo"))
+print(result.metrics.psnr_full, result.metrics.coverage)
+```
+
+## Методи, які порівнюються
+
+| Метод | Що це | Автентифікація |
+| --- | --- | --- |
+| `B0a` | незахищене зображення через аналоговий растр | немає |
+| `B0d` | той самий цифровий транспорт **без** криптографії (діагностика) | немає |
+| `B1` | перестановка блоків на LFSR — реконструкція статті 2021 | немає |
+| `B2` | та сама перестановка з криптографічним генератором | немає |
+| `B3` | AEAD цілого кадру однією одиницею, фрагментованою в тракті | є |
+| `B4` | незалежно захищені смуги, один опис, налаштовані FEC і перемежування | є |
+| `P`  | кілька незалежних описів смуги + BAWP + спільний добір параметрів | є |
+
+`B4` і `P` — це **той самий клас конвеєра** з різними конфігураціями: різниця у
+порівнянні — конфігурація, а не якість реалізації.
+
+## Структура
+
+| Каталог | Призначення |
+| --- | --- |
+| `src/avsec/sources` | тестовий матеріал, файли, адаптер плати захоплення |
+| `src/avsec/source_coding` | смуги, описи, незалежні кодеки, збирання кадру |
+| `src/avsec/crypto` | ключі, сеанси, ChaCha20-Poly1305/AES-GCM, nonce, захист від повторів |
+| `src/avsec/framing` | канонічний бінарний формат і суворий обмежений парсер |
+| `src/avsec/fec` | Reed–Solomon з явним обліком блоків, padding і стирань |
+| `src/avsec/modem` | растровий модем, синхронізація, пілоти; `modem/cvbs.py` — рівень B |
+| `src/avsec/interleaving` | послідовне, блочне і запропоноване розміщення (BAWP) |
+| `src/avsec/channel` | модель прийнятого растру (рівень A) |
+| `src/avsec/transmitter.py`, `src/avsec/receiver` | передавач і приймач |
+| `src/avsec/baselines` | B0–B4 і P за спільним інтерфейсом |
+| `src/avsec/attacks` | лабораторний криптоаналіз перестановок, перевірки протоколу |
+| `src/avsec/optimization` | спільний бюджет, простір параметрів, добір із відсіканням |
+| `src/avsec/evaluation` | метрики, агрегування, довірчі інтервали, графіки |
+| `src/avsec/budget.py` | місткість каналу, накладні витрати, модельна затримка |
+| `src/avsec/ui` | локальний веб-інтерфейс |
+
+## Документація
+
+* [docs/architecture.md](docs/architecture.md) — архітектура і два рівні моделювання
+* [docs/protocol.md](docs/protocol.md) — специфікація формату та ключового контексту
+* [docs/threat_model.md](docs/threat_model.md) — модель загроз і межі тверджень
+* [docs/reconstruction_2021.md](docs/reconstruction_2021.md) — що саме взято зі статті, а що добудовано
+* [docs/related_work.md](docs/related_work.md) — найближчі роботи і можливий внесок
+* [docs/experiments.md](docs/experiments.md) — протокол експериментів і розділення даних
+* [docs/hardware.md](docs/hardware.md) — вимоги до обладнання, кошторис, невиконані перевірки
+* [docs/results.md](docs/results.md) — **підсумок фактично виконаних експериментів**
+* [results/](results/) — сирі результати, графіки і згенеровані звіти, що стоять за цими числами
+
+## Перевірки
+
+```bash
+PYTHONPATH=src python -m pytest -q
+```
+
+## Головний результат
+
+`[ЗАПУСК]` На каналі з довгими пакетами пошкоджень захищений цифровий транспорт
+через аналоговий растр дає **+6,4…+8,9 дБ** над незахищеним аналоговим
+передаванням і над перестановкою зі статті 2021 року — значуще на рівні 95%.
+
+`[ГІПОТЕЗА, не встановлена]` Перевага запропонованого методу `P` (кілька описів
++ BAWP) над налаштованим сильним базовим методом `B4` становить **+2,3 дБ** при
+вищому перевіреному покритті (0,80 проти 0,71), але 95% довірчий інтервал
+перетинає нуль ([−0,10; +4,73]), і між двома повтореннями того самого прогону
+висновок про значущість змінюється. **Гіпотеза не підтверджена.**
+
+Повні числа, умови й застереження: [docs/results.md](docs/results.md).
+
+## Що цей репозиторій НЕ доводить
+
+* Немає вимірювань на фізичному передавачі, приймачі чи платі захоплення.
+* Немає моделі радіочастотного FM-тракту; рівень B — це композитний сигнал у
+  основній смузі.
+* Немає виміряних енергоспоживання, вартості чи маси.
+* Правильна інтеграція AEAD, підтверджена перевірками, не доводить відсутності
+  інших помилок протоколу.
+* Усі поставлені в комплекті послідовності — синтетичні; це видно у полі
+  `provenance` кожного джерела і у звіті.
+* Гіпотеза про перевагу узгодженого добору параметрів **не підтверджена** на
+  рівні 95% — див. розділ «Головний результат».
+
+## Ліцензія
+
+MIT. Криптографічні примітиви беруться з бібліотеки `cryptography`, код
+Reed–Solomon — з `reedsolo`; вони не переписуються тут.

@@ -1,0 +1,11 @@
+admissible,aead_tag_bytes,coverage_mean,n_frames,psnr_mean,psnr_sd,rasters_mean,reason,variant
+True,16,0.96875,16,25.4528230672219,3.029336424540956,3.0,,P (proposed)
+True,16,0.9609375,16,26.90614772904088,3.835083655086249,2.375,,single description
+True,16,0.78125,16,24.52316776326159,3.4684069038747074,3.0,,sequential placement
+True,16,0.84765625,16,23.911765058395343,4.389335593441219,3.0,,plain block interleaving
+True,16,0.9609375,16,25.243876742411494,3.630388577435524,3.0,,deep block interleaving
+False,,,,,,,"CapacityExceeded: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",smaller AEAD unit
+False,,,,,,,"CapacityExceeded: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",larger AEAD unit
+True,16,0.7578125,16,20.503504000678877,8.047843766414534,2.0,,weaker FEC
+False,,,,,,,"CapacityExceeded: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",stronger FEC
+True,16,0.96484375,16,25.49521689582696,3.068151482725473,3.0,,shallow BAWP window

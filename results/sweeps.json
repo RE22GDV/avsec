@@ -1,0 +1,491 @@
+{
+  "kind": "sweeps",
+  "rows": [
+    {
+      "channel": "clean",
+      "method": "B0a",
+      "psnr_mean": 54.42378042554222,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.0,
+      "n": 16
+    },
+    {
+      "channel": "clean",
+      "method": "B0d",
+      "psnr_mean": 29.33750028209308,
+      "coverage_mean": 1.0,
+      "rasters_mean": 2.0,
+      "n": 16
+    },
+    {
+      "channel": "clean",
+      "method": "B1",
+      "psnr_mean": 54.42378042554222,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.0,
+      "n": 16
+    },
+    {
+      "channel": "clean",
+      "method": "B2",
+      "psnr_mean": 54.42378042554222,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.0,
+      "n": 16
+    },
+    {
+      "channel": "clean",
+      "method": "B3",
+      "psnr_mean": 29.33750028209308,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.375,
+      "n": 16
+    },
+    {
+      "channel": "clean",
+      "method": "B4",
+      "psnr_mean": 29.33750028209308,
+      "coverage_mean": 1.0,
+      "rasters_mean": 2.0,
+      "n": 16
+    },
+    {
+      "channel": "clean",
+      "method": "P",
+      "psnr_mean": 25.61393475413381,
+      "coverage_mean": 1.0,
+      "rasters_mean": 3.0,
+      "n": 16
+    },
+    {
+      "channel": "mild",
+      "method": "B0a",
+      "psnr_mean": 29.053094574161968,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.0,
+      "n": 16
+    },
+    {
+      "channel": "mild",
+      "method": "B0d",
+      "psnr_mean": 29.33750028209308,
+      "coverage_mean": 1.0,
+      "rasters_mean": 2.0,
+      "n": 16
+    },
+    {
+      "channel": "mild",
+      "method": "B1",
+      "psnr_mean": 27.5953354588208,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.0,
+      "n": 16
+    },
+    {
+      "channel": "mild",
+      "method": "B2",
+      "psnr_mean": 27.556272886002525,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.0,
+      "n": 16
+    },
+    {
+      "channel": "mild",
+      "method": "B3",
+      "psnr_mean": 29.33750028209308,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.375,
+      "n": 16
+    },
+    {
+      "channel": "mild",
+      "method": "B4",
+      "psnr_mean": 29.33750028209308,
+      "coverage_mean": 1.0,
+      "rasters_mean": 2.0,
+      "n": 16
+    },
+    {
+      "channel": "mild",
+      "method": "P",
+      "psnr_mean": 25.61393475413381,
+      "coverage_mean": 1.0,
+      "rasters_mean": 3.0,
+      "n": 16
+    },
+    {
+      "channel": "moderate",
+      "method": "B0a",
+      "psnr_mean": 22.039765390537177,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.0,
+      "n": 16
+    },
+    {
+      "channel": "moderate",
+      "method": "B0d",
+      "psnr_mean": 28.17957357667587,
+      "coverage_mean": 0.953125,
+      "rasters_mean": 2.0,
+      "n": 16
+    },
+    {
+      "channel": "moderate",
+      "method": "B1",
+      "psnr_mean": 20.463509799485493,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.0,
+      "n": 16
+    },
+    {
+      "channel": "moderate",
+      "method": "B2",
+      "psnr_mean": 20.19656384975329,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.0,
+      "n": 16
+    },
+    {
+      "channel": "moderate",
+      "method": "B3",
+      "psnr_mean": 23.703521578265544,
+      "coverage_mean": 0.6875,
+      "rasters_mean": 1.375,
+      "n": 16
+    },
+    {
+      "channel": "moderate",
+      "method": "B4",
+      "psnr_mean": 24.690008073424934,
+      "coverage_mean": 0.8671875,
+      "rasters_mean": 2.0,
+      "n": 16
+    },
+    {
+      "channel": "moderate",
+      "method": "P",
+      "psnr_mean": 25.533350994265867,
+      "coverage_mean": 0.9609375,
+      "rasters_mean": 3.0,
+      "n": 16
+    },
+    {
+      "channel": "bursty",
+      "method": "B0a",
+      "psnr_mean": 16.912936157851682,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.0,
+      "n": 16
+    },
+    {
+      "channel": "bursty",
+      "method": "B0d",
+      "psnr_mean": 17.282677081200216,
+      "coverage_mean": 0.5234375,
+      "rasters_mean": 2.0,
+      "n": 16
+    },
+    {
+      "channel": "bursty",
+      "method": "B1",
+      "psnr_mean": 13.975168376569508,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.0,
+      "n": 16
+    },
+    {
+      "channel": "bursty",
+      "method": "B2",
+      "psnr_mean": 15.960695523140723,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.0,
+      "n": 16
+    },
+    {
+      "channel": "bursty",
+      "method": "B3",
+      "psnr_mean": 22.918859368431082,
+      "coverage_mean": 0.625,
+      "rasters_mean": 1.375,
+      "n": 16
+    },
+    {
+      "channel": "bursty",
+      "method": "B4",
+      "psnr_mean": 15.77293992262752,
+      "coverage_mean": 0.5546875,
+      "rasters_mean": 2.0,
+      "n": 16
+    },
+    {
+      "channel": "bursty",
+      "method": "P",
+      "psnr_mean": 21.983265588113852,
+      "coverage_mean": 0.73828125,
+      "rasters_mean": 3.0,
+      "n": 16
+    },
+    {
+      "channel": "harsh",
+      "method": "B0a",
+      "psnr_mean": 16.04041520126283,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.0,
+      "n": 16
+    },
+    {
+      "channel": "harsh",
+      "method": "B0d",
+      "psnr_mean": 11.989543041557834,
+      "coverage_mean": 0.0,
+      "rasters_mean": 2.0,
+      "n": 16
+    },
+    {
+      "channel": "harsh",
+      "method": "B1",
+      "psnr_mean": 14.230529107584246,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.0,
+      "n": 16
+    },
+    {
+      "channel": "harsh",
+      "method": "B2",
+      "psnr_mean": 14.988718116562815,
+      "coverage_mean": 1.0,
+      "rasters_mean": 1.0,
+      "n": 16
+    },
+    {
+      "channel": "harsh",
+      "method": "B3",
+      "psnr_mean": 11.989543041557834,
+      "coverage_mean": 0.0,
+      "rasters_mean": 1.375,
+      "n": 16
+    },
+    {
+      "channel": "harsh",
+      "method": "B4",
+      "psnr_mean": 11.989543041557834,
+      "coverage_mean": 0.0,
+      "rasters_mean": 2.0,
+      "n": 16
+    },
+    {
+      "channel": "harsh",
+      "method": "P",
+      "psnr_mean": 11.989543041557834,
+      "coverage_mean": 0.0,
+      "rasters_mean": 3.0,
+      "n": 16
+    }
+  ],
+  "presets": [
+    "clean",
+    "mild",
+    "moderate",
+    "bursty",
+    "harsh"
+  ],
+  "plots": {
+    "psnr_vs_channel": "runs/benchmark\\psnr_vs_channel.png",
+    "coverage_vs_channel": "runs/benchmark\\coverage_vs_channel.png"
+  },
+  "skipped": {},
+  "record": {
+    "config_id": "comparison",
+    "config": {
+      "name": "comparison",
+      "seed": 20240909,
+      "frame": {
+        "width": 256,
+        "height": 192,
+        "n_frames": 4
+      },
+      "sources": {
+        "kind": "synthetic",
+        "n_frames": 4
+      },
+      "channel": {
+        "preset": "moderate",
+        "overrides": {}
+      },
+      "budget": {
+        "rasters_per_frame": 3,
+        "raster_rate_hz": 25.0,
+        "source_fps": 8.333,
+        "effective_display_fps": 8.333333333333334,
+        "max_accumulation_rows": 300,
+        "max_virtual_latency_s": 0.8,
+        "max_receiver_buffer_kb": 512,
+        "raster": "720x576",
+        "active_window": [
+          24,
+          8,
+          696,
+          568
+        ],
+        "amplitude_window": [
+          40,
+          216
+        ],
+        "note": "однакові геометрія растру, частота растрів і амплітудне вікно для всіх методів; порядок модуляції та розмір комірки символу входять до простору пошуку, тому жодна схема не отримує непомітно додаткового часу, смуги чи потужності сигналу"
+      },
+      "methods": [
+        "B0a",
+        "B0d",
+        "B1",
+        "B2",
+        "B3",
+        "B4",
+        "P"
+      ],
+      "profiles": {
+        "B0d": {
+          "stripe_height": 24,
+          "n_descriptions": 1,
+          "codec": "dct",
+          "quality": 12,
+          "max_unit_payload": 640,
+          "fec_nsym": 96,
+          "fec_header_nsym": 48,
+          "modulation": [
+            4,
+            8,
+            2
+          ],
+          "interleaver": [
+            "block",
+            278,
+            0
+          ]
+        },
+        "B3": {
+          "stripe_height": 24,
+          "n_descriptions": 1,
+          "codec": "dct",
+          "quality": 12,
+          "max_unit_payload": 640,
+          "fec_nsym": 96,
+          "fec_header_nsym": 48,
+          "modulation": [
+            4,
+            8,
+            2
+          ],
+          "interleaver": [
+            "block",
+            278,
+            0
+          ]
+        },
+        "B4": {
+          "stripe_height": 24,
+          "n_descriptions": 1,
+          "codec": "dct",
+          "quality": 12,
+          "max_unit_payload": 640,
+          "fec_nsym": 96,
+          "fec_header_nsym": 48,
+          "modulation": [
+            4,
+            8,
+            2
+          ],
+          "interleaver": [
+            "block",
+            278,
+            0
+          ]
+        },
+        "P": {
+          "stripe_height": 24,
+          "n_descriptions": 2,
+          "codec": "dct",
+          "quality": 8,
+          "max_unit_payload": 320,
+          "fec_nsym": 128,
+          "fec_header_nsym": 48,
+          "modulation": [
+            4,
+            8,
+            2
+          ],
+          "interleaver": [
+            "bawp",
+            0,
+            8
+          ]
+        }
+      },
+      "crypto": {
+        "algorithm": "chacha20poly1305",
+        "tag_bytes": 16,
+        "key_bytes": 32,
+        "nonce_bytes": 12,
+        "nonce_layout": "prefix(4B, HKDF per session+direction+stream) || counter(8B BE)",
+        "kdf": "HKDF-SHA256(salt=session_id, info=label|direction|stream|alg)",
+        "replay_window": 4096,
+        "direction": "uplink",
+        "stream_id": 0
+      },
+      "lfsr": {
+        "grid_rows": 12,
+        "grid_cols": 16,
+        "n_blocks": 192,
+        "variant": "fisher_yates",
+        "size_policy": "pad",
+        "per_frame": false,
+        "frame_seed_mode": null,
+        "block_order": "row-major (raster) over the block grid",
+        "lfsr": {
+          "width": 16,
+          "taps": [
+            16,
+            15,
+            13,
+            4
+          ],
+          "polynomial": "x^16 + x^15 + x^13 + x^4 + 1",
+          "form": "fibonacci",
+          "seed": 44257,
+          "zero_state_policy": "force_one",
+          "state_space": 65535,
+          "note": "reconstruction: the 2021 paper does not specify these parameters"
+        }
+      },
+      "b2_grid": [
+        12,
+        16
+      ],
+      "fill": "interpolate",
+      "key_mode": "lab",
+      "max_frames_per_source": 4,
+      "channel_realisations": 3,
+      "notes": "SYNTHETIC DATA: vsi poslidovnosti protsedurno zgenerovani v tsomu repozytorii. Vysnovky stosuiutsia synthetychnoho stenda, a ne vymiriv realnoho videotraktu.\n [loaded from comparison.yaml]"
+    },
+    "environment": {
+      "python": "3.12.10",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "machine": "AMD64",
+      "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+      "cpu_count": 32,
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.16.0",
+        "cv2": "4.13.0",
+        "cryptography": "50.0.1",
+        "reedsolo": "unknown",
+        "PIL": "11.0.0",
+        "matplotlib": "3.9.2",
+        "yaml": "6.0.2"
+      },
+      "avsec_version": "0.1.0",
+      "git_commit": null
+    },
+    "inputs": {},
+    "counters": {}
+  }
+}

@@ -1,0 +1,145 @@
+accumulation_rows,admissible,coverage,key,label,n_frames,payload_efficiency,psnr_full,rasters_per_frame,reason,ssim_full,units_per_raster,virtual_latency_s
+278,True,0.8194444444444443,sh16_d1_dctq8_u320_n96_m4c8x2_block278,tune,3,0.4240817872018175,23.711415176561076,2.3333333333333335,,0.810711389995506,7,0.32861631131911945
+278,True,0.625,sh16_d1_dctq8_u320_n96_m4c8x2_bawp12,tune,3,0.4240817872018175,19.407482497297593,2.3333333333333335,,0.7019686126893497,7,0.32861631131911945
+278,True,0.7777777777777778,sh16_d1_dctq8_u320_n128_m4c8x2_block278,tune,3,0.363498674744415,21.738935894107346,2.3333333333333335,,0.7309352314546698,6,0.32861631131911945
+278,True,0.9444444444444445,sh16_d1_dctq8_u320_n128_m4c8x2_bawp12,tune,3,0.363498674744415,24.811318971984885,2.3333333333333335,,0.8180134022027364,6,0.32861631131911945
+278,True,0.7222222222222222,sh16_d1_dctq8_u640_n96_m4c8x2_block278,tune,3,0.48466489965922,21.30036302928316,3.0,,0.7015888458864658,4,0.32861631131911945
+278,True,0.4444444444444444,sh16_d1_dctq8_u640_n96_m4c8x2_bawp12,tune,3,0.48466489965922,16.274458882645085,3.0,,0.6042265831307506,4,0.32861631131911945
+0,False,0.0,sh16_d1_dctq8_u640_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq8_u640_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq8_u896_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq8_u896_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq8_u896_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq8_u896_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq12_u320_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq12_u320_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq12_u320_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq12_u320_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+278,True,0.6666666666666666,sh16_d1_dctq12_u640_n96_m4c8x2_block278,tune,3,0.48466489965922,22.37911452945694,3.0,,0.7318242378134147,4,0.32861631131911945
+278,True,0.5,sh16_d1_dctq12_u640_n96_m4c8x2_bawp12,tune,3,0.48466489965922,16.813123014640723,3.0,,0.6806509955464191,4,0.32861631131911945
+0,False,0.0,sh16_d1_dctq12_u640_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq12_u640_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq12_u896_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq12_u896_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq12_u896_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq12_u896_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq18_u320_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq18_u320_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq18_u320_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 5 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq18_u320_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 5 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq18_u640_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq18_u640_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq18_u640_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 5 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq18_u640_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 5 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq18_u896_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq18_u896_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq18_u896_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d1_dctq18_u896_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq8_u320_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq8_u320_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq8_u320_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq8_u320_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq8_u640_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq8_u640_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq8_u640_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq8_u640_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq8_u896_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq8_u896_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq8_u896_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq8_u896_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq12_u320_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq12_u320_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq12_u320_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq12_u320_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq12_u640_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq12_u640_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq12_u640_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq12_u640_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq12_u896_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq12_u896_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq12_u896_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq12_u896_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq18_u320_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq18_u320_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq18_u320_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq18_u320_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq18_u640_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq18_u640_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq18_u640_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq18_u640_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq18_u896_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq18_u896_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq18_u896_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh16_d2_dctq18_u896_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 12 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+278,True,0.3958333333333333,sh24_d1_dctq8_u320_n96_m4c8x2_block278,tune,3,0.4240817872018175,16.24997783542817,2.3333333333333335,,0.5461714867161104,7,0.3336165113271198
+278,True,0.5276692708333334,sh24_d1_dctq8_u320_n96_m4c8x2_bawp12,tune,3,0.4240817872018175,20.841618672721495,2.3333333333333335,,0.5644015826004211,7,0.3336165113271198
+278,True,1.0,sh24_d1_dctq8_u320_n128_m4c8x2_block278,tune,3,0.363498674744415,25.978123833448027,2.6666666666666665,,0.8586346687897187,6,0.3336165113271198
+278,True,0.875,sh24_d1_dctq8_u320_n128_m4c8x2_bawp12,tune,3,0.363498674744415,23.57813623293492,2.6666666666666665,,0.7615562402805383,6,0.3336165113271198
+278,True,0.5,sh24_d1_dctq8_u640_n96_m4c8x2_block278,tune,3,0.48466489965922,17.41900402207953,2.0,,0.7138707880944967,4,0.29361651132711974
+278,True,0.7083333333333334,sh24_d1_dctq8_u640_n96_m4c8x2_bawp12,tune,3,0.48466489965922,18.640861583087176,2.0,,0.7033501429045299,4,0.29361651132711974
+278,True,0.875,sh24_d1_dctq8_u640_n128_m4c8x2_block278,tune,3,0.363498674744415,23.70042998482405,3.0,,0.7629088598833876,3,0.3336165113271198
+278,True,1.0,sh24_d1_dctq8_u640_n128_m4c8x2_bawp12,tune,3,0.363498674744415,25.9632108447304,3.0,,0.8581484351632404,3,0.3336165113271198
+278,True,0.7083333333333334,sh24_d1_dctq8_u896_n96_m4c8x2_block278,tune,3,0.508898144642181,21.337161514258053,3.0,,0.6654727413810592,3,0.3336165113271198
+278,True,0.6666666666666666,sh24_d1_dctq8_u896_n96_m4c8x2_bawp12,tune,3,0.508898144642181,20.88872255060374,3.0,,0.6856274698229905,3,0.3336165113271198
+0,False,0.0,sh24_d1_dctq8_u896_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d1_dctq8_u896_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+278,True,0.84033203125,sh24_d1_dctq12_u320_n96_m4c8x2_block278,tune,3,0.4240817872018175,23.371862168693394,2.6666666666666665,,0.8015099095308442,7,0.3336165113271198
+278,True,0.7638346354166666,sh24_d1_dctq12_u320_n96_m4c8x2_bawp12,tune,3,0.4240817872018175,24.312730976449103,2.6666666666666665,,0.811888434347575,7,0.3336165113271198
+0,False,0.0,sh24_d1_dctq12_u320_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d1_dctq12_u320_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+278,True,1.0,sh24_d1_dctq12_u640_n96_m4c8x2_block278,tune,3,0.48466489965922,27.62464615548706,2.0,,0.8923153933618159,4,0.29361651132711974
+278,True,0.8333333333333334,sh24_d1_dctq12_u640_n96_m4c8x2_bawp12,tune,3,0.48466489965922,24.18796148898656,2.0,,0.7529912182296238,4,0.29361651132711974
+278,True,0.7916666666666666,sh24_d1_dctq12_u640_n128_m4c8x2_block278,tune,3,0.363498674744415,20.335077196979185,3.0,,0.7969817097915454,3,0.3336165113271198
+278,True,0.875,sh24_d1_dctq12_u640_n128_m4c8x2_bawp12,tune,3,0.363498674744415,22.606106779069254,3.0,,0.8649648930406868,3,0.3336165113271198
+278,True,0.75,sh24_d1_dctq12_u896_n96_m4c8x2_block278,tune,3,0.508898144642181,20.545129248608987,3.0,,0.8261366725059055,3,0.3336165113271198
+278,True,0.4583333333333333,sh24_d1_dctq12_u896_n96_m4c8x2_bawp12,tune,3,0.508898144642181,16.12671418556695,3.0,,0.6348467325546339,3,0.3336165113271198
+0,False,0.0,sh24_d1_dctq12_u896_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d1_dctq12_u896_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d1_dctq18_u320_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d1_dctq18_u320_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d1_dctq18_u320_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 5 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d1_dctq18_u320_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 5 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d1_dctq18_u640_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d1_dctq18_u640_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d1_dctq18_u640_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d1_dctq18_u640_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+278,True,0.75,sh24_d1_dctq18_u896_n96_m4c8x2_block278,tune,3,0.508898144642181,21.012543618772007,3.0,,0.8535172246002015,3,0.3336165113271198
+278,True,0.4583333333333333,sh24_d1_dctq18_u896_n96_m4c8x2_bawp12,tune,3,0.508898144642181,16.872952553945208,3.0,,0.5625340774372886,3,0.3336165113271198
+0,False,0.0,sh24_d1_dctq18_u896_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d1_dctq18_u896_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+278,True,0.7083333333333334,sh24_d2_dctq8_u320_n96_m4c8x2_block278,tune,3,0.4240817872018175,18.907690541436846,3.0,,0.6880955944334367,7,0.3336165113271198
+278,True,0.5208333333333334,sh24_d2_dctq8_u320_n96_m4c8x2_bawp12,tune,3,0.363498674744415,21.82269647565867,3.0,,0.7381837278008957,6,0.3336165113271198
+278,True,0.6666666666666666,sh24_d2_dctq8_u320_n128_m4c8x2_block278,tune,3,0.363498674744415,17.69714674714778,3.0,,0.6746593380267695,6,0.3336165113271198
+278,True,0.9583333333333334,sh24_d2_dctq8_u320_n128_m4c8x2_bawp12,tune,3,0.363498674744415,23.694710030554777,3.0,,0.7714445314410049,6,0.3336165113271198
+0,False,0.0,sh24_d2_dctq8_u640_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq8_u640_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq8_u640_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq8_u640_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq8_u896_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq8_u896_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq8_u896_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq8_u896_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq12_u320_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq12_u320_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq12_u320_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq12_u320_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq12_u640_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq12_u640_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq12_u640_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq12_u640_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq12_u896_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq12_u896_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq12_u896_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq12_u896_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq18_u320_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq18_u320_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq18_u320_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq18_u320_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 6 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq18_u640_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq18_u640_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq18_u640_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq18_u640_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq18_u896_n96_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq18_u896_n96_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq18_u896_n128_m4c8x2_block278,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0
+0,False,0.0,sh24_d2_dctq18_u896_n128_m4c8x2_bawp12,tune,0,0.0,nan,0.0,"does not fit the shared budget: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",nan,0,0.0

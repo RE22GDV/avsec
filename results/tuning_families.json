@@ -1,0 +1,128 @@
+{
+  "B4": {
+    "search_space_size": 108,
+    "candidates": 108,
+    "admissible": 42,
+    "seconds": 71.7,
+    "selected_key": "sh24_d1_dctq12_u640_n96_m4c8x2_block278",
+    "validation_psnr": 33.349,
+    "validation_coverage": 1.0,
+    "profile": {
+      "stripe_height": 24,
+      "n_descriptions": 1,
+      "codec": "dct",
+      "quality": 12,
+      "max_unit_payload": 640,
+      "fec_nsym": 96,
+      "fec_header_nsym": 48,
+      "modulation": [
+        4,
+        8,
+        2
+      ],
+      "interleaver": [
+        "block",
+        278,
+        4
+      ]
+    },
+    "top5_validation": [
+      {
+        "key": "sh24_d1_dctq12_u640_n96_m4c8x2_block278",
+        "psnr": 33.349,
+        "cov": 1.0
+      },
+      {
+        "key": "sh24_d1_dctq8_u320_n128_m4c8x2_block278",
+        "psnr": 31.545,
+        "cov": 1.0
+      },
+      {
+        "key": "sh24_d1_dctq8_u640_n128_m4c8x2_block278",
+        "psnr": 24.526,
+        "cov": 0.812
+      },
+      {
+        "key": "sh16_d1_dctq12_u640_n96_m4c8x2_block128",
+        "psnr": 23.173,
+        "cov": 0.75
+      },
+      {
+        "key": "sh16_d1_dctq8_u320_n96_m4c8x2_block278",
+        "psnr": 22.909,
+        "cov": 0.708
+      }
+    ]
+  },
+  "P": {
+    "search_space_size": 216,
+    "candidates": 216,
+    "admissible": 6,
+    "seconds": 24.5,
+    "selected_key": "sh24_d2_dctq8_u320_n128_m4c8x2_bawp8",
+    "validation_psnr": 30.563,
+    "validation_coverage": 0.938,
+    "profile": {
+      "stripe_height": 24,
+      "n_descriptions": 2,
+      "codec": "dct",
+      "quality": 8,
+      "max_unit_payload": 320,
+      "fec_nsym": 128,
+      "fec_header_nsym": 48,
+      "modulation": [
+        4,
+        8,
+        2
+      ],
+      "interleaver": [
+        "bawp",
+        1,
+        8
+      ]
+    },
+    "top5_validation": [
+      {
+        "key": "sh24_d2_dctq8_u320_n128_m4c8x2_bawp8",
+        "psnr": 30.563,
+        "cov": 0.938
+      },
+      {
+        "key": "sh24_d2_dctq8_u320_n128_m4c8x2_bawp12",
+        "psnr": 30.261,
+        "cov": 0.969
+      },
+      {
+        "key": "sh24_d2_dctq8_u320_n128_m4c8x2_bawp24",
+        "psnr": 29.954,
+        "cov": 0.844
+      },
+      {
+        "key": "sh24_d2_dctq8_u320_n96_m4c8x2_bawp12",
+        "psnr": 23.434,
+        "cov": 0.344
+      },
+      {
+        "key": "sh24_d2_dctq8_u320_n96_m4c8x2_bawp24",
+        "psnr": 22.666,
+        "cov": 0.594
+      }
+    ]
+  },
+  "splits": {
+    "calibration": [
+      "still_text",
+      "seq_texture_fast",
+      "seq_illumination_slow"
+    ],
+    "validation": [
+      "still_smooth",
+      "still_edges"
+    ],
+    "test": [
+      "still_texture",
+      "seq_edges_slow"
+    ]
+  },
+  "channel_used_for_tuning": "bursty"
+}

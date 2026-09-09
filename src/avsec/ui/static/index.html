@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>avsec — стенд захищеного відео через аналоговий тракт</title>
+<style>
+:root{
+  --bg:#0f1216; --panel:#161b22; --panel2:#1c232c; --line:#2a323d;
+  --fg:#e6edf3; --muted:#9aa7b4; --accent:#4c9aff; --ok:#3fb950; --warn:#d29922; --err:#f85149;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: light){
+  :root{--bg:#f6f8fa;--panel:#fff;--panel2:#f0f3f6;--line:#d5dbe2;--fg:#12181f;--muted:#5b6875;--accent:#0969da;}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{display:flex;align-items:baseline;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:20;flex-wrap:wrap}
+header h1{font-size:16px;margin:0;letter-spacing:.2px}
+header .sub{color:var(--muted);font-size:12px}
+.badge{font:11px var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:2px 8px;color:var(--muted)}
+main{display:grid;grid-template-columns:340px 1fr;gap:0;min-height:calc(100vh - 52px)}
+aside{border-right:1px solid var(--line);background:var(--panel);padding:14px;overflow:auto;max-height:calc(100vh - 52px);position:sticky;top:52px}
+section.content{padding:16px 20px;overflow:auto}
+h2{font-size:14px;margin:18px 0 8px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+h3{font-size:13px;margin:14px 0 6px}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:10px;margin:0 0 12px}
+legend{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:0 6px}
+label{display:block;font-size:12px;color:var(--muted);margin:6px 0 2px}
+input,select,textarea{width:100%;background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:5px 7px;font:12px var(--mono)}
+input[type=range]{padding:0}
+input[type=checkbox]{width:auto;margin-right:6px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+button{background:var(--accent);color:#fff;border:0;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer}
+button.sec{background:var(--panel2);color:var(--fg);border:1px solid var(--line);font-weight:500}
+button:disabled{opacity:.5;cursor:not-allowed}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:14px;padding-bottom:8px}
+nav.tabs button{background:transparent;color:var(--muted);border:1px solid transparent;font-weight:500;padding:6px 12px}
+nav.tabs button.active{background:var(--panel);color:var(--fg);border-color:var(--line)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th,td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+td.num,th.num{text-align:right;font-family:var(--mono)}
+.imgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:8px}
+.imgrid figure{margin:0;background:var(--panel2);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.imgrid img{width:100%;display:block;background:#000;cursor:zoom-in}
+.imgrid figcaption{font-size:11px;color:var(--muted);padding:4px 7px;border-top:1px solid var(--line)}
+.progress{height:6px;background:var(--panel2);border-radius:3px;overflow:hidden;margin:10px 0}
+.progress > div{height:100%;background:var(--accent);width:0;transition:width .25s}
+.status{font:12px var(--mono);color:var(--muted);min-height:18px}
+.err{color:var(--err);white-space:pre-wrap;font:12px var(--mono)}
+.ok{color:var(--ok)} .warn{color:var(--warn)}
+.note{font-size:12px;color:var(--muted);border-left:3px solid var(--line);padding:6px 10px;margin:8px 0;background:var(--panel2);border-radius:0 6px 6px 0}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.chip{font:11px var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:2px 9px;cursor:pointer;color:var(--muted)}
+.chip.on{border-color:var(--accent);color:var(--fg)}
+pre{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px;overflow:auto;font:11.5px var(--mono);max-height:420px}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;z-index:100;padding:24px}
+.lightbox.on{display:flex}
+.lightbox img{max-width:96vw;max-height:92vh;image-rendering:pixelated}
+details summary{cursor:pointer;color:var(--muted);font-size:12px;margin:6px 0}
+@media (max-width:900px){main{grid-template-columns:1fr}aside{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>avsec</h1>
+  <span class="sub">захищене відео через наявний аналоговий відеотракт — дослідницький стенд</span>
+  <span class="badge" id="ver">…</span>
+  <span class="badge" id="env">…</span>
+</header>
+
+<main>
+<aside>
+  <fieldset>
+    <legend>Конфігурація</legend>
+    <label>Готовий файл конфігурації</label>
+    <select id="cfgFile"></select>
+    <div style="display:flex;gap:6px;margin-top:6px">
+      <button class="sec" style="flex:1" onclick="loadCfgFile()">Завантажити</button>
+      <button class="sec" style="flex:1" onclick="resetCfg()">Скинути</button>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Кадр і джерело</legend>
+    <div class="row">
+      <div><label>ширина</label><input id="fw" type="number" value="256"></div>
+      <div><label>висота</label><input id="fh" type="number" value="192"></div>
+    </div>
+    <label>тестовий вміст</label>
+    <select id="pattern"></select>
+    <label>власне зображення (png/jpg)</label>
+    <input id="upload" type="file" accept="image/*">
+    <label>seed експерименту (несекретна частина)</label>
+    <input id="seed" type="number" value="20240909">
+  </fieldset>
+
+  <fieldset>
+    <legend>Канал (рівень A)</legend>
+    <label>профіль</label>
+    <select id="chPreset"></select>
+    <label>шум σ, кодів яскравості: <b id="lNoise">—</b></label>
+    <input id="noise" type="range" min="0" max="40" step="0.5">
+    <label>підсилення: <b id="lGain">—</b></label>
+    <input id="gain" type="range" min="0.4" max="1.2" step="0.01">
+    <label>зміщення: <b id="lOff">—</b></label>
+    <input id="off" type="range" min="-20" max="60" step="1">
+    <label>смуга: σ фільтра = <b id="lLp">—</b></label>
+    <input id="lp" type="range" min="0" max="3" step="0.1">
+    <label>пакетів пошкоджень на кадр: <b id="lBr">—</b></label>
+    <input id="brate" type="range" min="0" max="12" step="0.5">
+    <label>довжина пакета, рядків: <b id="lBl">—</b></label>
+    <input id="blen" type="range" min="1" max="128" step="1">
+  </fieldset>
+
+  <fieldset>
+    <legend>Спільний бюджет</legend>
+    <div class="row">
+      <div><label>растрів/кадр</label><input id="rpf" type="number" value="3"></div>
+      <div><label>растрів/с</label><input id="rrate" type="number" value="25" step="0.5"></div>
+    </div>
+    <div class="row">
+      <div><label>кадрів/с джерела</label><input id="sfps" type="number" value="8.333" step="0.1"></div>
+      <div><label>межа затримки, с</label><input id="lat" type="number" value="0.8" step="0.05"></div>
+    </div>
+    <div class="note" style="margin-top:8px">Однакова геометрія растра, частота і амплітудне вікно для всіх методів. Порядок модуляції та розмір символу входять до простору пошуку.</div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Методи</legend>
+    <div class="chips" id="methods"></div>
+    <div class="note" id="methodNote"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Профіль B4 (сильна база)</legend>
+    <div class="row3">
+      <div><label>смуга, рядків</label><input id="b4_sh" type="number" value="24"></div>
+      <div><label>якість</label><input id="b4_q" type="number" value="15"></div>
+      <div><label>одиниця, Б</label><input id="b4_up" type="number" value="640"></div>
+    </div>
+    <div class="row3">
+      <div><label>FEC nsym</label><input id="b4_nsym" type="number" value="128"></div>
+      <div><label>рівнів</label><select id="b4_lv"><option>2</option><option selected>4</option></select></div>
+      <div><label>символ, пкс</label><input id="b4_cell" value="8x2"></div>
+    </div>
+    <div class="row">
+      <div><label>розміщення</label><select id="b4_il"><option>sequential</option><option selected>block</option><option>bawp</option></select></div>
+      <div><label>глибина / пакет</label><input id="b4_ild" type="number" value="278"></div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Профіль P (запропоноване)</legend>
+    <div class="row3">
+      <div><label>смуга, рядків</label><input id="p_sh" type="number" value="24"></div>
+      <div><label>якість</label><input id="p_q" type="number" value="15"></div>
+      <div><label>одиниця, Б</label><input id="p_up" type="number" value="320"></div>
+    </div>
+    <div class="row3">
+      <div><label>описів</label><select id="p_nd"><option>1</option><option selected>2</option><option>4</option></select></div>
+      <div><label>FEC nsym</label><input id="p_nsym" type="number" value="128"></div>
+      <div><label>символ, пкс</label><input id="p_cell" value="8x2"></div>
+    </div>
+    <div class="row">
+      <div><label>розміщення</label><select id="p_il"><option>sequential</option><option>block</option><option selected>bawp</option></select></div>
+      <div><label>глибина / пакет</label><input id="p_ild" type="number" value="12"></div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Перестановка (B1/B2)</legend>
+    <div class="row3">
+      <div><label>рядків</label><input id="gr" type="number" value="12"></div>
+      <div><label>стовпців</label><input id="gc" type="number" value="16"></div>
+      <div><label>seed</label><input id="lseed" type="number" value="44257"></div>
+    </div>
+    <div class="row">
+      <div><label>розрядність LFSR</label><input id="lwidth" type="number" value="16"></div>
+      <div><label>варіант</label><select id="lvariant"><option>fisher_yates</option><option>first_occurrence</option></select></div>
+    </div>
+    <label style="margin-top:8px"><input id="perframe" type="checkbox"> нова перестановка на кожен кадр</label>
+  </fieldset>
+</aside>
+
+<section class="content">
+  <nav class="tabs" id="tabs"></nav>
+  <div class="progress"><div id="bar"></div></div>
+  <div class="status" id="status">готово</div>
+  <div id="view"></div>
+</section>
+</main>
+
+<div class="lightbox" id="lb" onclick="this.classList.remove('on')"><img id="lbimg" alt=""></div>
+
+<script>
+const $ = id => document.getElementById(id);
+let DEF = null, UPLOAD = null, CURRENT = "demo", CFG_OVERRIDE = null;
+
+const TABS = [
+  ["demo",       "Демонстрація",     runDemo],
+  ["scramble",   "Перестановка та атаки", runScramble],
+  ["comparison", "Порівняння B0–B4/P", runComparison],
+  ["sweep",      "Залежність від спотворень", runSweep],
+  ["tune",       "Добір параметрів", runTune],
+  ["ablate",     "Абляції",          runAblate],
+  ["cvbs",       "CVBS (рівень B)",  runCvbs],
+  ["budget",     "Бюджет каналу",    runBudget],
+  ["report",     "Звіт",             runReport],
+];
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function fmt(v,d=2){ if(v===null||v===undefined) return "—";
+  if(typeof v==="number") return Number.isFinite(v)? v.toFixed(d) : "n/a";
+  if(typeof v==="boolean") return v?"так":"ні"; return esc(v); }
+
+function setStatus(t, cls){ const s=$("status"); s.textContent=t; s.className="status "+(cls||""); }
+function setBar(f){ $("bar").style.width = Math.round(f*100)+"%"; }
+
+function tabsInit(){
+  $("tabs").innerHTML = TABS.map(([id,label]) =>
+    `<button data-t="${id}" onclick="selectTab('${id}')">${label}</button>`).join("");
+  selectTab("demo");
+}
+function selectTab(id){
+  CURRENT = id;
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("active", b.dataset.t===id));
+  const t = TABS.find(x=>x[0]===id);
+  $("view").innerHTML = `<div class="panel"><button onclick="TABRUN['${id}']()">Запустити: ${t[1]}</button>
+    <span style="margin-left:10px;color:var(--muted);font-size:12px">${TAB_HINT[id]||""}</span></div>
+    <div id="out"></div>`;
+}
+const TAB_HINT = {
+  demo: "один кадр через усі вибрані методи, з зображеннями і метриками",
+  scramble: "відтворення алгоритму 2021 року та атаки на нього",
+  comparison: "спільні дані, спільний бюджет, довірчі інтервали за послідовностями",
+  sweep: "якість і покриття залежно від профілю каналу",
+  tune: "перебір із відсіканням; тестова частина не використовується",
+  ablate: "по одному фактору за раз, стійкість криптографії незмінна",
+  cvbs: "композитний сигнал 625/50 зі спрощеннями, вказаними у профілі",
+  budget: "точний облік накладних витрат і модельної затримки",
+  report: "зібрати Markdown-звіт з наявних артефактів",
+};
+const TABRUN = {};
+TABS.forEach(([id,,fn]) => TABRUN[id]=fn);
+
+function cfg(){
+  const [b4w,b4h] = ($("b4_cell").value||"8x2").split("x").map(Number);
+  const [pw,ph]   = ($("p_cell").value||"8x2").split("x").map(Number);
+  const base = CFG_OVERRIDE ? JSON.parse(JSON.stringify(CFG_OVERRIDE)) : {};
+  const ov = {};
+  const num = (id)=>parseFloat($(id).value);
+  if(num("noise")>0) ov.noise_sigma = num("noise");
+  ov.gain = num("gain"); ov.offset = num("off");
+  if(num("lp")>0){ ov.lowpass_kind="gaussian"; ov.lowpass_sigma=num("lp"); ov.lowpass_taps=7; }
+  if(num("brate")>0){ ov.burst_rate_per_frame=num("brate"); ov.burst_len_lines=parseInt($("blen").value); }
+  const methods = [...document.querySelectorAll("#methods .chip.on")].map(c=>c.dataset.m);
+  const prof = (sh,q,up,nd,nsym,lv,cw,ch,il,ild)=>({
+    stripe_height:+sh, n_descriptions:+nd, codec:"dct", quality:+q, max_unit_payload:+up,
+    fec_nsym:+nsym, fec_header_nsym:48, modulation:[+lv,+cw,+ch],
+    interleaver:[il, il==="block"? +ild : 278, il==="bawp"? +ild : 0]});
+  const b4 = prof($("b4_sh").value,$("b4_q").value,$("b4_up").value,1,$("b4_nsym").value,$("b4_lv").value,b4w,b4h,$("b4_il").value,$("b4_ild").value);
+  const p  = prof($("p_sh").value,$("p_q").value,$("p_up").value,$("p_nd").value,$("p_nsym").value,$("b4_lv").value,pw,ph,$("p_il").value,$("p_ild").value);
+  return Object.assign(base, {
+    name: base.name || "ui",
+    seed: parseInt($("seed").value),
+    key_mode: "lab",
+    frame: {width: parseInt($("fw").value), height: parseInt($("fh").value), n_frames: 2},
+    sources: {kind:"synthetic", patterns:[$("pattern").value], n_frames:2},
+    channel: {preset: $("chPreset").value, overrides: ov},
+    budget: Object.assign(base.budget||{}, {
+      rasters_per_frame: parseInt($("rpf").value),
+      raster_rate_hz: parseFloat($("rrate").value),
+      source_fps: parseFloat($("sfps").value),
+      max_virtual_latency_s: parseFloat($("lat").value),
+      max_accumulation_rows: 300}),
+    methods: methods.length? methods : ["B4"],
+    profiles: {B0d: b4, B3: b4, B4: b4, P: p},
+    lfsr: {grid_rows:+$("gr").value, grid_cols:+$("gc").value, seed:+$("lseed").value,
+           width:+$("lwidth").value, variant:$("lvariant").value, per_frame:$("perframe").checked},
+    max_frames_per_source: 2,
+    save_images: false,
+  });
+}
+
+async function post(url, body){
+  const r = await fetch(url, {method:"POST", headers:{"Content-Type":"application/json"},
+                             body: JSON.stringify(body||{})});
+  const j = await r.json();
+  if(!r.ok && !j.job) throw new Error(j.error || ("HTTP "+r.status));
+  return j;
+}
+
+async function job(action, payload, render){
+  setStatus("запуск…"); setBar(0.02); $("out").innerHTML="";
+  let j;
+  try { j = await post("/api/run/"+action, payload); }
+  catch(e){ setStatus(String(e), "err"); return; }
+  const id = j.job;
+  while(true){
+    await new Promise(r=>setTimeout(r, 350));
+    const st = await (await fetch("/api/job/"+id)).json();
+    setBar(st.progress || 0);
+    setStatus(st.stage || st.state);
+    if(st.state==="done"){ setBar(1); setStatus("готово", "ok");
+      try { render(st.result); } catch(e){ $("out").innerHTML = `<div class="panel err">${esc(e.stack||e)}</div>`; }
+      return; }
+    if(st.state==="error"){ setBar(0); setStatus("помилка", "err");
+      $("out").innerHTML = `<div class="panel"><div class="err">${esc(st.error)}\n\n${esc(st.traceback||"")}</div></div>`;
+      return; }
+  }
+}
+
+function table(rows, cols, heads){
+  if(!rows || !rows.length) return `<div class="note">немає даних</div>`;
+  const h = (heads||cols).map(c=>`<th>${esc(c)}</th>`).join("");
+  const b = rows.map(r=>"<tr>"+cols.map(c=>{
+    const v=r[c]; const n = typeof v==="number";
+    return `<td class="${n?'num':''}">${n?fmt(v,3):fmt(v)}</td>`;}).join("")+"</tr>").join("");
+  return `<div style="overflow:auto"><table><thead><tr>${h}</tr></thead><tbody>${b}</tbody></table></div>`;
+}
+function gallery(images, caps){
+  return `<div class="imgrid">` + Object.entries(images).map(([k,src]) =>
+    `<figure><img src="${src}" alt="${esc(k)}" onclick="zoom(this.src)"><figcaption>${esc((caps&&caps[k])||k)}</figcaption></figure>`
+  ).join("") + `</div>`;
+}
+function zoom(src){ $("lbimg").src=src; $("lb").classList.add("on"); }
+
+const IMG_CAPS = {
+  original:"початкове зображення", transmitted:"растр, що передається",
+  received:"прийнятий спотворений растр", reconstructed:"відновлене зображення",
+  availability:"карта: зелене — перевірені дані, бурштин — застаріле, червоне — оцінка",
+  scrambled:"перемішане (B1)", restored:"відновлене ключем",
+  boundary_attack:"результат атаки за сумісністю меж (без ключа)",
+  b2_scrambled:"перемішане криптогенератором (B2)",
+  b2_boundary_attack:"атака за межами на B2",
+};
+
+/* ---------------------------------------------------------------- actions */
+function runDemo(){
+  job("demo", {config: cfg(), image_b64: UPLOAD}, res => {
+    let html = `<div class="panel"><h3>Джерело</h3>
+      <div class="note">${esc(res.source.description)} — походження: <b>${esc(res.source.provenance)}</b>,
+      sha256 ${esc((res.source.content_sha256||"").slice(0,16))}</div></div>`;
+    const rows = res.results.filter(r=>!r.error).map(r=>({
+      метод:r.method, "автентифіковано":r.authenticated,
+      "PSNR, дБ":r.metrics.psnr_full, SSIM:r.metrics.ssim_full,
+      "покриття":r.metrics.coverage, "одиниць ok":r.metrics.units_verified,
+      "надіслано":r.metrics.units_sent, "растрів":r.metrics.rasters,
+      "SER до FEC":r.metrics.symbol_errors_pre_fec}));
+    html += `<div class="panel"><h3>Метрики</h3>${table(rows, Object.keys(rows[0]||{метод:1}))}
+      <div class="note">Для B0a/B1/B2 «покриття» = 1 означає лише «зображення відображено»,
+      а не «дані криптографічно перевірені».</div></div>`;
+    for(const r of res.results){
+      if(r.error){ html += `<div class="panel"><h3>${esc(r.method)}</h3><div class="err">${esc(r.error)}</div></div>`; continue; }
+      html += `<div class="panel"><h3>${esc(r.method)} ${r.authenticated?'<span class="ok">· автентифіковано</span>':'<span class="warn">· без автентифікації</span>'}</h3>
+        ${r.notes?`<div class="note">${esc(r.notes)}</div>`:""}
+        ${gallery(r.images, IMG_CAPS)}
+        ${r.metrics.status_counts? "":""}</div>`;
+    }
+    html += `<div class="panel"><details><summary>Час виконання за етапами (wall-clock симулятора, не модельна затримка)</summary>
+      <pre>${esc(JSON.stringify(res.timing, null, 1))}</pre></details></div>`;
+    $("out").innerHTML = html;
+  });
+}
+
+function runScramble(){
+  job("scramble", {config: cfg(), pattern: $("pattern").value, image_b64: UPLOAD,
+                   run_attacks:true, run_b2:true, run_bruteforce:$("lwidth").value<=16},
+    res => {
+      const s = res.similarity;
+      let html = `<div class="panel"><h3>Реконструкція алгоритму 2021 року</h3>
+        <div class="note">Стаття не подає розрядності регістра, полінома, правила побудови перестановки
+        та порядку обходу блоків. Наведені значення — параметри <b>нашої реконструкції</b>.</div>
+        <pre>${esc(JSON.stringify(res.lfsr, null, 1))}</pre></div>`;
+      html += `<div class="panel"><h3>«Схожість» у сенсі статті</h3>${table([{
+        "оригінал vs перемішане, %": s.similarity_scrambled_pct,
+        "оригінал vs відновлене, %": s.similarity_restored_pct,
+        "точне відновлення": s.exact_recovery}], ["оригінал vs перемішане, %","оригінал vs відновлене, %","точне відновлення"])}
+        <div class="note">Низька кореляція не є доказом конфіденційності — див. атаки нижче.</div></div>`;
+      html += `<div class="panel"><h3>Зображення</h3>${gallery(res.images, IMG_CAPS)}</div>`;
+      const rows = res.attacks.map(a=>({
+        "атака":a.name, "успіх":a.success,
+        "точність перестановки": a.metrics.permutation_accuracy ?? a.metrics.direct_accuracy,
+        "суміжність": a.metrics.neighbour_accuracy,
+        "PSNR відновл., дБ": a.metrics.reconstruction_psnr_db,
+        "seed знайдено": a.metrics.seed_found, "простір ключів": a.metrics.key_space,
+        "с": a.seconds, "припущення": a.assumptions}));
+      html += `<div class="panel"><h3>Атаки</h3>${table(rows, Object.keys(rows[0]||{}))}</div>`;
+      $("out").innerHTML = html;
+    });
+}
+
+function runComparison(){
+  job("comparison", {config: cfg()}, res => {
+    const rows = res.summary.map(s=>({
+      "метод":s.method, "автентиф.":s.authenticated, "послідовностей":s.sequences,
+      "PSNR, дБ":s.psnr_mean, "нижня межа":s.psnr_lo, "верхня межа":s.psnr_hi,
+      "покриття":s.coverage_mean}));
+    let html = `<div class="panel"><h3>Підсумок (усереднення за незалежними послідовностями)</h3>
+      ${table(rows, Object.keys(rows[0]||{}))}</div>`;
+    if(res.provenance_warning)
+      html += `<div class="panel"><div class="note warn">${esc(res.provenance_warning)}</div></div>`;
+    if(res.paired && res.paired.length){
+      const p = res.paired.map(x=>({"пара":x.a+" − "+x.b, "різниця, дБ":x.mean,
+        "нижня":x.lo, "верхня":x.hi, "значуще":x.significant_at_95}));
+      html += `<div class="panel"><h3>Парні порівняння</h3>${table(p, Object.keys(p[0]))}</div>`;
+    }
+    if(res.errors && Object.keys(res.errors).length){
+      html += `<div class="panel"><h3>Виключені методи</h3>` +
+        Object.entries(res.errors).map(([k,v])=>`<div class="err">${esc(k)}: ${esc(v)}</div>`).join("") + `</div>`;
+    }
+    html += `<div class="panel"><div class="note">Сирі дані: <code>${esc(res.output_dir)}</code></div></div>`;
+    $("out").innerHTML = html;
+  });
+}
+
+function runSweep(){
+  job("sweep", {config: cfg(), presets:["clean","mild","moderate","bursty","harsh"]}, res => {
+    let html = `<div class="panel"><h3>Якість залежно від профілю каналу</h3>
+      ${table(res.rows.map(r=>({"канал":r.channel,"метод":r.method,"PSNR, дБ":r.psnr_mean,
+        "покриття":r.coverage_mean,"растрів/кадр":r.rasters_mean,"кадрів":r.n})),
+        ["канал","метод","PSNR, дБ","покриття","растрів/кадр","кадрів"])}</div>`;
+    if(res.plot_images) html += `<div class="panel">${gallery(res.plot_images, {})}</div>`;
+    $("out").innerHTML = html;
+  });
+}
+
+function runTune(){
+  job("tune", {config: cfg(), frames:1}, res => {
+    let html = `<div class="panel"><h3>Пошук</h3>
+      <div class="note">${esc(res.discipline)}</div>
+      <p>кандидатів: <b>${res.n_candidates}</b>, допустимих: <b>${res.n_admissible}</b></p>
+      <pre>${esc(JSON.stringify(res.splits, null, 1))}</pre></div>`;
+    const adm = res.calibration.filter(r=>r.admissible).sort((a,b)=>b.psnr_full-a.psnr_full).slice(0,20);
+    html += `<div class="panel"><h3>Найкращі допустимі (калібрування)</h3>
+      ${table(adm.map(r=>({"конфігурація":r.key,"PSNR, дБ":r.psnr_full,"покриття":r.coverage,
+        "растрів/кадр":r.rasters_per_frame,"ефективність":r.payload_efficiency,
+        "накопич. рядків":r.accumulation_rows,"затримка, с":r.virtual_latency_s})),
+        ["конфігурація","PSNR, дБ","покриття","растрів/кадр","ефективність","накопич. рядків","затримка, с"])}</div>`;
+    const rej = res.calibration.filter(r=>!r.admissible).slice(0,15);
+    if(rej.length) html += `<div class="panel"><details><summary>Відхилені конфігурації (${res.n_candidates-res.n_admissible})</summary>
+      ${table(rej.map(r=>({"конфігурація":r.key,"причина":r.reason})), ["конфігурація","причина"])}</details></div>`;
+    if(res.validation && res.validation.length)
+      html += `<div class="panel"><h3>Валідація фіналістів</h3>
+        ${table(res.validation.map(r=>({"конфігурація":r.key,"PSNR валід.":r.psnr_full,
+          "PSNR калібр.":r.calibration_psnr,"покриття":r.coverage})),
+          ["конфігурація","PSNR валід.","PSNR калібр.","покриття"])}</div>`;
+    if(res.selected) html += `<div class="panel"><h3>Обрана конфігурація</h3><pre>${esc(res.selected.key)}</pre></div>`;
+    $("out").innerHTML = html;
+  });
+}
+
+function runAblate(){
+  job("ablate", {config: cfg()}, res => {
+    $("out").innerHTML = `<div class="panel"><h3>Абляції</h3>
+      <div class="note">${esc(res.note)}</div>
+      ${table(res.rows.map(r=>({"варіант":r.variant,"допустимий":r.admissible,
+        "PSNR, дБ":r.psnr_mean,"покриття":r.coverage_mean,"растрів/кадр":r.rasters_mean,
+        "причина":r.reason})), ["варіант","допустимий","PSNR, дБ","покриття","растрів/кадр","причина"])}</div>`;
+  });
+}
+
+function runCvbs(){
+  job("cvbs", {config: cfg(), preset: $("chPreset").value in {clean:1,mild:1,moderate:1,harsh:1} ? $("chPreset").value : "mild",
+               method:"B4"}, res => {
+    let html = `<div class="panel"><h3>Профіль 625/50</h3>
+      <pre>${esc(JSON.stringify(res.profile_description||res.profile, null, 1))}</pre></div>`;
+    if(res.waveform) html += `<div class="panel"><h3>Осцилограма</h3>
+      <figure style="margin:0"><img src="${res.waveform}" style="width:100%" onclick="zoom(this.src)"></figure></div>`;
+    html += `<div class="panel"><h3>Результат приймання</h3>
+      ${table([{"PSNR, дБ":res.quality.psnr_full,"SSIM":res.quality.ssim_full,
+                "перевірене покриття":res.quality.coverage}], ["PSNR, дБ","SSIM","перевірене покриття"])}
+      <pre>${esc(JSON.stringify({статуси:res.status_counts, растр:res.cvbs_stats}, null, 1))}</pre></div>`;
+    $("out").innerHTML = html;
+  });
+}
+
+function runBudget(){
+  job("budget", {config: cfg()}, res => {
+    const rows = Object.entries(res.methods).map(([m,d])=>({
+      "метод":m, "корисних Б/одиниця":d.unit_plain_bytes, "Б у каналі":d.unit_wire_bytes,
+      "одиниць/растр":d.units_per_raster_after_placement,
+      "корисна, Мбіт/с":d.payload_bitrate_bps/1e6, "повна, Мбіт/с":d.gross_bitrate_bps/1e6,
+      "ефективність":d.payload_efficiency, "накопич. рядків":d.accumulation_rows,
+      "модельна затримка, мс":d.latency.virtual_total_s*1000}));
+    let html = `<div class="panel"><h3>Опорна величина</h3>
+      <div class="note">${esc(res.raw_grayscale_reference_note)} → <b>${(res.raw_grayscale_reference_bps/1e6).toFixed(2)} Мбіт/с</b>.
+      Ця величина не вважається автоматично доступною в обраному тракті.</div></div>`;
+    html += `<div class="panel"><h3>Облік по методах</h3>${table(rows, Object.keys(rows[0]||{}))}</div>`;
+    html += `<div class="panel"><h3>Розклад накладних витрат на одиницю</h3>
+      <pre>${esc(JSON.stringify(Object.fromEntries(Object.entries(res.methods).map(
+        ([m,d])=>[m,d.overhead_breakdown_per_unit])), null, 1))}</pre></div>`;
+    $("out").innerHTML = html;
+  });
+}
+
+function runReport(){
+  job("report", {input_dir:"runs", output_dir:"reports/ui", title:"Звіт avsec (веб-інтерфейс)"},
+    res => { $("out").innerHTML = `<div class="panel"><h3>Звіт</h3>
+      <div class="note">Записано у <code>${esc(res.path)}</code></div>
+      <pre style="max-height:70vh">${esc(res.markdown)}</pre></div>`; });
+}
+
+/* ------------------------------------------------------------------ init */
+async function init(){
+  DEF = await post("/api/sync/defaults", {});
+  $("ver").textContent = "v" + DEF.version;
+  $("env").textContent = "python " + DEF.environment.python + " · numpy " + DEF.environment.packages.numpy;
+  $("pattern").innerHTML = DEF.patterns.map(p=>`<option${p==="edges"?" selected":""}>${p}</option>`).join("");
+  $("chPreset").innerHTML = Object.keys(DEF.channel_presets).map(
+    p=>`<option${p==="moderate"?" selected":""}>${p}</option>`).join("");
+  $("cfgFile").innerHTML = (DEF.configs_dir||[]).map(
+      f=>`<option${f==="comparison.yaml"?" selected":""}>${f}</option>`).join("");
+  const b = DEF.default_config.budget;
+  $("rpf").value = b.rasters_per_frame; $("rrate").value = b.raster_rate_hz;
+  $("sfps").value = b.source_fps; $("lat").value = b.max_virtual_latency_s;
+  $("methods").innerHTML = DEF.methods.map(m=>
+    `<span class="chip on" data-m="${m}" title="${esc(DEF.method_notes[m]||"")}" onclick="this.classList.toggle('on');showNotes()">${m}</span>`).join("");
+  applyProfile("b4", DEF.default_profiles.B4);
+  applyProfile("p",  DEF.default_profiles.P);
+  showNotes();
+  applyPresetSliders();
+  $("chPreset").addEventListener("change", applyPresetSliders);
+  ["noise","gain","off","lp","brate","blen"].forEach(id=>$(id).addEventListener("input", syncLabels));
+  $("upload").addEventListener("change", ev=>{
+    const f = ev.target.files[0]; if(!f){ UPLOAD=null; return; }
+    const r = new FileReader(); r.onload = () => { UPLOAD = r.result; setStatus("зображення завантажено: "+f.name, "ok"); };
+    r.readAsDataURL(f);
+  });
+  tabsInit();
+}
+function applyProfile(prefix, p){
+  if(!p) return;
+  $(prefix+"_sh").value = p.stripe_height;
+  $(prefix+"_q").value  = p.quality;
+  $(prefix+"_up").value = p.max_unit_payload;
+  $(prefix+"_nsym").value = p.fec_nsym;
+  if($(prefix+"_lv")) $(prefix+"_lv").value = p.modulation[0];
+  if($(prefix+"_nd")) $(prefix+"_nd").value = p.n_descriptions;
+  $(prefix+"_cell").value = p.modulation[1] + "x" + p.modulation[2];
+  $(prefix+"_il").value = p.interleaver[0];
+  $(prefix+"_ild").value = p.interleaver[0] === "bawp" ? p.interleaver[2] : p.interleaver[1];
+}
+function showNotes(){
+  const on = [...document.querySelectorAll("#methods .chip.on")].map(c=>c.dataset.m);
+  $("methodNote").innerHTML = on.map(m=>`<b>${m}</b> — ${esc(DEF.method_notes[m]||"")}`).join("<br>");
+}
+function applyPresetSliders(){
+  const p = DEF.channel_presets[$("chPreset").value] || {};
+  $("noise").value = p.noise_sigma ?? 0;
+  $("gain").value  = p.gain ?? 1;
+  $("off").value   = p.offset ?? 0;
+  $("lp").value    = (p.lowpass_kind==="gaussian" ? (p.lowpass_sigma ?? 0) : (p.lowpass_taps>1 ? 1 : 0));
+  $("brate").value = p.burst_rate_per_frame ?? 0;
+  $("blen").value  = p.burst_len_lines ?? 8;
+  syncLabels();
+}
+function syncLabels(){
+  $("lNoise").textContent = $("noise").value;
+  $("lGain").textContent  = $("gain").value;
+  $("lOff").textContent   = $("off").value;
+  $("lLp").textContent    = $("lp").value;
+  $("lBr").textContent    = $("brate").value;
+  $("lBl").textContent    = $("blen").value;
+}
+async function loadCfgFile(){
+  try{
+    const r = await post("/api/sync/load_config", {path: $("cfgFile").value});
+    CFG_OVERRIDE = null;
+    const c = r.config;
+    $("fw").value=c.frame.width; $("fh").value=c.frame.height; $("seed").value=c.seed;
+    $("chPreset").value=c.channel.preset; applyPresetSliders();
+    $("rpf").value=c.budget.rasters_per_frame; $("rrate").value=c.budget.raster_rate_hz;
+    $("sfps").value=c.budget.source_fps; $("lat").value=c.budget.max_virtual_latency_s;
+    document.querySelectorAll("#methods .chip").forEach(ch=>
+      ch.classList.toggle("on", c.methods.includes(ch.dataset.m)));
+    const b4=c.profiles.B4, p=c.profiles.P;
+    if(b4){ $("b4_sh").value=b4.stripe_height; $("b4_q").value=b4.quality;
+      $("b4_up").value=b4.max_unit_payload; $("b4_nsym").value=b4.fec_nsym;
+      $("b4_lv").value=b4.modulation[0]; $("b4_cell").value=b4.modulation[1]+"x"+b4.modulation[2];
+      $("b4_il").value=b4.interleaver[0];
+      $("b4_ild").value=b4.interleaver[0]==="bawp"? b4.interleaver[2] : b4.interleaver[1]; }
+    if(p){ $("p_sh").value=p.stripe_height; $("p_q").value=p.quality; $("p_up").value=p.max_unit_payload;
+      $("p_nd").value=p.n_descriptions; $("p_nsym").value=p.fec_nsym;
+      $("p_cell").value=p.modulation[1]+"x"+p.modulation[2]; $("p_il").value=p.interleaver[0];
+      $("p_ild").value=p.interleaver[0]==="bawp"? p.interleaver[2] : p.interleaver[1]; }
+    const l=c.lfsr; if(l){ $("gr").value=l.grid_rows; $("gc").value=l.grid_cols;
+      $("lseed").value=l.lfsr.seed; $("lwidth").value=l.lfsr.width; $("perframe").checked=!!l.per_frame; }
+    showNotes();
+    setStatus("конфігурацію завантажено: "+r.path, "ok");
+  }catch(e){ setStatus(String(e), "err"); }
+}
+function resetCfg(){ CFG_OVERRIDE=null; location.reload(); }
+
+init();
+</script>
+</body>
+</html>

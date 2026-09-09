@@ -1,0 +1,247 @@
+{
+  "raw_grayscale_reference_bps": 3276668.9280000003,
+  "raw_grayscale_reference_note": "нестиснене 256x192, 8 біт, 8.333 кадр/с; ця величина НЕ вважається автоматично доступною в обраному тракті",
+  "budget": {
+    "rasters_per_frame": 3,
+    "raster_rate_hz": 25.0,
+    "source_fps": 8.333,
+    "effective_display_fps": 8.333333333333334,
+    "max_accumulation_rows": 300,
+    "max_virtual_latency_s": 0.8,
+    "max_receiver_buffer_kb": 512,
+    "raster": "720x576",
+    "active_window": [
+      24,
+      8,
+      696,
+      568
+    ],
+    "amplitude_window": [
+      40,
+      216
+    ],
+    "note": "однакові геометрія растру, частота растрів і амплітудне вікно для всіх методів; порядок модуляції та розмір комірки символу входять до простору пошуку, тому жодна схема не отримує непомітно додаткового часу, смуги чи потужності сигналу"
+  },
+  "methods": {
+    "B0d": {
+      "unit_plain_bytes": 640,
+      "header_bytes": 52,
+      "tag_bytes": 16,
+      "header_encoded_bytes": 100,
+      "payload_encoded_bytes": 1136,
+      "unit_wire_bytes": 1236,
+      "unit_symbols": 4944,
+      "raster_capacity_symbols": 21128,
+      "units_per_raster": 4,
+      "unused_symbols": 1352,
+      "raster_fill_fraction": 0.936,
+      "bits_per_symbol": 2,
+      "raster_rate_hz": 25.0,
+      "gross_bitrate_bps": 1056400.0,
+      "wire_bitrate_bps": 988800.0,
+      "payload_bitrate_bps": 512000.0,
+      "payload_efficiency": 0.4847,
+      "overhead_breakdown_per_unit": {
+        "payload": 640,
+        "aead_tag": 16,
+        "header": 52,
+        "header_parity": 48,
+        "payload_parity": 480
+      },
+      "units_per_raster_after_placement": 4,
+      "accumulation_rows": 278,
+      "latency": {
+        "stripe_accumulation_s": 0.015001,
+        "interleaver_accumulation_s": 0.038611,
+        "serialisation_s": 0.12,
+        "reception_s": 0.04,
+        "display_hold_s": 0.120005,
+        "virtual_total_s": 0.333617
+      },
+      "profile": {
+        "stripe_height": 24,
+        "n_descriptions": 1,
+        "codec": "dct",
+        "quality": 12,
+        "max_unit_payload": 640,
+        "fec_nsym": 96,
+        "fec_header_nsym": 48,
+        "modulation": [
+          4,
+          8,
+          2
+        ],
+        "interleaver": [
+          "block",
+          278,
+          0
+        ]
+      }
+    },
+    "B3": {
+      "unit_plain_bytes": 640,
+      "header_bytes": 52,
+      "tag_bytes": 16,
+      "header_encoded_bytes": 100,
+      "payload_encoded_bytes": 1136,
+      "unit_wire_bytes": 1236,
+      "unit_symbols": 4944,
+      "raster_capacity_symbols": 21128,
+      "units_per_raster": 4,
+      "unused_symbols": 1352,
+      "raster_fill_fraction": 0.936,
+      "bits_per_symbol": 2,
+      "raster_rate_hz": 25.0,
+      "gross_bitrate_bps": 1056400.0,
+      "wire_bitrate_bps": 988800.0,
+      "payload_bitrate_bps": 512000.0,
+      "payload_efficiency": 0.4847,
+      "overhead_breakdown_per_unit": {
+        "payload": 640,
+        "aead_tag": 16,
+        "header": 52,
+        "header_parity": 48,
+        "payload_parity": 480
+      },
+      "units_per_raster_after_placement": 4,
+      "accumulation_rows": 278,
+      "latency": {
+        "stripe_accumulation_s": 0.015001,
+        "interleaver_accumulation_s": 0.038611,
+        "serialisation_s": 0.12,
+        "reception_s": 0.04,
+        "display_hold_s": 0.120005,
+        "virtual_total_s": 0.333617
+      },
+      "profile": {
+        "stripe_height": 24,
+        "n_descriptions": 1,
+        "codec": "dct",
+        "quality": 12,
+        "max_unit_payload": 640,
+        "fec_nsym": 96,
+        "fec_header_nsym": 48,
+        "modulation": [
+          4,
+          8,
+          2
+        ],
+        "interleaver": [
+          "block",
+          278,
+          0
+        ]
+      }
+    },
+    "B4": {
+      "unit_plain_bytes": 640,
+      "header_bytes": 52,
+      "tag_bytes": 16,
+      "header_encoded_bytes": 100,
+      "payload_encoded_bytes": 1136,
+      "unit_wire_bytes": 1236,
+      "unit_symbols": 4944,
+      "raster_capacity_symbols": 21128,
+      "units_per_raster": 4,
+      "unused_symbols": 1352,
+      "raster_fill_fraction": 0.936,
+      "bits_per_symbol": 2,
+      "raster_rate_hz": 25.0,
+      "gross_bitrate_bps": 1056400.0,
+      "wire_bitrate_bps": 988800.0,
+      "payload_bitrate_bps": 512000.0,
+      "payload_efficiency": 0.4847,
+      "overhead_breakdown_per_unit": {
+        "payload": 640,
+        "aead_tag": 16,
+        "header": 52,
+        "header_parity": 48,
+        "payload_parity": 480
+      },
+      "units_per_raster_after_placement": 4,
+      "accumulation_rows": 278,
+      "latency": {
+        "stripe_accumulation_s": 0.015001,
+        "interleaver_accumulation_s": 0.038611,
+        "serialisation_s": 0.12,
+        "reception_s": 0.04,
+        "display_hold_s": 0.120005,
+        "virtual_total_s": 0.333617
+      },
+      "profile": {
+        "stripe_height": 24,
+        "n_descriptions": 1,
+        "codec": "dct",
+        "quality": 12,
+        "max_unit_payload": 640,
+        "fec_nsym": 96,
+        "fec_header_nsym": 48,
+        "modulation": [
+          4,
+          8,
+          2
+        ],
+        "interleaver": [
+          "block",
+          278,
+          0
+        ]
+      }
+    },
+    "P": {
+      "unit_plain_bytes": 320,
+      "header_bytes": 52,
+      "tag_bytes": 16,
+      "header_encoded_bytes": 100,
+      "payload_encoded_bytes": 720,
+      "unit_wire_bytes": 820,
+      "unit_symbols": 3280,
+      "raster_capacity_symbols": 21128,
+      "units_per_raster": 6,
+      "unused_symbols": 1448,
+      "raster_fill_fraction": 0.9315,
+      "bits_per_symbol": 2,
+      "raster_rate_hz": 25.0,
+      "gross_bitrate_bps": 1056400.0,
+      "wire_bitrate_bps": 984000.0,
+      "payload_bitrate_bps": 384000.0,
+      "payload_efficiency": 0.3635,
+      "overhead_breakdown_per_unit": {
+        "payload": 320,
+        "aead_tag": 16,
+        "header": 52,
+        "header_parity": 48,
+        "payload_parity": 384
+      },
+      "units_per_raster_after_placement": 6,
+      "accumulation_rows": 278,
+      "latency": {
+        "stripe_accumulation_s": 0.015001,
+        "interleaver_accumulation_s": 0.038611,
+        "serialisation_s": 0.12,
+        "reception_s": 0.04,
+        "display_hold_s": 0.120005,
+        "virtual_total_s": 0.333617
+      },
+      "profile": {
+        "stripe_height": 24,
+        "n_descriptions": 2,
+        "codec": "dct",
+        "quality": 8,
+        "max_unit_payload": 320,
+        "fec_nsym": 128,
+        "fec_header_nsym": 48,
+        "modulation": [
+          4,
+          8,
+          2
+        ],
+        "interleaver": [
+          "bawp",
+          0,
+          8
+        ]
+      }
+    }
+  }
+}

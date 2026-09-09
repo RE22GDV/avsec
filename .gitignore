@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# Key material must never be committed
+*.key
+*.secret
+*.pem
+session_state*.json
+
+# Working outputs: reproduce them with the commands in README.md.
+# The curated evidence that backs the report lives in results/ and IS tracked.
+runs/
+reports/
+data/generated/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
