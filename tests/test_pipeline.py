@@ -154,7 +154,8 @@ def test_slot_order_is_not_authenticated_but_position_in_the_picture_is():
     from avsec.crypto import AuthenticationFailed
 
     hdr = out.outcomes[0].header
-    opener = rx2._opener(hdr.session_id)
+    ctx = (hdr.session_id, hdr.session_epoch, hdr.stream_id)
+    opener = rx2._lookup_opener(ctx) or rx2._provisional_opener(ctx)
     import dataclasses
 
     forged = dataclasses.replace(hdr, stripe_id=hdr.stripe_id + 1).core_bytes()

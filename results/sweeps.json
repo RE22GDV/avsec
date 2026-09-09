@@ -60,7 +60,7 @@
     {
       "channel": "mild",
       "method": "B0a",
-      "psnr_mean": 29.053094574161968,
+      "psnr_mean": 29.162863187935578,
       "coverage_mean": 1.0,
       "rasters_mean": 1.0,
       "n": 16
@@ -76,7 +76,7 @@
     {
       "channel": "mild",
       "method": "B1",
-      "psnr_mean": 27.5953354588208,
+      "psnr_mean": 27.638940071365205,
       "coverage_mean": 1.0,
       "rasters_mean": 1.0,
       "n": 16
@@ -84,7 +84,7 @@
     {
       "channel": "mild",
       "method": "B2",
-      "psnr_mean": 27.556272886002525,
+      "psnr_mean": 27.607022906235315,
       "coverage_mean": 1.0,
       "rasters_mean": 1.0,
       "n": 16
@@ -116,7 +116,7 @@
     {
       "channel": "moderate",
       "method": "B0a",
-      "psnr_mean": 22.039765390537177,
+      "psnr_mean": 21.45441419656845,
       "coverage_mean": 1.0,
       "rasters_mean": 1.0,
       "n": 16
@@ -124,7 +124,7 @@
     {
       "channel": "moderate",
       "method": "B0d",
-      "psnr_mean": 28.17957357667587,
+      "psnr_mean": 28.00674690759638,
       "coverage_mean": 0.953125,
       "rasters_mean": 2.0,
       "n": 16
@@ -132,7 +132,7 @@
     {
       "channel": "moderate",
       "method": "B1",
-      "psnr_mean": 20.463509799485493,
+      "psnr_mean": 20.07748539051709,
       "coverage_mean": 1.0,
       "rasters_mean": 1.0,
       "n": 16
@@ -140,7 +140,7 @@
     {
       "channel": "moderate",
       "method": "B2",
-      "psnr_mean": 20.19656384975329,
+      "psnr_mean": 19.989075770797612,
       "coverage_mean": 1.0,
       "rasters_mean": 1.0,
       "n": 16
@@ -148,31 +148,31 @@
     {
       "channel": "moderate",
       "method": "B3",
-      "psnr_mean": 23.703521578265544,
-      "coverage_mean": 0.6875,
+      "psnr_mean": 28.726743791600008,
+      "coverage_mean": 0.9375,
       "rasters_mean": 1.375,
       "n": 16
     },
     {
       "channel": "moderate",
       "method": "B4",
-      "psnr_mean": 24.690008073424934,
-      "coverage_mean": 0.8671875,
+      "psnr_mean": 27.294123902616192,
+      "coverage_mean": 0.9375,
       "rasters_mean": 2.0,
       "n": 16
     },
     {
       "channel": "moderate",
       "method": "P",
-      "psnr_mean": 25.533350994265867,
-      "coverage_mean": 0.9609375,
+      "psnr_mean": 25.52859023366539,
+      "coverage_mean": 0.97265625,
       "rasters_mean": 3.0,
       "n": 16
     },
     {
       "channel": "bursty",
       "method": "B0a",
-      "psnr_mean": 16.912936157851682,
+      "psnr_mean": 15.375198032454565,
       "coverage_mean": 1.0,
       "rasters_mean": 1.0,
       "n": 16
@@ -180,15 +180,15 @@
     {
       "channel": "bursty",
       "method": "B0d",
-      "psnr_mean": 17.282677081200216,
-      "coverage_mean": 0.5234375,
+      "psnr_mean": 15.343304112632957,
+      "coverage_mean": 0.5625,
       "rasters_mean": 2.0,
       "n": 16
     },
     {
       "channel": "bursty",
       "method": "B1",
-      "psnr_mean": 13.975168376569508,
+      "psnr_mean": 15.318961663297141,
       "coverage_mean": 1.0,
       "rasters_mean": 1.0,
       "n": 16
@@ -196,7 +196,7 @@
     {
       "channel": "bursty",
       "method": "B2",
-      "psnr_mean": 15.960695523140723,
+      "psnr_mean": 15.266859336768047,
       "coverage_mean": 1.0,
       "rasters_mean": 1.0,
       "n": 16
@@ -204,7 +204,7 @@
     {
       "channel": "bursty",
       "method": "B3",
-      "psnr_mean": 22.918859368431082,
+      "psnr_mean": 24.300898374594908,
       "coverage_mean": 0.625,
       "rasters_mean": 1.375,
       "n": 16
@@ -212,24 +212,24 @@
     {
       "channel": "bursty",
       "method": "B4",
-      "psnr_mean": 15.77293992262752,
-      "coverage_mean": 0.5546875,
+      "psnr_mean": 15.343304112632957,
+      "coverage_mean": 0.5625,
       "rasters_mean": 2.0,
       "n": 16
     },
     {
       "channel": "bursty",
       "method": "P",
-      "psnr_mean": 21.983265588113852,
-      "coverage_mean": 0.73828125,
+      "psnr_mean": 21.344512199981146,
+      "coverage_mean": 0.77734375,
       "rasters_mean": 3.0,
       "n": 16
     },
     {
       "channel": "harsh",
       "method": "B0a",
-      "psnr_mean": 16.04041520126283,
-      "coverage_mean": 1.0,
+      "psnr_mean": 14.590974925734361,
+      "coverage_mean": 0.875,
       "rasters_mean": 1.0,
       "n": 16
     },
@@ -244,16 +244,16 @@
     {
       "channel": "harsh",
       "method": "B1",
-      "psnr_mean": 14.230529107584246,
-      "coverage_mean": 1.0,
+      "psnr_mean": 14.026492410188053,
+      "coverage_mean": 0.875,
       "rasters_mean": 1.0,
       "n": 16
     },
     {
       "channel": "harsh",
       "method": "B2",
-      "psnr_mean": 14.988718116562815,
-      "coverage_mean": 1.0,
+      "psnr_mean": 14.014410107974069,
+      "coverage_mean": 0.875,
       "rasters_mean": 1.0,
       "n": 16
     },
@@ -425,8 +425,10 @@
         "tag_bytes": 16,
         "key_bytes": 32,
         "nonce_bytes": 12,
-        "nonce_layout": "prefix(4B, HKDF per session+direction+stream) || counter(8B BE)",
-        "kdf": "HKDF-SHA256(salt=session_id, info=label|direction|stream|alg)",
+        "nonce_layout": "prefix(4B, HKDF per session+epoch+direction+stream) || counter(8B BE)",
+        "kdf": "HKDF-SHA256(salt=session_id, info=label|direction|stream|alg|epoch)",
+        "epoch_bits": 32,
+        "counter_allocation": "sealer-allocated, one-shot; no caller-supplied counter",
         "replay_window": 4096,
         "direction": "uplink",
         "stream_id": 0
@@ -483,7 +485,7 @@
         "yaml": "6.0.2"
       },
       "avsec_version": "0.1.0",
-      "git_commit": null
+      "git_commit": "22a831f41bdff151337cebb124fe6dd6cf460d72"
     },
     "inputs": {},
     "counters": {}

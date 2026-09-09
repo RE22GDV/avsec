@@ -17,7 +17,7 @@ countermeasure only - it is public, it is never relied on for confidentiality.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
@@ -36,6 +36,7 @@ class InterleaverConfig:
     window_rows: int = 0           # BAWP window height in symbol rows (0 = whole raster)
     burst_rows: int = 4            # assumed max burst height, in symbol rows
     column_twist: int = 1          # BAWP public constant sigma
+    strict_isolation: bool = False  # refuse to spill across description bands
 
     def validate(self) -> None:
         if self.scheme not in SCHEMES:
@@ -52,6 +53,7 @@ class InterleaverConfig:
             "window_rows": self.window_rows if self.scheme == "bawp" else None,
             "assumed_burst_rows": self.burst_rows if self.scheme == "bawp" else None,
             "column_twist": self.column_twist if self.scheme == "bawp" else None,
+            "strict_isolation": self.strict_isolation if self.scheme == "bawp" else None,
         }
 
 
@@ -99,9 +101,37 @@ def bawp_bands(window_rows: int, n_descriptions: int, burst_rows: int) -> List[T
     return bands
 
 
+@dataclass
+class PlacementInfo:
+    """What actually happened while placing, so guarantees can be checked.
+
+    ``spilled`` is the honest flag: once a unit had to be appended to a band
+    that belongs to another description class, the "a burst touches at most two
+    description classes" statement no longer follows from the construction
+    (defect F12).  The bound is then reported as not established rather than
+    silently assumed.
+    """
+
+    bands: List[Tuple[int, int]] = field(default_factory=list)
+    windows: int = 1
+    spilled: bool = False
+    spill_units: List[int] = field(default_factory=list)
+    band_of_unit: List[int] = field(default_factory=list)
+
+    @property
+    def isolation_guaranteed(self) -> bool:
+        return not self.spilled
+
+    def describe(self) -> Dict[str, object]:
+        return {"bands": [list(b) for b in self.bands], "windows": self.windows,
+                "spilled": self.spilled, "spill_units": list(self.spill_units),
+                "isolation_guaranteed": self.isolation_guaranteed}
+
+
 def bawp_placement(
     n_rows: int, n_cols: int, window_rows: int, n_descriptions: int, burst_rows: int,
     unit_lengths: Sequence[int], unit_descs: Sequence[int], column_twist: int = 1,
+    strict_isolation: bool = False, info: Optional[PlacementInfo] = None,
 ) -> List[np.ndarray]:
     """Burst-Aware Window Placement (BAWP), profile v1.
 
@@ -121,17 +151,33 @@ def bawp_placement(
 
        which is a bijection onto the band's cells for ``l < h * C``.
 
-    Guarantee
-    ---------
-    Consecutive symbols of one codeword land in distinct rows, cycling through
-    the band, so a burst of ``b <= h`` symbol rows removes at most
-    ``b * ceil(n / h)`` symbols of any codeword of length ``n``.  A configuration
-    is *admissible* for a code with ``nsym`` parity symbols iff
-    ``B * ceil(n / h) <= nsym`` (see :func:`bawp_admissible`).
-    Because bands are contiguous and at least ``B`` rows high, a burst of at
-    most ``B`` rows touches at most two bands, hence at most
-    ``ceil(2 * D / G)`` description classes - the remaining descriptions of the
-    affected stripes stay intact, which is what multiple descriptions are for.
+    Guarantees, and exactly when they hold
+    --------------------------------------
+    **Codeword spreading.** Consecutive symbols of one codeword land in distinct
+    rows, cycling through the band, so a burst of ``b <= h`` symbol rows removes
+    at most ``b * ceil(n / h)`` symbols of any codeword of length ``n``.  This
+    holds unconditionally for a codeword placed inside a single band.  The exact
+    per-codeword figure, including the shortened last RS block and the header
+    block, is computed by :func:`worst_case_codeword_damage`; the analytic bound
+    is only a sufficient condition.
+
+    **Description isolation.** Because bands are contiguous and at least ``B``
+    rows high, a burst of at most ``B`` rows touches at most two bands.  If, and
+    only if, **every band carries a single description class**, that means at
+    most ``ceil(2 * D / G)`` description classes.
+
+    That premise is broken by step 2's overflow: once a unit spills into another
+    class's band, one band carries two classes and a burst can touch three
+    classes.  A concrete counterexample (defect F12) is
+    ``n_rows=n_cols=window_rows=16, D=4, B=4``, lengths ``[64, 2, 1, 1, 1]``,
+    descriptions ``[0, 0, 1, 2, 3]``, damaged rows ``[5, 9)`` - it touches
+    classes 0, 1 and 2.  Therefore:
+
+    * ``strict_isolation=True`` refuses to spill and raises instead, so the
+      isolation statement is a real guarantee for the configurations it accepts;
+    * ``strict_isolation=False`` (default) still places the units, but records
+      ``PlacementInfo.spilled`` and reports ``isolation_guaranteed=False``.  No
+      caller may claim the bound for such a configuration.
 
     Complexity
     ----------
@@ -144,16 +190,27 @@ def bawp_placement(
     bands_template = bawp_bands(W, n_descriptions, burst_rows)
 
     # per-window, per-band fill counters
-    fill = [[0] * len(bands_template) for _ in range(n_windows)]
+    n_bands = len(bands_template)
+    fill = [[0] * n_bands for _ in range(n_windows)]
+    band_class: Dict[Tuple[int, int], int] = {}
     out: List[np.ndarray] = []
+    inf = info if info is not None else PlacementInfo()
+    inf.bands = list(bands_template)
+    inf.windows = n_windows
+    inf.spilled = False
+    inf.spill_units = []
+    inf.band_of_unit = []
 
-    for length, desc in zip(unit_lengths, unit_descs):
+    for ui, (length, desc) in enumerate(zip(unit_lengths, unit_descs)):
         placed: Optional[np.ndarray] = None
-        pref = int(desc) % len(bands_template)
+        pref = int(desc) % n_bands
+        cls = int(desc)
+        chosen = -1
         for wi in range(n_windows):
             row_base = wi * W
             rows_here = min(W, n_rows - row_base)
-            order = [(pref + i) % len(bands_template) for i in range(len(bands_template))]
+            order = ([pref] if strict_isolation
+                     else [(pref + i) % n_bands for i in range(n_bands)])
             for bi in order:
                 r0, h = bands_template[bi]
                 h = min(h, max(0, rows_here - r0))
@@ -163,21 +220,71 @@ def bawp_placement(
                 used = fill[wi][bi]
                 if cap - used < length:
                     continue
+                owner = band_class.get((wi, bi))
+                if strict_isolation and owner is not None and owner != cls:
+                    continue
                 idx = np.arange(used, used + length, dtype=np.int64)
                 rr = row_base + r0 + (idx % h)
                 cc = ((idx // h) + column_twist * (idx % h)) % n_cols
                 placed = rr * n_cols + cc
                 fill[wi][bi] = used + length
+                if owner is None:
+                    band_class[(wi, bi)] = cls
+                elif owner != cls:
+                    # this band now carries two description classes: the
+                    # isolation statement no longer follows (defect F12)
+                    inf.spilled = True
+                    inf.spill_units.append(ui)
+                chosen = bi
                 break
             if placed is not None:
                 break
         if placed is None:
+            if strict_isolation:
+                raise PlacementError(
+                    f"strict isolation: no room for a {length}-symbol unit of "
+                    f"description {desc} in its own band; spilling would break the "
+                    "description-isolation guarantee, so the configuration is "
+                    "rejected instead"
+                )
             raise PlacementError(
                 f"raster capacity exhausted while placing a {length}-symbol unit "
                 "(the transmitter must reduce the payload, never truncate it)"
             )
+        inf.band_of_unit.append(chosen)
         out.append(placed)
     return out
+
+
+def worst_case_codeword_damage(cells: np.ndarray, n_cols: int, burst_rows: int,
+                               n_rows: Optional[int] = None) -> int:
+    """Largest number of a codeword's symbols any single burst can destroy.
+
+    Exhaustive over every burst start position, so it needs no assumption about
+    band structure, spilling or the shortened last block (defect F11).  ``cells``
+    are data-cell indices; ``burst_rows`` is measured in **symbol rows**.
+    """
+    rows = np.asarray(cells, dtype=np.int64) // int(n_cols)
+    if rows.size == 0:
+        return 0
+    top = int(n_rows if n_rows is not None else rows.max() + 1)
+    b = max(1, int(burst_rows))
+    counts = np.bincount(rows, minlength=top + b)
+    window = np.convolve(counts, np.ones(b, dtype=np.int64), mode="valid")
+    return int(window.max()) if window.size else 0
+
+
+def burst_rows_from_lines(burst_lines: int, symbol_height: int) -> int:
+    """Raster lines -> symbol rows, allowing for misalignment.
+
+    A burst of ``L`` raster lines that does not start on a cell boundary touches
+    ``floor(L / symbol_height) + 1`` symbol rows.  Confusing these two units -
+    raster lines, symbol rows, modulation symbols and RS byte symbols - is
+    exactly the mistake defect F11 warns about, so the conversion lives here and
+    is used everywhere instead of being done inline.
+    """
+    h = max(1, int(symbol_height))
+    return max(1, int(burst_lines) // h + 1)
 
 
 def bawp_admissible(window_rows: int, n_descriptions: int, burst_rows: int,
@@ -202,6 +309,7 @@ class Interleaver:
         self.n_cols = int(n_cols)
         self.capacity = self.n_rows * self.n_cols
         self._table: Optional[np.ndarray] = None
+        self.last_info: Optional[PlacementInfo] = None
         if cfg.scheme == "sequential":
             self._table = sequential_placement(self.capacity)
         elif cfg.scheme == "block":
@@ -261,5 +369,6 @@ class Interleaver:
 __all__ = [
     "SCHEMES", "PlacementError", "InterleaverConfig", "Interleaver",
     "sequential_placement", "block_placement", "bawp_bands", "bawp_placement",
-    "bawp_admissible",
+    "bawp_admissible", "PlacementInfo", "worst_case_codeword_damage",
+    "burst_rows_from_lines",
 ]

@@ -158,12 +158,17 @@ def action_demo(payload: Dict[str, Any], progress) -> Dict[str, Any]:
 
     methods = build_methods(cfg, timer)
     frame = source.frames[0]
+    from avsec.channel import ChannelTrace
+
+    trace = ChannelTrace(seed=cfg.seed, scene=source.name, repetition=0,
+                         profile=cfg.channel_preset,
+                         rasters_per_frame=cfg.budget.rasters_per_frame)
     out: List[Dict[str, Any]] = []
     for i, (name, m) in enumerate(methods.items()):
         progress(f"метод {name}", i / max(len(methods), 1), {})
         m.reset()
         try:
-            res = m.process(frame, 0, experiment_rng(cfg.seed, "ui-demo", name))
+            res = m.process(frame, 0, trace)
         except Exception as exc:
             out.append({"method": name, "error": f"{type(exc).__name__}: {exc}"})
             continue

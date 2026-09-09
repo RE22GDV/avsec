@@ -10,7 +10,7 @@
         "n_blocks": 192.0,
         "n_frames_used": 1.0
       },
-      "seconds": 0.0015438000000358443,
+      "seconds": 0.0035052999992331024,
       "notes": "Recovering a static permutation does not break an independently regenerated permutation."
     },
     {
@@ -22,7 +22,7 @@
         "mean_match_cost": 0.0,
         "permutation_accuracy": 1.0
       },
-      "seconds": 0.033857099999977436,
+      "seconds": 0.05638810000164085,
       "notes": "",
       "content": "smooth"
     },
@@ -36,7 +36,7 @@
         "neighbour_accuracy": 0.949438202247191,
         "reconstruction_psnr_db": 24.681112285187794
       },
-      "seconds": 0.10289140000008956,
+      "seconds": 0.18023019999964163,
       "notes": "Greedy best-buddy jigsaw solver; no learned model is used.",
       "content": "smooth"
     },
@@ -49,7 +49,7 @@
         "mean_match_cost": 0.0,
         "permutation_accuracy": 0.3333333333333333
       },
-      "seconds": 0.053343300000051386,
+      "seconds": 0.05766769999900134,
       "notes": "",
       "content": "edges"
     },
@@ -63,7 +63,7 @@
         "neighbour_accuracy": 0.033707865168539325,
         "reconstruction_psnr_db": 6.033210412854942
       },
-      "seconds": 0.10735039999985929,
+      "seconds": 0.16936799999893992,
       "notes": "Greedy best-buddy jigsaw solver; no learned model is used.",
       "content": "edges"
     },
@@ -76,7 +76,7 @@
         "mean_match_cost": 0.0,
         "permutation_accuracy": 0.5364583333333334
       },
-      "seconds": 0.03926679999995031,
+      "seconds": 0.06021649999820511,
       "notes": "",
       "content": "text"
     },
@@ -90,7 +90,7 @@
         "neighbour_accuracy": 0.03089887640449438,
         "reconstruction_psnr_db": 13.027386367024139
       },
-      "seconds": 0.1165273999999954,
+      "seconds": 0.1856484999989334,
       "notes": "Greedy best-buddy jigsaw solver; no learned model is used.",
       "content": "text"
     },
@@ -103,7 +103,7 @@
         "mean_match_cost": 0.0,
         "permutation_accuracy": 1.0
       },
-      "seconds": 0.04646150000007765,
+      "seconds": 0.058020500000566244,
       "notes": "",
       "content": "texture"
     },
@@ -117,7 +117,7 @@
         "neighbour_accuracy": 0.6741573033707865,
         "reconstruction_psnr_db": 14.620146310552848
       },
-      "seconds": 0.1549363000001449,
+      "seconds": 0.22268909999911557,
       "notes": "Greedy best-buddy jigsaw solver; no learned model is used.",
       "content": "texture"
     },
@@ -130,7 +130,7 @@
         "n_frames": 12.0,
         "n_blocks": 192.0
       },
-      "seconds": 0.007528899999897476,
+      "seconds": 0.008575200001359917,
       "notes": "Shows why a per-frame permutation is required; still not a confidentiality proof for the per-frame variant."
     },
     {
@@ -141,9 +141,9 @@
         "seed_found": 44257.0,
         "seeds_tried": 44257.0,
         "key_space": 65535.0,
-        "seeds_per_second": 7668.36219537118
+        "seeds_per_second": 4820.11743651965
       },
-      "seconds": 5.771375799999987,
+      "seconds": 9.181726499999058,
       "notes": "key space 2^16-1 = 65535; searched 44257"
     }
   ],
@@ -232,103 +232,244 @@
   ],
   "protocol_checks": [
     {
-      "check": "valid unit",
+      "check": "valid unit (positive control)",
       "expected": "accept",
       "outcome": "ACCEPTED",
-      "passed": true
+      "passed": true,
+      "detail": "must accept, otherwise every rejection below is meaningless"
     },
     {
       "check": "replay of an accepted unit",
-      "expected": "reject",
+      "expected": "ReplayDetected",
       "outcome": "REJECTED (ReplayDetected)",
       "passed": true,
       "detail": "unit sequence 0 already accepted"
     },
     {
       "check": "modified ciphertext",
-      "expected": "reject",
+      "expected": "AuthenticationFailed",
       "outcome": "REJECTED (AuthenticationFailed)",
       "passed": true,
-      "detail": "tag verification failed"
+      "detail": "same nonce and same AAD as the genuine unit tag verification failed"
     },
     {
       "check": "modified tag",
-      "expected": "reject",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "same nonce and same AAD as the genuine unit tag verification failed"
+    },
+    {
+      "check": "truncated ciphertext",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "same nonce and same AAD as the genuine unit tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'frame_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'stripe_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'desc_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'seg_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'codec_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'profile_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'payload_len'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'flags'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'session_epoch'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'stream_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'n_segs'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'n_descs'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated geometry",
+      "expected": "AuthenticationFailed",
       "outcome": "REJECTED (AuthenticationFailed)",
       "passed": true,
       "detail": "tag verification failed"
     },
     {
-      "check": "modified authenticated coordinates",
-      "expected": "reject",
+      "check": "unit replayed into another session",
+      "expected": "AuthenticationFailed",
       "outcome": "REJECTED (AuthenticationFailed)",
       "passed": true,
       "detail": "tag verification failed"
     },
     {
-      "check": "unit moved to another stripe",
-      "expected": "reject",
-      "outcome": "REJECTED (AuthenticationFailed)",
-      "passed": true,
-      "detail": "tag verification failed"
-    },
-    {
-      "check": "unit moved to another frame",
-      "expected": "reject",
-      "outcome": "REJECTED (AuthenticationFailed)",
-      "passed": true,
-      "detail": "tag verification failed"
-    },
-    {
-      "check": "unit from another session",
-      "expected": "reject",
+      "check": "unit replayed into another epoch of the same session",
+      "expected": "AuthenticationFailed",
       "outcome": "REJECTED (AuthenticationFailed)",
       "passed": true,
       "detail": "tag verification failed"
     },
     {
       "check": "wrong master key",
-      "expected": "reject",
+      "expected": "AuthenticationFailed",
       "outcome": "REJECTED (AuthenticationFailed)",
       "passed": true,
       "detail": "tag verification failed"
     },
     {
+      "check": "unit replayed into another stream",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "tag verification failed"
+    },
+    {
+      "check": "negative control: empty AAD instead of the header",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "if this were accepted, the header would not be authenticated at all tag verification failed"
+    },
+    {
+      "check": "counters are allocated once and never repeat",
+      "expected": "strictly increasing, no caller-chosen counter",
+      "outcome": "0 then 1; seal() takes no counter argument",
+      "passed": true
+    },
+    {
+      "check": "counter beyond the profile limit",
+      "expected": "NonceExhausted",
+      "outcome": "REJECTED (NonceExhausted)",
+      "passed": true,
+      "detail": "session counter exhausted; move to a new epoch or session id"
+    },
+    {
       "check": "unknown protocol version",
-      "expected": "reject",
+      "expected": "UnknownVersion",
       "outcome": "REJECTED (UnknownVersion)",
       "passed": true,
       "detail": "unsupported protocol version 7"
     },
     {
-      "check": "out-of-range payload length",
-      "expected": "reject",
+      "check": "unknown transport profile",
+      "expected": "UnknownProfile",
+      "outcome": "REJECTED (UnknownProfile)",
+      "passed": true,
+      "detail": "unsupported profile id 200"
+    },
+    {
+      "check": "zero payload length",
+      "expected": "FramingError",
       "outcome": "REJECTED (FramingError)",
       "passed": true,
       "detail": "payload_len 0 outside (0, 16384]"
     },
     {
-      "check": "geometry outside the frame",
-      "expected": "reject",
+      "check": "payload length above the profile bound",
+      "expected": "FramingError",
       "outcome": "REJECTED (FramingError)",
       "passed": true,
-      "detail": "geometry exceeds the declared frame size"
+      "detail": "payload_len 9000 outside (0, 1024]"
     },
     {
-      "check": "header CRC corruption",
-      "expected": "reject",
+      "check": "segment index outside the segment count",
+      "expected": "FramingError",
+      "outcome": "REJECTED (FramingError)",
+      "passed": true,
+      "detail": "segment indices inconsistent"
+    },
+    {
+      "check": "corrupted header CRC",
+      "expected": "FramingError",
       "outcome": "REJECTED (FramingError)",
       "passed": true,
       "detail": "bad magic"
     },
     {
-      "check": "modification fully repaired by FEC",
-      "expected": "not a forgery (identical protected message restored)",
-      "outcome": "restored",
-      "passed": true
+      "check": "geometry outside the frame",
+      "expected": "FramingError",
+      "outcome": "REJECTED (FramingError)",
+      "passed": true,
+      "detail": "geometry exceeds the declared frame size"
     },
     {
-      "check": "modification beyond FEC capability",
+      "check": "geometry phase inconsistent with the step",
+      "expected": "FramingError",
+      "outcome": "REJECTED (FramingError)",
+      "passed": true,
+      "detail": "geometry phase inconsistent with step"
+    },
+    {
+      "check": "modification fully repaired by FEC",
+      "expected": "not a forgery: the identical protected message is restored",
+      "outcome": "restored",
+      "passed": true,
+      "detail": "a corrected error is not evidence of a broken tag"
+    },
+    {
+      "check": "modification beyond the FEC capability",
       "expected": "rejected by FEC or by AEAD",
       "outcome": "uncorrectable, discarded by FEC",
       "passed": true
@@ -465,8 +606,10 @@
         "tag_bytes": 16,
         "key_bytes": 32,
         "nonce_bytes": 12,
-        "nonce_layout": "prefix(4B, HKDF per session+direction+stream) || counter(8B BE)",
-        "kdf": "HKDF-SHA256(salt=session_id, info=label|direction|stream|alg)",
+        "nonce_layout": "prefix(4B, HKDF per session+epoch+direction+stream) || counter(8B BE)",
+        "kdf": "HKDF-SHA256(salt=session_id, info=label|direction|stream|alg|epoch)",
+        "epoch_bits": 32,
+        "counter_allocation": "sealer-allocated, one-shot; no caller-supplied counter",
         "replay_window": 4096,
         "direction": "uplink",
         "stream_id": 0
@@ -523,7 +666,7 @@
         "yaml": "6.0.2"
       },
       "avsec_version": "0.1.0",
-      "git_commit": null
+      "git_commit": "22a831f41bdff151337cebb124fe6dd6cf460d72"
     },
     "inputs": {},
     "counters": {}

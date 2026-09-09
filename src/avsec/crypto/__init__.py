@@ -4,20 +4,36 @@ Primitives come from ``cryptography`` (ChaCha20-Poly1305 / AES-GCM / HKDF-SHA256
 Nothing cryptographic is re-implemented here; this module only integrates the
 standard constructions and enforces the nonce / freshness discipline.
 
-Nonce construction (profile v1)
+Nonce construction (profile v2)
 -------------------------------
 ``nonce = nonce_prefix(4 B) || counter(8 B, big endian)`` for the 96-bit nonce of
-both ChaCha20-Poly1305 and AES-GCM.  ``nonce_prefix`` is derived per session and
-direction with HKDF; ``counter`` is strictly monotone inside a session.  Two
-encryptions therefore share a nonce only if they share a session key *and* a
-counter value, which the sealer refuses to produce.
+both ChaCha20-Poly1305 and AES-GCM.  ``nonce_prefix`` is derived per session,
+**epoch**, direction and stream with HKDF; ``counter`` is strictly monotone
+inside one epoch.  Two encryptions therefore share a nonce only if they share a
+session key *and* a counter value.
 
-Restart policy
---------------
-A session identifier is 8 random bytes drawn from ``os.urandom``.  After a
-restart a transmitter must either (a) start a **new** session id, or (b) restore
-the persisted counter of the old session.  Reusing an old session id without its
-counter is rejected by :class:`SessionState.restore`.
+Counters are handed out by :meth:`Sealer.seal`, which allocates the value itself
+and consumes it before the caller can observe it.  There is no API that lets a
+caller choose or repeat a counter, so a nonce cannot be reused through misuse of
+this module (defect F03).
+
+Session lifecycle and restart (profile v2)
+-----------------------------------------
+A session identifier is 8 random bytes from ``os.urandom``.  Every session also
+carries a 32-bit **epoch** that is authenticated in the header *and* mixed into
+the key derivation, so a different epoch means a different key.  That makes a
+restart safe in a way a persisted counter alone cannot:
+
+* preferred - start a new session id (fresh keys, epoch 0);
+* long-term key, autonomous restart - keep the session id and advance the epoch,
+  persisting it **before** any data of the new epoch is sent
+  (:class:`SessionState.begin_epoch`).  Because the key changes with the epoch,
+  restarting the counter at zero cannot repeat a nonce.
+
+The receiver keeps the highest accepted epoch per session and rejects units of a
+retired epoch, so a recording of a finished epoch cannot reopen it.  Both the
+epoch and the frame watermark advance **only after** a successful
+authentication.
 """
 from __future__ import annotations
 
@@ -25,19 +41,20 @@ import json
 import os
 import secrets
 from dataclasses import dataclass, field
-from typing import Dict, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple, Union
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM, ChaCha20Poly1305
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
-PROTOCOL_LABEL = b"avsec/v1"
+PROTOCOL_LABEL = b"avsec/v2"
 TAG_LEN = 16          # full 128-bit Poly1305 / GCM tag, never truncated
 KEY_LEN = 32
 NONCE_LEN = 12
 SESSION_ID_LEN = 8
 COUNTER_LEN = 8
 COUNTER_MAX = (1 << (8 * COUNTER_LEN)) - 1
+EPOCH_MAX = (1 << 32) - 1
 
 AEAD_ALGORITHMS = ("chacha20poly1305", "aes256gcm")
 
@@ -137,6 +154,13 @@ class SessionKeys:
     key: bytes = field(repr=False)
     nonce_prefix: bytes = field(repr=False)
     origin: str = "secure"
+    epoch: int = 0
+
+    @property
+    def context(self) -> Tuple[bytes, int, str, int, str]:
+        """The full key context.  Nonce uniqueness is required within it."""
+        return (self.session_id, self.epoch, self.direction, self.stream_id,
+                self.algorithm)
 
     def aead(self):
         if self.algorithm == "chacha20poly1305":
@@ -157,18 +181,23 @@ def derive_session_keys(
     direction: str = DIRECTION_UPLINK,
     stream_id: int = 0,
     algorithm: str = "chacha20poly1305",
+    epoch: int = 0,
 ) -> SessionKeys:
     """HKDF-SHA256 session derivation.
 
-    ``salt = session_id``; ``info`` binds protocol label, direction, stream id
-    and algorithm, so two directions or two streams never share a key.
+    ``salt = session_id``; ``info`` binds protocol label, direction, stream id,
+    algorithm and **epoch**, so two directions, two streams or two epochs never
+    share a key.  Because the epoch changes the key, a counter that restarts at
+    zero in a new epoch cannot repeat a nonce.
     """
     if algorithm not in AEAD_ALGORITHMS:
         raise CryptoError(f"algorithm must be one of {AEAD_ALGORITHMS}")
     if len(session_id) != SESSION_ID_LEN:
         raise CryptoError(f"session id must be {SESSION_ID_LEN} bytes")
+    if not 0 <= int(epoch) <= EPOCH_MAX:
+        raise CryptoError(f"epoch must be in [0, {EPOCH_MAX}]")
     info_base = b"|".join([PROTOCOL_LABEL, direction.encode(), bytes([stream_id & 0xFF]),
-                           algorithm.encode()])
+                           algorithm.encode(), int(epoch).to_bytes(4, "big")])
     okm = _hkdf(master.key, session_id, info_base + b"|key+nonceprefix", KEY_LEN + 4)
     return SessionKeys(
         session_id=session_id,
@@ -178,6 +207,7 @@ def derive_session_keys(
         key=okm[:KEY_LEN],
         nonce_prefix=okm[KEY_LEN:],
         origin=master.origin,
+        epoch=int(epoch),
     )
 
 
@@ -188,56 +218,159 @@ def new_session_id() -> bytes:
 # ------------------------------------------------------------------ transmitter
 @dataclass
 class SessionState:
-    """Persistent transmitter state: which counter values were already used."""
+    """Persistent transmitter state for one (session id, epoch).
+
+    ``reserved_through`` is the highest counter value that has been *durably
+    reserved*.  Counters are handed out only below that watermark, and the
+    watermark is persisted **before** the counters it covers are used, so a
+    crash between encrypting and saving can never lead to reuse.
+    """
 
     session_id_hex: str
+    epoch: int
     next_counter: int
+    reserved_through: int
+
+    def to_dict(self) -> Dict[str, object]:
+        return {"session_id": self.session_id_hex, "epoch": self.epoch,
+                "next_counter": self.next_counter,
+                "reserved_through": self.reserved_through}
 
     def save(self, path: str) -> None:
-        os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
-        with open(path, "w", encoding="utf-8") as fh:
-            json.dump({"session_id": self.session_id_hex, "next_counter": self.next_counter}, fh)
+        d = os.path.dirname(os.path.abspath(path))
+        os.makedirs(d, exist_ok=True)
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as fh:
+            json.dump(self.to_dict(), fh)
+            fh.flush()
+            os.fsync(fh.fileno())
+        os.replace(tmp, path)          # atomic; a crash leaves the old state intact
 
     @staticmethod
-    def restore(path: str, session_id: bytes) -> "SessionState":
+    def load(path: str) -> "SessionState":
         with open(path, "r", encoding="utf-8") as fh:
             d = json.load(fh)
-        if d["session_id"] != session_id.hex():
+        return SessionState(d["session_id"], int(d.get("epoch", 0)),
+                            int(d["next_counter"]),
+                            int(d.get("reserved_through", d["next_counter"])))
+
+    @staticmethod
+    def restore(path: str, session_id: bytes, epoch: int = 0) -> "SessionState":
+        """Resume the *same* epoch.  Only safe if a forward reservation survived.
+
+        Resuming at the last counter the process happened to write would repeat
+        every counter issued after the last save - exactly the crash-between-
+        encrypt-and-persist hole F03 warns about.  Resuming is therefore allowed
+        only above a durable reservation; without one the caller must move to a
+        new epoch.
+        """
+        st = SessionState.load(path)
+        if st.session_id_hex != session_id.hex():
             raise CryptoError(
-                "refusing to reuse a session id without its persisted counter "
-                "(would risk nonce reuse); start a new session instead"
+                "refusing to reuse a session id without its persisted state "
+                "(would risk nonce reuse); start a new session or a new epoch"
             )
-        return SessionState(d["session_id"], int(d["next_counter"]))
+        if st.epoch != int(epoch):
+            raise CryptoError(
+                f"persisted state belongs to epoch {st.epoch}, not {epoch}; "
+                "use begin_epoch() to move to a fresh epoch"
+            )
+        if st.reserved_through <= st.next_counter:
+            raise CryptoError(
+                "the persisted state carries no forward counter reservation, so "
+                "resuming this epoch could repeat a nonce; use begin_epoch() "
+                "(a new epoch derives a new key, so the counter may restart)"
+            )
+        # resume above the durable reservation, never at the last used counter
+        st.next_counter = st.reserved_through
+        return st
+
+    @staticmethod
+    def begin_epoch(path: str, session_id: bytes) -> "SessionState":
+        """Advance to the next epoch for this session id and persist it first.
+
+        This is the safe autonomous restart: a new epoch means a new key, so the
+        counter may legitimately start at zero.
+        """
+        try:
+            prev = SessionState.load(path)
+            epoch = prev.epoch + 1 if prev.session_id_hex == session_id.hex() else 0
+        except (FileNotFoundError, KeyError, ValueError):
+            epoch = 0
+        if epoch > EPOCH_MAX:
+            raise CryptoError("session epoch exhausted; negotiate a new session id")
+        st = SessionState(session_id.hex(), epoch, 0, 0)
+        st.save(path)
+        return st
 
 
 class Sealer:
-    """Encrypt-and-authenticate with a strictly monotone counter."""
+    """Encrypt-and-authenticate; the sealer alone allocates nonce counters.
 
-    def __init__(self, keys: SessionKeys, start_counter: int = 0) -> None:
+    The counter is consumed *before* the associated data is built and before the
+    AEAD call, and it is never returned to the pool - not even if building the
+    header or encrypting raises.  There is deliberately no way for a caller to
+    supply a counter (defect F03).
+    """
+
+    def __init__(self, keys: SessionKeys, start_counter: int = 0,
+                 reserve_chunk: int = 4096,
+                 persist: Optional[Callable[["SessionState"], None]] = None) -> None:
         self.keys = keys
         self._aead = keys.aead()
         self._counter = int(start_counter)
+        self._issued: set[int] = set()
+        self._reserve_chunk = max(1, int(reserve_chunk))
+        self._persist = persist
+        self._reserved_through = int(start_counter)
+        if persist is not None:
+            self._extend_reservation()
 
     @property
     def counter(self) -> int:
+        """Next counter that would be issued (diagnostic only)."""
         return self._counter
 
-    def next_counter(self) -> int:
+    @property
+    def reserved_through(self) -> int:
+        return self._reserved_through
+
+    def _extend_reservation(self) -> None:
+        self._reserved_through = self._counter + self._reserve_chunk
+        if self._persist is not None:
+            self._persist(self.state())
+
+    def _take(self) -> int:
+        """Allocate one counter.  Never returns the same value twice."""
         if self._counter > COUNTER_MAX:
-            raise NonceExhausted("session counter exhausted; rekey with a new session id")
+            raise NonceExhausted(
+                "session counter exhausted; move to a new epoch or session id")
+        if self._persist is not None and self._counter >= self._reserved_through:
+            self._extend_reservation()
         c = self._counter
-        self._counter += 1
+        self._counter += 1          # consumed now: an exception below cannot reuse it
         return c
 
-    def seal(self, plaintext: bytes, aad: bytes, counter: Optional[int] = None) -> Tuple[int, bytes]:
-        """Return ``(counter, ciphertext||tag)``."""
-        c = self.next_counter() if counter is None else int(counter)
-        if c > COUNTER_MAX:
-            raise NonceExhausted("counter beyond the profile limit")
-        return c, self._aead.encrypt(self.keys.nonce(c), plaintext, aad)
+    def seal(self, plaintext: bytes,
+             aad: Union[bytes, Callable[[int], bytes]]) -> Tuple[int, bytes]:
+        """Return ``(counter, ciphertext||tag)``.
+
+        ``aad`` may be raw bytes, or a callable receiving the freshly allocated
+        counter and returning the associated data.  The callable form exists so
+        a header that must carry its own sequence number can be built *inside*
+        the allocation, instead of the caller choosing a counter itself.
+        """
+        c = self._take()
+        assert c not in self._issued, "internal error: counter reuse"
+        self._issued.add(c)
+        if len(self._issued) > 1 << 20:          # bounded bookkeeping
+            self._issued = {x for x in self._issued if x > c - (1 << 19)}
+        data = aad(c) if callable(aad) else aad
+        return c, self._aead.encrypt(self.keys.nonce(c), plaintext, data)
 
     def state(self) -> SessionState:
-        return SessionState(self.keys.session_id.hex(), self._counter)
+        return SessionState(self.keys.session_id.hex(), self.keys.epoch,
+                            self._counter, self._reserved_through)
 
 
 class ReplayWindow:
@@ -307,16 +440,22 @@ class NullSealer(Sealer):
     labelled ``secure=False``.
     """
 
-    def __init__(self, keys: SessionKeys, start_counter: int = 0) -> None:
+    def __init__(self, keys: SessionKeys, start_counter: int = 0,
+                 reserve_chunk: int = 4096, persist=None) -> None:
         self.keys = keys
         self._counter = int(start_counter)
+        self._issued = set()
+        self._reserve_chunk = max(1, int(reserve_chunk))
+        self._persist = persist
+        self._reserved_through = int(start_counter)
 
-    def seal(self, plaintext: bytes, aad: bytes, counter: Optional[int] = None
-             ) -> Tuple[int, bytes]:
+    def seal(self, plaintext: bytes,
+             aad: Union[bytes, Callable[[int], bytes]]) -> Tuple[int, bytes]:
         import hashlib
 
-        c = self.next_counter() if counter is None else int(counter)
-        checksum = hashlib.sha256(aad + plaintext).digest()[:TAG_LEN]
+        c = self._take()
+        data = aad(c) if callable(aad) else aad
+        checksum = hashlib.sha256(data + plaintext).digest()[:TAG_LEN]
         return c, plaintext + checksum
 
 
@@ -354,8 +493,11 @@ class CryptoProfile:
             "tag_bytes": TAG_LEN,
             "key_bytes": KEY_LEN,
             "nonce_bytes": NONCE_LEN,
-            "nonce_layout": "prefix(4B, HKDF per session+direction+stream) || counter(8B BE)",
-            "kdf": "HKDF-SHA256(salt=session_id, info=label|direction|stream|alg)",
+            "nonce_layout": "prefix(4B, HKDF per session+epoch+direction+stream) "
+                            "|| counter(8B BE)",
+            "kdf": "HKDF-SHA256(salt=session_id, info=label|direction|stream|alg|epoch)",
+            "epoch_bits": 32,
+            "counter_allocation": "sealer-allocated, one-shot; no caller-supplied counter",
             "replay_window": self.replay_window,
             "direction": self.direction,
             "stream_id": self.stream_id,
@@ -366,17 +508,19 @@ def make_session(
     master: MasterSecret,
     profile: Optional[CryptoProfile] = None,
     session_id: Optional[bytes] = None,
+    epoch: int = 0,
 ) -> Tuple[SessionKeys, Sealer, Opener]:
     """Convenience constructor used by the transmitter/receiver pair in tests."""
     profile = profile or CryptoProfile()
     sid = session_id or new_session_id()
-    keys = derive_session_keys(master, sid, profile.direction, profile.stream_id, profile.algorithm)
+    keys = derive_session_keys(master, sid, profile.direction, profile.stream_id,
+                               profile.algorithm, epoch)
     return keys, Sealer(keys), Opener(keys, profile.replay_window)
 
 
 __all__ = [
     "PROTOCOL_LABEL", "TAG_LEN", "KEY_LEN", "NONCE_LEN", "SESSION_ID_LEN", "COUNTER_MAX",
-    "AEAD_ALGORITHMS", "DIRECTION_UPLINK", "DIRECTION_DOWNLINK",
+    "AEAD_ALGORITHMS", "DIRECTION_UPLINK", "DIRECTION_DOWNLINK", "EPOCH_MAX",
     "CryptoError", "NonceExhausted", "AuthenticationFailed", "ReplayDetected",
     "MasterSecret", "generate_master_secret", "lab_master_secret", "load_master_secret",
     "SessionKeys", "derive_session_keys", "new_session_id", "SessionState",

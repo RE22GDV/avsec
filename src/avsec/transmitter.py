@@ -128,6 +128,7 @@ class Transmitter:
         master: MasterSecret,
         crypto_profile: Optional[CryptoProfile] = None,
         session_id: Optional[bytes] = None,
+        session_epoch: int = 0,
         frame_width: int = 320,
         frame_height: int = 240,
         timer: Optional[StageTimer] = None,
@@ -139,9 +140,11 @@ class Transmitter:
         self.crypto_profile = crypto_profile or CryptoProfile()
         self._master = master
         self.session_id = session_id or new_session_id()
+        self.session_epoch = int(session_epoch)
         self.keys: SessionKeys = derive_session_keys(
             master, self.session_id, self.crypto_profile.direction,
             self.crypto_profile.stream_id, self.crypto_profile.algorithm,
+            self.session_epoch,
         )
         self.secure = bool(secure)
         self.sealer = Sealer(self.keys) if secure else NullSealer(self.keys)
@@ -174,20 +177,31 @@ class Transmitter:
                 "into one raster")
         self._placement = self._build_placement()
 
-    def new_session(self, session_id: Optional[bytes] = None) -> bytes:
-        """Start a fresh session: new random id, new key material, counter at 0.
-
-        Used between independent sequences.  A new session is the correct answer
-        to "the frame numbering restarts", because reusing a session id without
-        its counter would risk nonce reuse.
-        """
-        self.session_id = session_id or new_session_id()
+    def _rebuild_sealer(self) -> None:
         self.keys = derive_session_keys(
             self._master, self.session_id, self.crypto_profile.direction,
             self.crypto_profile.stream_id, self.crypto_profile.algorithm,
+            self.session_epoch,
         )
         self.sealer = Sealer(self.keys) if self.secure else NullSealer(self.keys)
+
+    def new_session(self, session_id: Optional[bytes] = None) -> bytes:
+        """Start a fresh session: new random id, epoch 0, counter 0."""
+        self.session_id = session_id or new_session_id()
+        self.session_epoch = 0
+        self._rebuild_sealer()
         return self.session_id
+
+    def new_epoch(self) -> int:
+        """Advance the epoch of the current session id (autonomous restart).
+
+        The epoch is authenticated in the header and mixed into the key
+        derivation, so the counter may safely restart at zero: a different epoch
+        is a different key, hence a different nonce space (defect F02/F03).
+        """
+        self.session_epoch += 1
+        self._rebuild_sealer()
+        return self.session_epoch
 
     # -- public schedule ---------------------------------------------------
     def _build_placement(self) -> List[np.ndarray]:
@@ -217,16 +231,24 @@ class Transmitter:
                 f"payload {len(payload)} exceeds the fixed unit size {fixed}"
             )
         plain = payload + bytes(fixed - len(payload))
-        seq = self.sealer.next_counter()
-        hdr = header.with_seq(seq).with_payload_len(len(payload))
-        aad = hdr.core_bytes()
-        _, ct = self.sealer.seal(plain, aad, counter=seq)
+        # The sealer allocates the counter and hands it to this builder; there is
+        # no way to pick or repeat a counter from outside (defect F03).
+        built: Dict[str, UnitHeader] = {}
+
+        def _aad(counter: int) -> bytes:
+            h = header.with_seq(counter).with_payload_len(len(payload))
+            built["header"] = h
+            return h.core_bytes()
+
+        _, ct = self.sealer.seal(plain, _aad)
+        hdr = built["header"]
         wire = self.rs_header.encode(hdr.to_bytes()) + self.rs_payload.encode(ct)
         return hdr, wire
 
     def _filler_header(self, frame_id: int) -> UnitHeader:
         return UnitHeader(
             profile_id=self.cfg.profile_id, session_id=self.session_id,
+            session_epoch=self.session_epoch,
             stream_id=self.crypto_profile.stream_id, codec_id=CODEC_FILLER,
             frame_id=frame_id, stripe_id=0, desc_id=0, seg_id=0, n_segs=1,
             n_descs=self.source_cfg.n_descriptions, unit_seq=0,
@@ -239,6 +261,7 @@ class Transmitter:
             flags |= FLAG_STRIPE_COMPLETE
         return UnitHeader(
             profile_id=self.cfg.profile_id, session_id=self.session_id,
+            session_epoch=self.session_epoch,
             stream_id=self.crypto_profile.stream_id, codec_id=seg.codec_id,
             frame_id=seg.frame_id, stripe_id=seg.stripe_id, desc_id=seg.desc_id,
             seg_id=seg.seg_id, n_segs=seg.n_segs, n_descs=seg.n_descs, unit_seq=0,
@@ -328,6 +351,7 @@ class Transmitter:
     def describe(self) -> Dict[str, object]:
         return {
             "session_id": self.session_id.hex(),
+            "session_epoch": self.session_epoch,
             "key_origin": self.keys.origin,
             "secure": self.secure,
             "source_coding": self.source_cfg.describe(),

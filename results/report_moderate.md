@@ -5,7 +5,7 @@
 - конфігурація: `comparison`
 - Python 3.12.10, Windows-11-10.0.26200-SP0
 - пакети: PIL 11.0.0, cryptography 50.0.1, cv2 4.13.0, matplotlib 3.9.2, numpy 2.1.2, reedsolo unknown, scipy 1.16.0, yaml 6.0.2
-- git commit: `репозиторій git відсутній`
+- git commit: `22a831f41bdff151337cebb124fe6dd6cf460d72`
 - seed (невідтворювані секрети не входять): `20240909`
 - ключі: режим `lab` (lab = відтворюваний ключ лише для бенчмарків)
 
@@ -17,10 +17,10 @@
 
 | метод | корисних Б/одиницю | Б у каналі/одиницю | одиниць/растр | корисна Мбіт/с | повна Мбіт/с | ефективність | накопич. рядків | модельна затримка, мс |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| B0d | 640 | 1236 | 4 | 0.512 | 1.056 | 0.485 | 278 | 333.600 |
-| B3 | 640 | 1236 | 4 | 0.512 | 1.056 | 0.485 | 278 | 333.600 |
-| B4 | 640 | 1236 | 4 | 0.512 | 1.056 | 0.485 | 278 | 333.600 |
-| P | 320 | 820 | 6 | 0.384 | 1.056 | 0.363 | 278 | 333.600 |
+| B0d | 640 | 1288 | 4 | 0.512 | 1.056 | 0.485 | 278 | 333.600 |
+| B3 | 640 | 1288 | 4 | 0.512 | 1.056 | 0.485 | 278 | 333.600 |
+| B4 | 640 | 1288 | 4 | 0.512 | 1.056 | 0.485 | 278 | 333.600 |
+| P | 320 | 872 | 6 | 0.384 | 1.056 | 0.363 | 278 | 333.600 |
 
 
 **[МОДЕЛЬ]** Наведена затримка - віртуальний розклад моделі, а не вимірювання апаратури.
@@ -33,40 +33,40 @@
 
 | метод | автентифіковано | послідовностей | PSNR, дБ | 95% ДІ | перевірене покриття |
 | --- | --- | --- | --- | --- | --- |
-| B0a | ні | 21 | 21.315 | [20.50; 22.13] | 1.000 |
-| B0d | ні | 21 | 26.310 | [23.92; 28.70] | 0.899 |
-| B1 | ні | 21 | 20.363 | [19.31; 21.42] | 1.000 |
-| B2 | ні | 21 | 19.990 | [18.97; 21.01] | 1.000 |
-| B3 | так | 21 | 25.031 | [22.03; 28.03] | 0.726 |
-| B4 | так | 21 | 24.673 | [22.34; 27.01] | 0.838 |
-| P | так | 21 | 25.338 | [23.37; 27.31] | 0.914 |
+| B0a | ні | 21 | 21.222 | [20.22; 22.23] | 1.000 |
+| B0d | ні | 21 | 26.116 | [23.11; 29.12] | 0.875 |
+| B1 | ні | 21 | 19.965 | [18.88; 21.05] | 1.000 |
+| B2 | ні | 21 | 19.945 | [18.88; 21.01] | 1.000 |
+| B3 | так | 21 | 25.813 | [22.35; 29.28] | 0.750 |
+| B4 | так | 21 | 25.682 | [22.70; 28.66] | 0.842 |
+| P | так | 21 | 25.050 | [22.98; 27.12] | 0.935 |
 
 
 ### Парні порівняння (PSNR, за послідовностями)
 
 | пара | середня різниця, дБ | 95% ДІ | значуще на рівні 95% |
 | --- | --- | --- | --- |
-| B0a - B0d | -4.995 | [-7.17; -2.82] | так |
-| B0a - B1 | 0.952 | [0.02; 1.88] | так |
-| B0a - B2 | 1.325 | [0.39; 2.27] | так |
-| B0a - B3 | -3.715 | [-6.87; -0.56] | так |
-| B0a - B4 | -3.358 | [-5.88; -0.83] | так |
-| B0a - P | -4.023 | [-5.84; -2.21] | так |
-| B0d - B1 | 5.946 | [3.45; 8.44] | так |
-| B0d - B2 | 6.320 | [4.04; 8.60] | так |
-| B0d - B3 | 1.279 | [-2.47; 5.03] | ні |
-| B0d - B4 | 1.637 | [-2.12; 5.39] | ні |
-| B0d - P | 0.971 | [-0.94; 2.89] | ні |
-| B1 - B2 | 0.374 | [-0.61; 1.35] | ні |
-| B1 - B3 | -4.667 | [-8.21; -1.12] | так |
-| B1 - B4 | -4.310 | [-6.70; -1.92] | так |
-| B1 - P | -4.975 | [-7.01; -2.94] | так |
-| B2 - B3 | -5.041 | [-8.19; -1.89] | так |
-| B2 - B4 | -4.683 | [-7.25; -2.12] | так |
-| B2 - P | -5.349 | [-7.62; -3.08] | так |
-| B3 - B4 | 0.358 | [-2.70; 3.41] | ні |
-| B3 - P | -0.308 | [-3.97; 3.35] | ні |
-| B4 - P | -0.666 | [-3.83; 2.50] | ні |
+| B0a - B0d | -4.894 | [-7.73; -2.06] | так |
+| B0a - B1 | 1.258 | [0.82; 1.70] | так |
+| B0a - B2 | 1.277 | [0.88; 1.67] | так |
+| B0a - B3 | -4.590 | [-7.78; -1.40] | так |
+| B0a - B4 | -4.459 | [-7.25; -1.67] | так |
+| B0a - P | -3.828 | [-5.75; -1.91] | так |
+| B0d - B1 | 6.152 | [3.34; 8.96] | так |
+| B0d - B2 | 6.171 | [3.33; 9.01] | так |
+| B0d - B3 | 0.304 | [-2.64; 3.25] | ні |
+| B0d - B4 | 0.435 | [-0.61; 1.48] | ні |
+| B0d - P | 1.066 | [-0.33; 2.47] | ні |
+| B1 - B2 | 0.020 | [-0.07; 0.11] | ні |
+| B1 - B3 | -5.848 | [-9.21; -2.48] | так |
+| B1 - B4 | -5.717 | [-8.45; -2.99] | так |
+| B1 - P | -5.086 | [-7.03; -3.15] | так |
+| B2 - B3 | -5.868 | [-9.22; -2.52] | так |
+| B2 - B4 | -5.737 | [-8.49; -2.99] | так |
+| B2 - P | -5.105 | [-7.07; -3.14] | так |
+| B3 - B4 | 0.131 | [-2.91; 3.17] | ні |
+| B3 - P | 0.763 | [-2.04; 3.57] | ні |
+| B4 - P | 0.632 | [-1.02; 2.28] | ні |
 
 
 **[ІНЖЕНЕРНЕ ПРИПУЩЕННЯ]** Для аналогових базових методів `coverage = 1` означає лише «зображення відображено», а не «дані перевірені»: у B0a/B1/B2 криптографічної перевірки немає.
@@ -77,17 +77,17 @@
 
 | атака | вміст | успіх | точність перестановки | суміжність | PSNR відновлення, дБ | с |
 | --- | --- | --- | --- | --- | --- | --- |
-| chosen_plaintext_permutation_recovery | - | так | 1.000 | n/a | n/a | 0.002 |
-| known_plaintext_tile_matching | smooth | так | 1.000 | n/a | n/a | 0.034 |
-| boundary_compatibility_reassembly | smooth | ні | 0.000 | 0.949 | 24.681 | 0.103 |
-| known_plaintext_tile_matching | edges | так | 0.333 | n/a | n/a | 0.053 |
-| boundary_compatibility_reassembly | edges | ні | 0.010 | 0.034 | 6.033 | 0.107 |
-| known_plaintext_tile_matching | text | так | 0.536 | n/a | n/a | 0.039 |
-| boundary_compatibility_reassembly | text | ні | 0.000 | 0.031 | 13.027 | 0.117 |
-| known_plaintext_tile_matching | texture | так | 1.000 | n/a | n/a | 0.046 |
-| boundary_compatibility_reassembly | texture | ні | 0.005 | 0.674 | 14.620 | 0.155 |
-| multi_frame_variance_fingerprint | - | так | 0.510 | n/a | n/a | 0.008 |
-| lfsr_seed_bruteforce | - | так | n/a | n/a | n/a | 5.771 |
+| chosen_plaintext_permutation_recovery | - | так | 1.000 | n/a | n/a | 0.004 |
+| known_plaintext_tile_matching | smooth | так | 1.000 | n/a | n/a | 0.056 |
+| boundary_compatibility_reassembly | smooth | ні | 0.000 | 0.949 | 24.681 | 0.180 |
+| known_plaintext_tile_matching | edges | так | 0.333 | n/a | n/a | 0.058 |
+| boundary_compatibility_reassembly | edges | ні | 0.010 | 0.034 | 6.033 | 0.169 |
+| known_plaintext_tile_matching | text | так | 0.536 | n/a | n/a | 0.060 |
+| boundary_compatibility_reassembly | text | ні | 0.000 | 0.031 | 13.027 | 0.186 |
+| known_plaintext_tile_matching | texture | так | 1.000 | n/a | n/a | 0.058 |
+| boundary_compatibility_reassembly | texture | ні | 0.005 | 0.674 | 14.620 | 0.223 |
+| multi_frame_variance_fingerprint | - | так | 0.510 | n/a | n/a | 0.009 |
+| lfsr_seed_bruteforce | - | так | n/a | n/a | n/a | 9.182 |
 
 
 > відновлення однієї сталої перестановки нічого не говорить про незалежно перегенеровану перестановку; невдала атака не є доказом безпеки
@@ -115,21 +115,41 @@
 
 | перевірка | очікувано | результат | пройдено |
 | --- | --- | --- | --- |
-| valid unit | accept | ACCEPTED | так |
-| replay of an accepted unit | reject | REJECTED (ReplayDetected) | так |
-| modified ciphertext | reject | REJECTED (AuthenticationFailed) | так |
-| modified tag | reject | REJECTED (AuthenticationFailed) | так |
-| modified authenticated coordinates | reject | REJECTED (AuthenticationFailed) | так |
-| unit moved to another stripe | reject | REJECTED (AuthenticationFailed) | так |
-| unit moved to another frame | reject | REJECTED (AuthenticationFailed) | так |
-| unit from another session | reject | REJECTED (AuthenticationFailed) | так |
-| wrong master key | reject | REJECTED (AuthenticationFailed) | так |
-| unknown protocol version | reject | REJECTED (UnknownVersion) | так |
-| out-of-range payload length | reject | REJECTED (FramingError) | так |
-| geometry outside the frame | reject | REJECTED (FramingError) | так |
-| header CRC corruption | reject | REJECTED (FramingError) | так |
-| modification fully repaired by FEC | not a forgery (identical protected message restored) | restored | так |
-| modification beyond FEC capability | rejected by FEC or by AEAD | uncorrectable, discarded by FEC | так |
+| valid unit (positive control) | accept | ACCEPTED | так |
+| replay of an accepted unit | ReplayDetected | REJECTED (ReplayDetected) | так |
+| modified ciphertext | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| modified tag | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| truncated ciphertext | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| modified authenticated field 'frame_id' | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| modified authenticated field 'stripe_id' | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| modified authenticated field 'desc_id' | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| modified authenticated field 'seg_id' | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| modified authenticated field 'codec_id' | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| modified authenticated field 'profile_id' | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| modified authenticated field 'payload_len' | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| modified authenticated field 'flags' | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| modified authenticated field 'session_epoch' | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| modified authenticated field 'stream_id' | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| modified authenticated field 'n_segs' | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| modified authenticated field 'n_descs' | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| modified authenticated geometry | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| unit replayed into another session | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| unit replayed into another epoch of the same session | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| wrong master key | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| unit replayed into another stream | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| negative control: empty AAD instead of the header | AuthenticationFailed | REJECTED (AuthenticationFailed) | так |
+| counters are allocated once and never repeat | strictly increasing, no caller-chosen counter | 0 then 1; seal() takes no counter argument | так |
+| counter beyond the profile limit | NonceExhausted | REJECTED (NonceExhausted) | так |
+| unknown protocol version | UnknownVersion | REJECTED (UnknownVersion) | так |
+| unknown transport profile | UnknownProfile | REJECTED (UnknownProfile) | так |
+| zero payload length | FramingError | REJECTED (FramingError) | так |
+| payload length above the profile bound | FramingError | REJECTED (FramingError) | так |
+| segment index outside the segment count | FramingError | REJECTED (FramingError) | так |
+| corrupted header CRC | FramingError | REJECTED (FramingError) | так |
+| geometry outside the frame | FramingError | REJECTED (FramingError) | так |
+| geometry phase inconsistent with the step | FramingError | REJECTED (FramingError) | так |
+| modification fully repaired by FEC | not a forgery: the identical protected message is restored | restored | так |
+| modification beyond the FEC capability | rejected by FEC or by AEAD | uncorrectable, discarded by FEC | так |
 
 
 ## Абляції запропонованого методу
@@ -138,16 +158,16 @@
 
 | варіант | допустимий | PSNR, дБ | покриття | растрів/кадр | причина відхилення |
 | --- | --- | --- | --- | --- | --- |
-| P (proposed) | так | 25.453 | 0.969 | 3.000 |  |
-| single description | так | 26.906 | 0.961 | 2.375 |  |
-| sequential placement | так | 24.523 | 0.781 | 3.000 |  |
-| plain block interleaving | так | 23.912 | 0.848 | 3.000 |  |
-| deep block interleaving | так | 25.244 | 0.961 | 3.000 |  |
+| P (proposed) | так | 25.548 | 0.973 | 3.000 |  |
+| single description | так | 27.654 | 1.000 | 2.375 |  |
+| sequential placement | так | 24.841 | 0.895 | 3.000 |  |
+| plain block interleaving | так | 24.610 | 0.910 | 3.000 |  |
+| deep block interleaving | так | 25.617 | 0.992 | 3.000 |  |
 | smaller AEAD unit | ні |  |  |  | CapacityExceeded: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity |
 | larger AEAD unit | ні |  |  |  | CapacityExceeded: frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity |
-| weaker FEC | так | 20.504 | 0.758 | 2.000 |  |
+| weaker FEC | так | 23.620 | 0.812 | 2.000 |  |
 | stronger FEC | ні |  |  |  | CapacityExceeded: frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity |
-| shallow BAWP window | так | 25.495 | 0.965 | 3.000 |  |
+| shallow BAWP window | так | 25.529 | 0.973 | 3.000 |  |
 
 
 ## Залежність від сили спотворень
@@ -161,31 +181,31 @@
 | clean | B3 | 29.338 | 1.000 | 1.375 | 16 |
 | clean | B4 | 29.338 | 1.000 | 2.000 | 16 |
 | clean | P | 25.614 | 1.000 | 3.000 | 16 |
-| mild | B0a | 29.053 | 1.000 | 1.000 | 16 |
+| mild | B0a | 29.163 | 1.000 | 1.000 | 16 |
 | mild | B0d | 29.338 | 1.000 | 2.000 | 16 |
-| mild | B1 | 27.595 | 1.000 | 1.000 | 16 |
-| mild | B2 | 27.556 | 1.000 | 1.000 | 16 |
+| mild | B1 | 27.639 | 1.000 | 1.000 | 16 |
+| mild | B2 | 27.607 | 1.000 | 1.000 | 16 |
 | mild | B3 | 29.338 | 1.000 | 1.375 | 16 |
 | mild | B4 | 29.338 | 1.000 | 2.000 | 16 |
 | mild | P | 25.614 | 1.000 | 3.000 | 16 |
-| moderate | B0a | 22.040 | 1.000 | 1.000 | 16 |
-| moderate | B0d | 28.180 | 0.953 | 2.000 | 16 |
-| moderate | B1 | 20.464 | 1.000 | 1.000 | 16 |
-| moderate | B2 | 20.197 | 1.000 | 1.000 | 16 |
-| moderate | B3 | 23.704 | 0.688 | 1.375 | 16 |
-| moderate | B4 | 24.690 | 0.867 | 2.000 | 16 |
-| moderate | P | 25.533 | 0.961 | 3.000 | 16 |
-| bursty | B0a | 16.913 | 1.000 | 1.000 | 16 |
-| bursty | B0d | 17.283 | 0.523 | 2.000 | 16 |
-| bursty | B1 | 13.975 | 1.000 | 1.000 | 16 |
-| bursty | B2 | 15.961 | 1.000 | 1.000 | 16 |
-| bursty | B3 | 22.919 | 0.625 | 1.375 | 16 |
-| bursty | B4 | 15.773 | 0.555 | 2.000 | 16 |
-| bursty | P | 21.983 | 0.738 | 3.000 | 16 |
-| harsh | B0a | 16.040 | 1.000 | 1.000 | 16 |
+| moderate | B0a | 21.454 | 1.000 | 1.000 | 16 |
+| moderate | B0d | 28.007 | 0.953 | 2.000 | 16 |
+| moderate | B1 | 20.077 | 1.000 | 1.000 | 16 |
+| moderate | B2 | 19.989 | 1.000 | 1.000 | 16 |
+| moderate | B3 | 28.727 | 0.938 | 1.375 | 16 |
+| moderate | B4 | 27.294 | 0.938 | 2.000 | 16 |
+| moderate | P | 25.529 | 0.973 | 3.000 | 16 |
+| bursty | B0a | 15.375 | 1.000 | 1.000 | 16 |
+| bursty | B0d | 15.343 | 0.562 | 2.000 | 16 |
+| bursty | B1 | 15.319 | 1.000 | 1.000 | 16 |
+| bursty | B2 | 15.267 | 1.000 | 1.000 | 16 |
+| bursty | B3 | 24.301 | 0.625 | 1.375 | 16 |
+| bursty | B4 | 15.343 | 0.562 | 2.000 | 16 |
+| bursty | P | 21.345 | 0.777 | 3.000 | 16 |
+| harsh | B0a | 14.591 | 0.875 | 1.000 | 16 |
 | harsh | B0d | 11.990 | 0.000 | 2.000 | 16 |
-| harsh | B1 | 14.231 | 1.000 | 1.000 | 16 |
-| harsh | B2 | 14.989 | 1.000 | 1.000 | 16 |
+| harsh | B1 | 14.026 | 0.875 | 1.000 | 16 |
+| harsh | B2 | 14.014 | 0.875 | 1.000 | 16 |
 | harsh | B3 | 11.990 | 0.000 | 1.375 | 16 |
 | harsh | B4 | 11.990 | 0.000 | 2.000 | 16 |
 | harsh | P | 11.990 | 0.000 | 3.000 | 16 |
@@ -218,13 +238,13 @@
 
 | метод | PSNR, дБ | SSIM | покриття | перевірено одиниць | надіслано одиниць | растрів |
 | --- | --- | --- | --- | --- | --- | --- |
-| B0a | 24.637 | 0.531 | 1.000 | 0 | 0 | 1 |
+| B0a | 24.118 | 0.513 | 1.000 | 0 | 0 | 1 |
 | B0d | 36.483 | 0.887 | 1.000 | 8 | 8 | 2 |
-| B1 | 22.654 | 0.423 | 1.000 | 0 | 0 | 1 |
-| B2 | 23.039 | 0.420 | 1.000 | 0 | 0 | 1 |
+| B1 | 23.218 | 0.419 | 1.000 | 0 | 0 | 1 |
+| B2 | 23.083 | 0.417 | 1.000 | 0 | 0 | 1 |
 | B3 | 36.483 | 0.887 | 1.000 | 1 | 1 | 1 |
-| B4 | 14.335 | 0.776 | 0.000 | 0 | 8 | 2 |
-| P | 34.768 | 0.882 | 0.812 | 13 | 16 | 3 |
+| B4 | 36.483 | 0.887 | 1.000 | 8 | 8 | 2 |
+| P | 34.605 | 0.869 | 1.000 | 16 | 16 | 3 |
 
 
 ### B0a

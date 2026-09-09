@@ -34,6 +34,7 @@ from avsec.baselines import (
     make_b2_cryptoperm,
 )
 from avsec.budget import capacity_check, compute_latency, raw_video_bitrate
+from avsec.channel import ChannelTrace
 from avsec.config import ALL_METHODS, ExperimentConfig, MethodProfile
 from avsec.crypto import AuthenticationFailed, ReplayDetected
 from avsec.lfsr import BlockScrambler, correlation_similarity
@@ -60,6 +61,17 @@ def _emit(progress: Progress, stage: str, frac: float, **info: Any) -> None:
             progress(stage, float(frac), info)
         except Exception:
             pass
+
+
+def _trace(cfg: ExperimentConfig, scene: str, repetition: int) -> "ChannelTrace":
+    """Channel realisation for one (scene, repetition) under this profile.
+
+    Deliberately independent of which method is being measured: that is what
+    makes the paired comparison paired (defect F08).
+    """
+    return ChannelTrace(seed=cfg.seed, scene=scene, repetition=int(repetition),
+                        profile=cfg.channel_preset,
+                        rasters_per_frame=cfg.budget.rasters_per_frame)
 
 
 # --------------------------------------------------------------------- setup
@@ -124,9 +136,9 @@ def run_demo(cfg: ExperimentConfig, output_dir: str,
     for i, (name, m) in enumerate(methods.items()):
         _emit(progress, f"method {name}", i / max(len(methods), 1), method=name)
         m.reset()
-        rng = experiment_rng(cfg.seed, "demo", name, 0)
+        trace = _trace(cfg, srcs[0].name, 0)
         try:
-            res = m.process(frame, 0, rng)
+            res = m.process(frame, 0, trace)
         except Exception as exc:
             errors[name] = f"{type(exc).__name__}: {exc}"
             continue
@@ -174,12 +186,14 @@ def run_comparison(cfg: ExperimentConfig, output_dir: str,
                 _emit(progress, f"{name} / {src.name} / run {rep}", done / total,
                       method=name, source=src.name)
                 m.reset()
+                # One trace per (scene, repetition): every method meets the
+                # same damage in the same time slot (defect F08).
+                trace = _trace(cfg, src.name, rep)
                 seq_psnr: List[float] = []
                 seq_cov: List[float] = []
                 for fi, frame in enumerate(src.frames[: cfg.max_frames_per_source]):
-                    rng = experiment_rng(cfg.seed, "cmp", name, si, rep, fi)
                     try:
-                        res = m.process(frame, fi, rng)
+                        res = m.process(frame, fi, trace)
                     except CapacityExceeded as exc:
                         errors[f"{name}/{src.name}"] = f"capacity: {exc}"
                         counters["skipped"] += 1
@@ -191,7 +205,7 @@ def run_comparison(cfg: ExperimentConfig, output_dir: str,
                     counters["ok"] += 1
                     row = res.metrics.to_row()
                     row.update({"source": src.name, "provenance": src.provenance,
-                                "realisation": rep,
+                                "realisation": rep, "channel_trace": trace.trace_id,
                                 "authenticated": bool(getattr(m, "authenticated", False))})
                     rows.append(row)
                     append_jsonl(jsonl, row)
@@ -332,72 +346,236 @@ def run_attacks(cfg: ExperimentConfig, output_dir: str,
 
 
 def run_protocol_checks(cfg: ExperimentConfig) -> List[Dict[str, Any]]:
-    """Tamper / replay / session checks against the real AEAD pipeline."""
-    from avsec.crypto import CryptoProfile, lab_master_secret, make_session
-    from avsec.framing import Geometry, UnitHeader, parse_header
+    """Isolated tamper / replay / parser checks.
+
+    Defect F07: the previous version reused one opener and walked the counter
+    forward for every mutation, so a rejection could have come from the nonce
+    rather than from the field under test, and any ``Exception`` counted as a
+    cryptographic rejection.
+
+    Each check below therefore
+
+    * builds a **fresh** sealer/opener pair and seals exactly once,
+    * mutates exactly one thing,
+    * opens with an opener that has not yet seen this unit,
+    * and demands a **specific** exception type, not just "something raised".
+
+    Replay is tested on its own, and the suite is self-checking: a positive
+    control seals and opens an untouched unit, and a negative control confirms
+    that a field really is inside the associated data.
+    """
+    import dataclasses
+
+    from avsec.crypto import (
+        AuthenticationFailed,
+        CryptoError,
+        NonceExhausted,
+        ReplayDetected,
+        Sealer,
+        Opener,
+        derive_session_keys,
+        lab_master_secret,
+        new_session_id,
+    )
+    from avsec.fec import FECConfig, RSCodec
+    from avsec.framing import (
+        FramingError,
+        Geometry,
+        UnitHeader,
+        UnknownProfile,
+        UnknownVersion,
+        parse_header,
+    )
 
     master = lab_master_secret(cfg.seed)
-    keys, sealer, opener = make_session(master, cfg.crypto)
-    hdr = UnitHeader(profile_id=1, session_id=keys.session_id, stream_id=0, codec_id=1,
-                     frame_id=3, stripe_id=2, desc_id=0, seg_id=0, n_segs=1, n_descs=1,
-                     unit_seq=0, geometry=Geometry(0, 16, 320, 8), payload_len=10)
     payload = b"0123456789" + bytes(54)
-    seq, ct = sealer.seal(payload, hdr.with_seq(0).core_bytes(), counter=0)
-    aad = hdr.with_seq(seq).core_bytes()
+
+    def _fresh(session_id: Optional[bytes] = None, epoch: int = 0,
+               master_secret=None, stream_id: int = 0):
+        """A sealer and an independent opener over the same key context."""
+        sid = session_id or new_session_id()
+        keys = derive_session_keys(master_secret or master, sid,
+                                   cfg.crypto.direction, stream_id,
+                                   cfg.crypto.algorithm, epoch)
+        return sid, epoch, Sealer(keys), Opener(keys, cfg.crypto.replay_window)
+
+    def _header(sid: bytes, epoch: int, **over: Any) -> UnitHeader:
+        base = dict(profile_id=1, session_id=sid, session_epoch=epoch, stream_id=0,
+                    codec_id=1, frame_id=3, stripe_id=2, desc_id=0, seg_id=0,
+                    n_segs=2, n_descs=2, unit_seq=0,
+                    geometry=Geometry(0, 16, 320, 8), payload_len=10)
+        base.update(over)
+        return UnitHeader(**base)
+
+    def _seal(sid: bytes, epoch: int, sealer: Sealer, **over: Any):
+        """Seal one unit; the AAD is built inside the counter allocation."""
+        box: Dict[str, UnitHeader] = {}
+
+        def _aad(counter: int) -> bytes:
+            h = _header(sid, epoch, unit_seq=counter, **over)
+            box["h"] = h
+            return h.core_bytes()
+
+        seq, ct = sealer.seal(payload, _aad)
+        return seq, ct, box["h"]
 
     checks: List[Dict[str, Any]] = []
 
-    def _check(name: str, fn, expect: str) -> None:
+    def _expect(name: str, fn, outcome: str, exc: Optional[type] = None,
+                note: str = "") -> None:
+        """``outcome`` is 'accept' or the name of the required exception."""
         try:
             fn()
-            checks.append({"check": name, "expected": expect, "outcome": "ACCEPTED",
-                           "passed": expect == "accept"})
-        except Exception as exc:
-            checks.append({"check": name, "expected": expect,
-                           "outcome": f"REJECTED ({type(exc).__name__})",
-                           "passed": expect == "reject", "detail": str(exc)[:120]})
+            ok = outcome == "accept"
+            checks.append({"check": name, "expected": outcome, "outcome": "ACCEPTED",
+                           "passed": ok, "detail": note})
+        except Exception as e:  # noqa: BLE001 - the type is what we are asserting
+            ok = exc is not None and isinstance(e, exc)
+            checks.append({
+                "check": name, "expected": outcome,
+                "outcome": f"REJECTED ({type(e).__name__})", "passed": ok,
+                "detail": (note + " " if note else "") + str(e)[:110],
+            })
 
-    _check("valid unit", lambda: opener.open(seq, ct, aad), "accept")
-    _check("replay of an accepted unit", lambda: opener.open(seq, ct, aad), "reject")
-    _check("modified ciphertext",
-           lambda: opener.open(seq + 1, bytes([ct[0] ^ 1]) + ct[1:], aad), "reject")
-    _check("modified tag",
-           lambda: opener.open(seq + 2, ct[:-1] + bytes([ct[-1] ^ 0x80]), aad), "reject")
-    _check("modified authenticated coordinates",
-           lambda: opener.open(seq + 3, ct, hdr.with_seq(seq).core_bytes().replace(
-               b"\x00\x03", b"\x00\x04", 1)), "reject")
-    _check("unit moved to another stripe",
-           lambda: opener.open(seq + 4, ct,
-                               UnitHeader(**{**hdr.__dict__, "stripe_id": 9,
-                                             "unit_seq": seq}).core_bytes()), "reject")
-    _check("unit moved to another frame",
-           lambda: opener.open(seq + 5, ct,
-                               UnitHeader(**{**hdr.__dict__, "frame_id": 99,
-                                             "unit_seq": seq}).core_bytes()), "reject")
+    # ---- positive control: an untouched unit must open -------------------
+    sid, ep, sealer, opener = _fresh()
+    seq, ct, hdr = _seal(sid, ep, sealer)
+    _expect("valid unit (positive control)", lambda: opener.open(seq, ct, hdr.core_bytes()),
+            "accept", note="must accept, otherwise every rejection below is meaningless")
 
-    keys2, sealer2, opener2 = make_session(master, cfg.crypto)
-    _check("unit from another session", lambda: opener2.open(seq, ct, aad), "reject")
+    # ---- replay, on its own ---------------------------------------------
+    sid, ep, sealer, opener = _fresh()
+    seq, ct, hdr = _seal(sid, ep, sealer)
+    opener.open(seq, ct, hdr.core_bytes())
+    _expect("replay of an accepted unit", lambda: opener.open(seq, ct, hdr.core_bytes()),
+            "ReplayDetected", ReplayDetected)
 
-    master2 = lab_master_secret(cfg.seed + 1)
-    _, _, opener3 = make_session(master2, cfg.crypto, keys.session_id)
-    _check("wrong master key", lambda: opener3.open(seq, ct, aad), "reject")
+    # ---- ciphertext / tag, same nonce, fresh opener ----------------------
+    for name, mutate in (
+        ("modified ciphertext", lambda c: bytes([c[0] ^ 1]) + c[1:]),
+        ("modified tag", lambda c: c[:-1] + bytes([c[-1] ^ 0x80])),
+        ("truncated ciphertext", lambda c: c[:-1]),
+    ):
+        sid, ep, sealer, opener = _fresh()
+        seq, ct, hdr = _seal(sid, ep, sealer)
+        bad = mutate(ct)
+        _expect(name, lambda s=seq, b=bad, h=hdr: opener.open(s, b, h.core_bytes()),
+                "AuthenticationFailed", AuthenticationFailed,
+                note="same nonce and same AAD as the genuine unit")
 
-    def _bad_version():
-        import dataclasses
+    # ---- one authenticated header field at a time ------------------------
+    FIELDS = {
+        "frame_id": 99, "stripe_id": 9, "desc_id": 1, "seg_id": 1,
+        "codec_id": 2, "profile_id": 7, "payload_len": 11, "flags": 0x02,
+        "session_epoch": 5, "stream_id": 1, "n_segs": 3, "n_descs": 3,
+    }
+    for field_name, value in FIELDS.items():
+        sid, ep, sealer, opener = _fresh()
+        seq, ct, hdr = _seal(sid, ep, sealer)
+        forged = dataclasses.replace(hdr, **{field_name: value})
+        if forged.core_bytes() == hdr.core_bytes():
+            # Changing the field did not change the associated data, so the field
+            # is NOT authenticated.  Reporting this as a pass (or skipping it)
+            # is precisely the blind spot F07 is about.
+            checks.append({
+                "check": f"modified authenticated field '{field_name}'",
+                "expected": "AuthenticationFailed",
+                "outcome": "FIELD NOT COVERED BY THE AAD",
+                "passed": False,
+                "detail": f"changing {field_name} leaves core_bytes() identical, so "
+                          "the tag cannot possibly bind it",
+            })
+            continue
+        _expect(f"modified authenticated field '{field_name}'",
+                lambda s=seq, c=ct, f=forged: opener.open(s, c, f.core_bytes()),
+                "AuthenticationFailed", AuthenticationFailed,
+                note="only this field differs; nonce and ciphertext are untouched")
 
-        parse_header(dataclasses.replace(hdr, version=7).to_bytes())
+    # geometry is authenticated too
+    sid, ep, sealer, opener = _fresh()
+    seq, ct, hdr = _seal(sid, ep, sealer)
+    moved = dataclasses.replace(hdr, geometry=Geometry(0, 24, 320, 8))
+    _expect("modified authenticated geometry",
+            lambda: opener.open(seq, ct, moved.core_bytes()),
+            "AuthenticationFailed", AuthenticationFailed)
 
-    _check("unknown protocol version", _bad_version, "reject")
-    _check("out-of-range payload length",
-           lambda: parse_header(hdr.with_payload_len(0).to_bytes()), "reject")
-    _check("geometry outside the frame",
-           lambda: Geometry(0, 236, 160, 6, 2, 2, 1, 1).validate(320, 240), "reject")
-    _check("header CRC corruption", lambda: parse_header(
-        bytes([hdr.to_bytes()[0] ^ 0xFF]) + hdr.to_bytes()[1:]), "reject")
+    # ---- wrong key context ----------------------------------------------
+    sid, ep, sealer, _ = _fresh()
+    seq, ct, hdr = _seal(sid, ep, sealer)
+    _, _, _, other_session = _fresh()
+    _expect("unit replayed into another session",
+            lambda: other_session.open(seq, ct, hdr.core_bytes()),
+            "AuthenticationFailed", AuthenticationFailed)
+    _, _, _, other_epoch = _fresh(session_id=sid, epoch=ep + 1)
+    _expect("unit replayed into another epoch of the same session",
+            lambda: other_epoch.open(seq, ct, hdr.core_bytes()),
+            "AuthenticationFailed", AuthenticationFailed)
+    _, _, _, other_key = _fresh(session_id=sid, master_secret=lab_master_secret(cfg.seed + 1))
+    _expect("wrong master key", lambda: other_key.open(seq, ct, hdr.core_bytes()),
+            "AuthenticationFailed", AuthenticationFailed)
+    _, _, _, other_stream = _fresh(session_id=sid, stream_id=1)
+    _expect("unit replayed into another stream",
+            lambda: other_stream.open(seq, ct, hdr.core_bytes()),
+            "AuthenticationFailed", AuthenticationFailed)
 
-    # FEC-corrected modification must NOT count as a forgery
-    from avsec.fec import FECConfig, RSCodec
+    # ---- negative control: is the AAD really being used? -----------------
+    sid, ep, sealer, opener = _fresh()
+    seq, ct, hdr = _seal(sid, ep, sealer)
+    _expect("negative control: empty AAD instead of the header",
+            lambda: opener.open(seq, ct, b""),
+            "AuthenticationFailed", AuthenticationFailed,
+            note="if this were accepted, the header would not be authenticated at all")
 
+    # ---- one-shot nonce allocation (F03) ---------------------------------
+    _, _, sealer_only, _ = _fresh()
+    a, _ = sealer_only.seal(b"x" * 16, b"aad")
+    b, _ = sealer_only.seal(b"x" * 16, b"aad")
+    checks.append({
+        "check": "counters are allocated once and never repeat",
+        "expected": "strictly increasing, no caller-chosen counter",
+        "outcome": f"{a} then {b}; seal() takes no counter argument",
+        "passed": b == a + 1 and "counter" not in Sealer.seal.__code__.co_varnames,
+    })
+    from avsec.crypto import COUNTER_MAX
+
+    exhausted = Sealer(derive_session_keys(master, new_session_id()),
+                       start_counter=COUNTER_MAX + 1)
+    _expect("counter beyond the profile limit",
+            lambda: exhausted.seal(b"x", b"a"), "NonceExhausted", NonceExhausted)
+
+    # ---- parser bounds ---------------------------------------------------
+    sid0 = new_session_id()
+    _expect("unknown protocol version",
+            lambda: parse_header(dataclasses.replace(_header(sid0, 0), version=7).to_bytes()),
+            "UnknownVersion", UnknownVersion)
+    _expect("unknown transport profile",
+            lambda: parse_header(_header(sid0, 0, profile_id=200).to_bytes(),
+                                 accepted_profiles=(1,)),
+            "UnknownProfile", UnknownProfile)
+    _expect("zero payload length",
+            lambda: parse_header(_header(sid0, 0).with_payload_len(0).to_bytes()),
+            "FramingError", FramingError)
+    _expect("payload length above the profile bound",
+            lambda: parse_header(_header(sid0, 0).with_payload_len(9000).to_bytes(),
+                                 max_payload_len=1024),
+            "FramingError", FramingError)
+    _expect("segment index outside the segment count",
+            lambda: parse_header(_header(sid0, 0, seg_id=3, n_segs=2).to_bytes()),
+            "FramingError", FramingError)
+    _expect("corrupted header CRC",
+            lambda: parse_header(bytes([_header(sid0, 0).to_bytes()[0] ^ 0xFF])
+                                 + _header(sid0, 0).to_bytes()[1:]),
+            "FramingError", FramingError)
+    _expect("geometry outside the frame",
+            lambda: Geometry(0, 236, 160, 6, 2, 2, 1, 1).validate(320, 240),
+            "FramingError", FramingError)
+    _expect("geometry phase inconsistent with the step",
+            lambda: Geometry(0, 0, 64, 8, step_x=2, phase_x=2).validate(320, 240),
+            "FramingError", FramingError)
+
+    # ---- FEC versus forgery ---------------------------------------------
+    sid, ep, sealer, opener = _fresh()
+    seq, ct, hdr = _seal(sid, ep, sealer)
     rs = RSCodec(FECConfig(k=191, nsym=64))
     enc = bytearray(rs.encode(ct))
     for i in range(10):
@@ -405,26 +583,30 @@ def run_protocol_checks(cfg: ExperimentConfig) -> List[Dict[str, Any]]:
     dec, _ = rs.try_decode(bytes(enc), len(ct))
     checks.append({
         "check": "modification fully repaired by FEC",
-        "expected": "not a forgery (identical protected message restored)",
+        "expected": "not a forgery: the identical protected message is restored",
         "outcome": "restored" if dec == ct else "not restored",
         "passed": dec == ct,
+        "detail": "a corrected error is not evidence of a broken tag",
     })
     enc2 = bytearray(rs.encode(ct))
     for i in range(0, 200, 2):
         if i < len(enc2):
             enc2[i] ^= 0xA5
     dec2, _ = rs.try_decode(bytes(enc2), len(ct))
-    ok = True
     detail = "uncorrectable, discarded by FEC"
+    ok = True
     if dec2 is not None and dec2 != ct:
         try:
-            opener.open(seq + 20, dec2, aad)
-            ok = False
-            detail = "AEAD ACCEPTED a miscorrected message"
-        except Exception as exc:
-            detail = f"miscorrected by FEC, rejected by AEAD ({type(exc).__name__})"
+            opener.open(seq, dec2, hdr.core_bytes())
+            ok, detail = False, "AEAD ACCEPTED a miscorrected message"
+        except AuthenticationFailed:
+            detail = "miscorrected by FEC, rejected by AEAD"
+        except ReplayDetected:
+            detail = "miscorrected by FEC, rejected as replay"
+    elif dec2 == ct:
+        detail = "still repaired by FEC"
     checks.append({
-        "check": "modification beyond FEC capability",
+        "check": "modification beyond the FEC capability",
         "expected": "rejected by FEC or by AEAD", "outcome": detail, "passed": ok,
     })
     return checks
@@ -622,9 +804,10 @@ def run_ablations(cfg: ExperimentConfig, output_dir: str,
         failed = ""
         for si, s in enumerate(srcs):
             m.reset()
+            trace = _trace(cfg, s.name, 0)
             for fi, frame in enumerate(s.frames[: cfg.max_frames_per_source]):
                 try:
-                    res = m.process(frame, fi, experiment_rng(cfg.seed, "abl", name, si, fi))
+                    res = m.process(frame, fi, trace)
                 except Exception as exc:
                     failed = f"{type(exc).__name__}: {exc}"
                     break
@@ -682,10 +865,10 @@ def run_sweeps(cfg: ExperimentConfig, output_dir: str,
             rast: List[int] = []
             for si, s in enumerate(srcs):
                 m.reset()
+                trace = _trace(sub, s.name, 0)
                 for fi, frame in enumerate(s.frames[: cfg.max_frames_per_source]):
                     try:
-                        res = m.process(frame, fi,
-                                        experiment_rng(cfg.seed, "sweep", pname, name, si, fi))
+                        res = m.process(frame, fi, trace)
                     except Exception as exc:
                         skipped[f"{pname}/{name}/{s.name}"] = f"{type(exc).__name__}: {exc}"
                         break

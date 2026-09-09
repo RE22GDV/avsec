@@ -59,8 +59,9 @@ LAB = lab_master_secret(12345)
 
 def _header(**kw):
     base = dict(
-        profile_id=1, session_id=bytes(range(8)), stream_id=0, codec_id=1, frame_id=5,
-        stripe_id=2, desc_id=0, seg_id=0, n_segs=1, n_descs=1, unit_seq=7,
+        profile_id=1, session_id=bytes(range(8)), session_epoch=0, stream_id=0,
+        codec_id=1, frame_id=5, stripe_id=2, desc_id=0, seg_id=0, n_segs=1,
+        n_descs=1, unit_seq=7,
         geometry=Geometry(0, 16, 64, 8), payload_len=20, flags=0,
     )
     base.update(kw)
@@ -162,16 +163,74 @@ def test_directions_and_streams_use_different_keys():
     assert len({a.key, b.key, c.key}) == 3
 
 
-def test_restart_without_persisted_counter_is_refused():
+def test_restart_without_persisted_state_is_refused():
+    from avsec.crypto import Sealer, derive_session_keys
+
     sid = new_session_id()
     _, sealer, _ = make_session(LAB, CryptoProfile(), sid)
     sealer.seal(b"data", b"aad")
     with tempfile.TemporaryDirectory() as d:
         path = os.path.join(d, "state.json")
         sealer.state().save(path)
-        assert SessionState.restore(path, sid).next_counter == 1
         with pytest.raises(CryptoError):
-            SessionState.restore(path, new_session_id())
+            SessionState.restore(path, new_session_id(), 0)   # wrong session
+        with pytest.raises(CryptoError):
+            SessionState.restore(path, sid, 5)                # wrong epoch
+        with pytest.raises(CryptoError):
+            # no forward reservation: resuming could repeat counters
+            SessionState.restore(path, sid, 0)
+
+        # with a durable reservation, resuming starts *above* everything reserved
+        saved = []
+        keys = derive_session_keys(LAB, sid)
+        s2 = Sealer(keys, reserve_chunk=32, persist=lambda st: saved.append(st))
+        for _ in range(5):
+            s2.seal(b"x" * 8, b"aad")
+        saved[-1].save(path)
+        resumed = SessionState.restore(path, sid, 0)
+        assert resumed.next_counter >= s2.counter
+        assert resumed.next_counter >= 32
+
+
+def test_new_epoch_is_a_safe_restart():
+    """F02/F03: a new epoch means a new key, so the counter may restart at 0."""
+    from avsec.crypto import derive_session_keys
+
+    sid = new_session_id()
+    k0 = derive_session_keys(LAB, sid, epoch=0)
+    k1 = derive_session_keys(LAB, sid, epoch=1)
+    assert k0.key != k1.key and k0.nonce_prefix != k1.nonce_prefix
+    assert k0.nonce(0) != k1.nonce(0) or k0.key != k1.key
+    with tempfile.TemporaryDirectory() as d:
+        path = os.path.join(d, "state.json")
+        st0 = SessionState.begin_epoch(path, sid)
+        st1 = SessionState.begin_epoch(path, sid)
+        assert st1.epoch == st0.epoch + 1
+        assert st1.next_counter == 0          # safe: the key changed with the epoch
+
+
+def test_counter_cannot_be_chosen_or_repeated():
+    """F03: there is no API that lets a caller pick or reuse a counter."""
+    import inspect
+
+    from avsec.crypto import Sealer
+
+    params = set(inspect.signature(Sealer.seal).parameters)
+    assert "counter" not in params
+    _, sealer, _ = make_session(LAB, CryptoProfile())
+    seen = [sealer.seal(b"x" * 8, b"aad")[0] for _ in range(50)]
+    assert seen == sorted(set(seen)) == list(range(50))
+
+    class _Boom(Exception):
+        pass
+
+    def _explode(counter):
+        raise _Boom()
+
+    with pytest.raises(_Boom):
+        sealer.seal(b"x" * 8, _explode)
+    # the counter consumed by the failed attempt is never handed out again
+    assert sealer.seal(b"x" * 8, b"aad")[0] > 50
 
 
 def test_counter_limit_is_explicit():
@@ -379,7 +438,8 @@ def test_transmitter_refuses_to_exceed_the_declared_capacity():
         tx.encode_frame(S.pattern_texture(240, 320), 0)
 
 
-def test_receiver_bounds_the_number_of_live_sessions():
+def test_unauthenticated_sessions_never_enter_the_cache():
+    """F01: only a successful AEAD open may install or evict a session."""
     from avsec.optimization import SharedBudget
     from avsec.receiver import Receiver
     from avsec.transmitter import TransportConfig
@@ -391,7 +451,15 @@ def test_receiver_bounds_the_number_of_live_sessions():
                          fec_header=FECConfig(k=52, nsym=48))
     rx = Receiver(src, tr, LAB, frame_width=W, frame_height=H, max_sessions=3)
     for _ in range(10):
-        rx._opener(new_session_id())
+        ctx = (new_session_id(), 0, 0)
+        assert rx._lookup_opener(ctx) is None      # read-only lookup
+        assert rx._provisional_opener(ctx) is not None
+    assert len(rx._openers) == 0                   # nothing was cached
+
+    # only a commit installs, and eviction stays bounded
+    for _ in range(10):
+        ctx = (new_session_id(), 0, 0)
+        rx._commit_session(ctx, rx._provisional_opener(ctx))
     assert len(rx._openers) <= 3
 
 

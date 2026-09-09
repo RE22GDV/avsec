@@ -108,8 +108,11 @@ crypto:
   tag_bytes: 16
   key_bytes: 32
   nonce_bytes: 12
-  nonce_layout: prefix(4B, HKDF per session+direction+stream) || counter(8B BE)
-  kdf: HKDF-SHA256(salt=session_id, info=label|direction|stream|alg)
+  nonce_layout: prefix(4B, HKDF per session+epoch+direction+stream) || counter(8B
+    BE)
+  kdf: HKDF-SHA256(salt=session_id, info=label|direction|stream|alg|epoch)
+  epoch_bits: 32
+  counter_allocation: sealer-allocated, one-shot; no caller-supplied counter
   replay_window: 4096
   direction: uplink
   stream_id: 0

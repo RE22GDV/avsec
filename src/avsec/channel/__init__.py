@@ -196,6 +196,62 @@ class RasterChannel:
         img = np.clip(img, cfg.clip_low, cfg.clip_high)
         return np.round(img).astype(np.uint8), truth
 
+    # ---------------------------------------------------------------- stream
+    def reset_stream(self) -> None:
+        """Clear the stream state.  Call once per independent sequence only."""
+        self._pending: List[Tuple[np.ndarray, ChannelTruth]] = []
+        self._held: Optional[Tuple[np.ndarray, ChannelTruth]] = None
+        self._raster_index = 0
+
+    def apply_stream(self, raster: np.ndarray, rng: np.random.Generator
+                     ) -> List[Tuple[Optional[np.ndarray], ChannelTruth]]:
+        """Feed one transmitted raster into a *continuous* delivery stream.
+
+        Unlike :meth:`apply`, this keeps state across rasters and across source
+        frames, so drop / duplicate / reorder act on the real timeline instead
+        of being reset every frame (defect F06).  Returns the rasters that
+        become available to the receiver at this step: zero of them when the
+        raster was dropped or is being held back for a swap, two when a
+        duplicate or a held raster is released.
+        """
+        if not hasattr(self, "_pending"):
+            self.reset_stream()
+        cfg = self.cfg
+        img, truth = self.apply(raster, rng)
+        truth.events.append({"type": "raster", "index": self._raster_index})
+        self._raster_index += 1
+
+        out: List[Tuple[Optional[np.ndarray], ChannelTruth]] = []
+        if cfg.frame_drop_prob > 0 and rng.random() < cfg.frame_drop_prob:
+            truth.dropped = True
+            truth.events.append({"type": "raster_drop"})
+            return [(None, truth)]
+
+        if self._held is not None:                       # release a swapped pair
+            out.append((img, truth))
+            out.append(self._held)
+            self._held[1].events.append({"type": "raster_swap_release"})
+            self._held = None
+        elif cfg.frame_swap_prob > 0 and rng.random() < cfg.frame_swap_prob:
+            truth.events.append({"type": "raster_swap_hold"})
+            self._held = (img, truth)
+            return []
+        else:
+            out.append((img, truth))
+
+        if cfg.frame_duplicate_prob > 0 and rng.random() < cfg.frame_duplicate_prob:
+            truth.duplicated = True
+            truth.events.append({"type": "raster_duplicate"})
+            out.append((img.copy(), truth))
+        return out
+
+    def flush_stream(self) -> List[Tuple[Optional[np.ndarray], ChannelTruth]]:
+        """Release anything still held back at the end of a sequence."""
+        if getattr(self, "_held", None) is None:
+            return []
+        held, self._held = self._held, None
+        return [held]
+
     def apply_sequence(self, rasters: Sequence[np.ndarray], rng: np.random.Generator
                        ) -> Tuple[List[Optional[np.ndarray]], List[ChannelTruth]]:
         """Frame-level impairments: drop, duplicate and swap received rasters."""
@@ -223,6 +279,73 @@ class RasterChannel:
                     out[i], out[i + 1] = out[i + 1], out[i]
                     truths[i].events.append({"type": "frame_swap", "with": i + 1})
         return out, truths
+
+
+# ----------------------------------------------------------------- trace
+@dataclass
+class ChannelTrace:
+    """The impairment realisation as a function of *absolute raster time*.
+
+    Defect F08: the channel must not depend on which method is being measured.
+    A trace is identified by ``(scene, repetition, profile)`` and produces, for
+    each absolute raster index, a deterministic random stream.  Two methods that
+    occupy the same time slot therefore meet exactly the same damage, which is
+    what makes the paired comparison a paired comparison.
+
+    The absolute index is ``frame_id * rasters_per_frame + slot``, so a method
+    that fills fewer of the shared budget's raster slots still lines up in time
+    with one that fills all of them.
+    """
+
+    seed: int
+    scene: str
+    repetition: int
+    profile: str
+    rasters_per_frame: int = 1
+
+    @property
+    def trace_id(self) -> str:
+        return f"{self.profile}|{self.scene}|rep{self.repetition}|seed{self.seed}"
+
+    def raster_index(self, frame_id: int, slot: int = 0) -> int:
+        return int(frame_id) * max(1, int(self.rasters_per_frame)) + int(slot)
+
+    def rng(self, frame_id: int, slot: int = 0) -> np.random.Generator:
+        from avsec.utils import experiment_rng
+
+        return experiment_rng(self.seed, "channel", self.profile, self.scene,
+                              self.repetition, self.raster_index(frame_id, slot))
+
+    def describe(self) -> Dict[str, Any]:
+        return {"trace_id": self.trace_id, "seed": self.seed, "scene": self.scene,
+                "repetition": self.repetition, "profile": self.profile,
+                "rasters_per_frame": self.rasters_per_frame}
+
+
+def resolve_trace(source: Any, rasters_per_frame: int = 1) -> ChannelTrace:
+    """Accept a :class:`ChannelTrace` or, for unit tests, a bare Generator.
+
+    A bare Generator is wrapped in a trace that ignores the raster index; that
+    is fine for a single-method test but must never be used for a comparison,
+    which is why the experiment runners construct real traces.
+    """
+    if isinstance(source, ChannelTrace):
+        return source
+    if isinstance(source, np.random.Generator):
+        return _GeneratorTrace(source, rasters_per_frame)
+    raise TypeError(f"expected ChannelTrace or numpy Generator, got {type(source)!r}")
+
+
+class _GeneratorTrace(ChannelTrace):
+    """Legacy adapter: one shared Generator, no time indexing."""
+
+    def __init__(self, gen: np.random.Generator, rasters_per_frame: int = 1) -> None:
+        super().__init__(seed=0, scene="_generator", repetition=0, profile="_generator",
+                         rasters_per_frame=rasters_per_frame)
+        self._gen = gen
+
+    def rng(self, frame_id: int, slot: int = 0) -> np.random.Generator:
+        return self._gen
 
 
 # ---------------------------------------------------------------- named presets
@@ -289,5 +412,6 @@ def gilbert_elliott_mask(n: int, cfg: GilbertElliottConfig,
 
 __all__ = [
     "RasterChannelConfig", "ChannelTruth", "RasterChannel", "PRESETS", "preset",
+    "ChannelTrace", "resolve_trace",
     "GilbertElliottConfig", "gilbert_elliott_mask",
 ]

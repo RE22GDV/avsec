@@ -1,39 +1,50 @@
 """Versioned binary wire format with a strict, bounded parser.
 
-Canonical header (profile v1), big-endian, fixed 48 bytes plus a 4-byte CRC32::
+Canonical header (profile v2), big-endian, fixed 52 bytes plus a 4-byte CRC32::
 
     off size field            meaning
     ---------------------------------------------------------------------
       0    2  magic           0xA5 0x53
-      2    1  version         protocol version (1)
+      2    1  version         protocol version (2)
       3    1  profile_id      transport/codec profile identifier
       4    8  session_id      random per-session identifier
-     12    1  stream_id       logical stream inside the session
-     13    1  codec_id        source coding profile of this payload
-     14    4  frame_id        source frame number
-     18    2  stripe_id       stripe index inside the frame
-     20    1  desc_id         description index inside the stripe
-     21    1  seg_id          segment index inside the description
-     22    1  n_segs          number of segments of this description
-     23    1  n_descs         number of descriptions of this stripe
-     24    8  unit_seq        AEAD counter == anti-replay sequence number
-     32    2  x0              geometry: left column in the source frame
-     34    2  y0              geometry: top row in the source frame
-     36    2  width           geometry: number of *sampled* columns
-     38    2  height          geometry: number of *sampled* rows
-     40    1  step_x          sub-lattice horizontal step
-     41    1  step_y          sub-lattice vertical step
-     42    1  phase_x         sub-lattice horizontal phase
-     43    1  phase_y         sub-lattice vertical phase
-     44    2  payload_len     ciphertext length in bytes (tag excluded)
-     46    1  flags           bit0 last-segment, bit1 stripe-complete marker
-     47    1  reserved        must be 0
-     48    4  header_crc32    CRC-32 of bytes[0:48]
+     12    4  session_epoch   monotone epoch of this session (added in v2)
+     16    1  stream_id       logical stream inside the session
+     17    1  codec_id        source coding profile of this payload
+     18    4  frame_id        source frame number
+     22    2  stripe_id       stripe index inside the frame
+     24    1  desc_id         description index inside the stripe
+     25    1  seg_id          segment index inside the description
+     26    1  n_segs          number of segments of this description
+     27    1  n_descs         number of descriptions of this stripe
+     28    8  unit_seq        AEAD counter == anti-replay sequence number
+     36    2  x0              geometry: left column in the source frame
+     38    2  y0              geometry: top row in the source frame
+     40    2  width           geometry: number of *sampled* columns
+     42    2  height          geometry: number of *sampled* rows
+     44    1  step_x          sub-lattice horizontal step
+     45    1  step_y          sub-lattice vertical step
+     46    1  phase_x         sub-lattice horizontal phase
+     47    1  phase_y         sub-lattice vertical phase
+     48    2  payload_len     ciphertext length in bytes (tag excluded)
+     50    1  flags           bit0 last-segment, bit1 stripe-complete marker
+     51    1  reserved        must be 0
+     52    4  header_crc32    CRC-32 of bytes[0:52]
 
-Bytes ``[0:48]`` are passed verbatim as AEAD associated data, so every field
-above is cryptographically bound to the payload.  The CRC is a transport-level
-aid for *finding and pre-parsing* a header before authentication; it is never
-treated as a substitute for the tag.
+Bytes ``[0:52]`` are passed verbatim as AEAD associated data, so every field
+above is cryptographically bound to the payload.
+
+Version history
+---------------
+* v1 - 48-byte core, no session epoch.  Superseded; a v1 header is rejected.
+* v2 - adds ``session_epoch`` so a restart under a long-term key is safe and a
+  retired epoch cannot be reopened from a recording (defect F02).  The epoch is
+  also mixed into the key derivation, so it changes the key and not only the
+  associated data.  The 4 extra header bytes are accounted for by
+  :mod:`avsec.budget`.
+
+The CRC is a transport-level aid for *finding and pre-parsing* a header before
+authentication; it is never treated as a substitute for the tag.
 """
 from __future__ import annotations
 
@@ -43,10 +54,10 @@ from dataclasses import dataclass, replace
 from typing import Dict, Optional, Tuple
 
 MAGIC = b"\xa5\x53"
-VERSION = 1
-HEADER_CORE_LEN = 48
+VERSION = 2
+HEADER_CORE_LEN = 52
 HEADER_LEN = HEADER_CORE_LEN + 4
-_STRUCT = struct.Struct(">2sBB8sBBIHBBBBQHHHHBBBBHBB")
+_STRUCT = struct.Struct(">2sBB8sIBBIHBBBBQHHHHBBBBHBB")
 
 MAX_PAYLOAD_LEN = 16384        # hard bound applied before any allocation
 MAX_FRAME_DIM = 4096
@@ -119,6 +130,7 @@ class UnitHeader:
 
     profile_id: int
     session_id: bytes
+    session_epoch: int
     stream_id: int
     codec_id: int
     frame_id: int
@@ -135,12 +147,13 @@ class UnitHeader:
 
     # -- serialisation -------------------------------------------------
     def core_bytes(self) -> bytes:
-        """Canonical 48-byte encoding used verbatim as AEAD associated data."""
+        """Canonical 52-byte encoding used verbatim as AEAD associated data."""
         if len(self.session_id) != 8:
             raise FramingError("session id must be 8 bytes")
         g = self.geometry
         return _STRUCT.pack(
             MAGIC, self.version & 0xFF, self.profile_id & 0xFF, self.session_id,
+            self.session_epoch & 0xFFFFFFFF,
             self.stream_id & 0xFF, self.codec_id & 0xFF,
             self.frame_id & 0xFFFFFFFF, self.stripe_id & 0xFFFF,
             self.desc_id & 0xFF, self.seg_id & 0xFF, self.n_segs & 0xFF, self.n_descs & 0xFF,
@@ -161,13 +174,24 @@ class UnitHeader:
         return replace(self, payload_len=n)
 
     def key(self) -> Tuple[int, int, int, int]:
+        """Position of this unit inside one frame."""
         return (self.frame_id, self.stripe_id, self.desc_id, self.seg_id)
+
+    def identity(self) -> Tuple[bytes, int, int, int]:
+        """Authenticated stream identity: (session, epoch, stream, frame).
+
+        Frame assembly is keyed by this, so segments of two different frames
+        - or of two different sessions or epochs - can never be merged into
+        one picture (defect F04).
+        """
+        return (self.session_id, self.session_epoch, self.stream_id, self.frame_id)
 
     def to_dict(self) -> Dict[str, object]:
         g = self.geometry
         return {
             "version": self.version, "profile_id": self.profile_id,
-            "session_id": self.session_id.hex(), "stream_id": self.stream_id,
+            "session_id": self.session_id.hex(), "session_epoch": self.session_epoch,
+            "stream_id": self.stream_id,
             "codec_id": self.codec_id, "frame_id": self.frame_id,
             "stripe_id": self.stripe_id, "desc_id": self.desc_id, "seg_id": self.seg_id,
             "n_segs": self.n_segs, "n_descs": self.n_descs, "unit_seq": self.unit_seq,
@@ -194,9 +218,10 @@ def parse_header(
     if len(data) < HEADER_LEN:
         raise FramingError(f"header needs {HEADER_LEN} bytes, got {len(data)}")
     core = data[:HEADER_CORE_LEN]
-    (magic, version, profile_id, session_id, stream_id, codec_id, frame_id, stripe_id,
-     desc_id, seg_id, n_segs, n_descs, unit_seq, x0, y0, width, height,
-     step_x, step_y, phase_x, phase_y, payload_len, flags, reserved) = _STRUCT.unpack(core)
+    (magic, version, profile_id, session_id, session_epoch, stream_id, codec_id,
+     frame_id, stripe_id, desc_id, seg_id, n_segs, n_descs, unit_seq, x0, y0,
+     width, height, step_x, step_y, phase_x, phase_y, payload_len, flags,
+     reserved) = _STRUCT.unpack(core)
 
     if magic != MAGIC:
         raise FramingError("bad magic")
@@ -224,7 +249,8 @@ def parse_header(
         raise FramingError("description indices inconsistent")
 
     return UnitHeader(
-        profile_id=profile_id, session_id=session_id, stream_id=stream_id, codec_id=codec_id,
+        profile_id=profile_id, session_id=session_id, session_epoch=session_epoch,
+        stream_id=stream_id, codec_id=codec_id,
         frame_id=frame_id, stripe_id=stripe_id, desc_id=desc_id, seg_id=seg_id,
         n_segs=n_segs, n_descs=n_descs, unit_seq=unit_seq,
         geometry=Geometry(x0, y0, width, height, step_x, step_y, phase_x, phase_y),

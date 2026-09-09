@@ -34,10 +34,19 @@ import numpy as np
 
 from avsec import budget as budget_mod
 from avsec import evaluation as ev
-from avsec.channel import RasterChannelConfig
+from avsec.channel import ChannelTrace, RasterChannelConfig
 from avsec.crypto import MasterSecret
 from avsec.fec import FECConfig
-from avsec.interleaving import InterleaverConfig, Interleaver, bawp_admissible
+from avsec.crypto import TAG_LEN
+from avsec.framing import HEADER_LEN
+from avsec.interleaving import (
+    Interleaver,
+    InterleaverConfig,
+    PlacementError,
+    bawp_admissible,
+    burst_rows_from_lines,
+    worst_case_codeword_damage,
+)
 from avsec.modem import ModemConfig
 from avsec.source_coding import SourceCodingConfig, SourceCodingError
 from avsec.sources import FrameSource
@@ -175,6 +184,9 @@ class ScoredCandidate:
     payload_efficiency: float = 0.0
     units_per_raster: int = 0
     n_frames: int = 0
+    guarantee_satisfied: bool = False
+    guarantee_note: str = ""
+    fingerprint: str = ""
 
     def to_row(self) -> Dict[str, Any]:
         d = {k: v for k, v in self.__dict__.items() if k != "candidate"}
@@ -210,10 +222,124 @@ def build_candidate(
     return Candidate(src, tr, label or "candidate")
 
 
+def effective_fingerprint(cand: Candidate) -> str:
+    """Hash of everything that actually changes the transmitted signal.
+
+    Defect F13: at the current geometry, ``burst_rows`` of 8, 12 and 24 all
+    produce the same number of BAWP bands and therefore the *same placement
+    table*.  Searching them as three candidates wastes the budget and makes the
+    search look larger than it is.  The fingerprint covers the codec, the
+    segment geometry, the protected unit, the FEC blocking, the modem and the
+    realised placement table, so equivalent configurations collapse to one and
+    the rest are recorded as aliases.
+    """
+    import hashlib
+
+    s, t = cand.source, cand.transport
+    m, il_cfg = t.modem, t.interleaver
+    h = hashlib.sha256()
+    h.update(repr((
+        s.stripe_height, s.n_descriptions, s.codec, s.quality, s.max_unit_payload,
+        t.fec_payload.k, t.fec_payload.nsym, t.fec_header.k, t.fec_header.nsym,
+        m.levels, m.symbol_width, m.symbol_height, m.raster_width, m.raster_height,
+        m.active_x0, m.active_x1, m.active_y0, m.active_y1, m.level_low, m.level_high,
+        t.profile_id, t.raster_rate_hz, t.send_filler, t.max_rasters_per_frame,
+    )).encode())
+    bud = budget_mod.compute_budget(m, t.fec_payload, t.fec_header,
+                                    s.max_unit_payload, t.raster_rate_hz)
+    il = Interleaver(il_cfg, m.n_data_rows, m.n_data_cols)
+    n = il.max_units(bud.unit_symbols, s.n_descriptions, bud.units_per_raster)
+    h.update(repr(n).encode())
+    if n >= 1:
+        try:
+            tables = il.place([bud.unit_symbols] * n,
+                              [i % max(1, s.n_descriptions) for i in range(n)],
+                              s.n_descriptions)
+            for tab in tables:
+                h.update(np.asarray(tab, dtype=np.int64).tobytes())
+        except PlacementError as exc:
+            h.update(f"unplaceable:{exc}".encode())
+    return h.hexdigest()[:16]
+
+
 # ------------------------------------------------------------------ pruning
+def placement_guarantee(cand: Candidate, n_descriptions: int,
+                        burst_lines: Optional[int] = None) -> Tuple[bool, str]:
+    """Is the analytic burst guarantee actually established for this candidate?
+
+    Defect F11: the old code computed a predicate and then discarded it with a
+    bare ``pass``, and it mixed up raster lines, symbol rows and RS byte symbols.
+    This version converts units explicitly and checks **every real RS codeword**
+    of a transport unit - the header block and each payload block, including the
+    shortened last one - against its own parity budget, using the exact
+    worst-case damage over all burst positions rather than a bound.
+
+    Erasures whose positions the receiver can flag cost ``s <= nsym``; symbol
+    errors at unknown positions cost ``2e <= nsym``.  The conservative test used
+    here is the error case, because the receiver cannot always localise damage.
+    """
+    src, tr = cand.source, cand.transport
+    modem = tr.modem
+    il_cfg = tr.interleaver
+    bud = budget_mod.compute_budget(modem, tr.fec_payload, tr.fec_header,
+                                    src.max_unit_payload, tr.raster_rate_hz)
+    il = Interleaver(il_cfg, modem.n_data_rows, modem.n_data_cols)
+    n_units = il.max_units(bud.unit_symbols, n_descriptions, bud.units_per_raster)
+    if n_units < 1:
+        return False, "no unit fits the raster"
+
+    # raster lines -> symbol rows, once, in one place
+    lines = int(burst_lines) if burst_lines is not None else \
+        il_cfg.burst_rows * modem.symbol_height
+    b_rows = burst_rows_from_lines(lines, modem.symbol_height)
+
+    try:
+        placements = il.place([bud.unit_symbols] * n_units,
+                              [i % max(1, n_descriptions) for i in range(n_units)],
+                              n_descriptions)
+    except PlacementError as exc:
+        return False, str(exc)
+
+    if il_cfg.scheme == "bawp" and il.last_info is not None and il.last_info.spilled:
+        return False, ("units spilled across description bands, so the isolation "
+                       "bound does not follow (F12)")
+
+    # byte offsets of every real RS codeword inside one transport unit
+    sym_per_byte = 8 // modem.bits_per_symbol
+    blocks: List[Tuple[int, int, int]] = []          # (start_byte, length, nsym)
+    off = 0
+    for _, _, es, elen in tr.fec_header.block_layout(HEADER_LEN):
+        blocks.append((off + es, elen, tr.fec_header.nsym))
+    off += tr.fec_header.encoded_len(HEADER_LEN)
+    pay_len = src.max_unit_payload + TAG_LEN
+    for _, _, es, elen in tr.fec_payload.block_layout(pay_len):
+        blocks.append((off + es, elen, tr.fec_payload.nsym))
+
+    for cells in placements:
+        for start, length, nsym in blocks:
+            lo, hi = start * sym_per_byte, (start + length) * sym_per_byte
+            if hi > cells.size:
+                return False, "codeword layout does not fit the placed unit"
+            dmg_symbols = worst_case_codeword_damage(
+                cells[lo:hi], modem.n_data_cols, b_rows, modem.n_data_rows)
+            dmg_bytes = int(np.ceil(dmg_symbols / sym_per_byte))
+            if 2 * dmg_bytes > nsym:
+                return False, (
+                    f"a {lines}-line burst ({b_rows} symbol rows) can destroy "
+                    f"{dmg_bytes} bytes of a {length}-byte codeword with nsym={nsym}; "
+                    f"2*{dmg_bytes} > {nsym}")
+    return True, ""
+
+
 def static_admissibility(cand: Candidate, shared: SharedBudget,
-                         frame_h: int) -> Tuple[bool, str]:
-    """Cheap checks that do not need any frame to be transmitted."""
+                         frame_h: int, require_guarantee: bool = False
+                         ) -> Tuple[bool, str]:
+    """Cheap checks that do not need any frame to be transmitted.
+
+    ``require_guarantee=True`` selects the *guaranteed* family: a configuration
+    whose analytic burst guarantee is not established is rejected.  The default
+    research family keeps such configurations but records the fact.
+    """
     src, tr = cand.source, cand.transport
     try:
         src.validate()
@@ -239,16 +365,9 @@ def static_admissibility(cand: Candidate, shared: SharedBudget,
         return False, (f"only {placeable} slots per raster for {src.n_descriptions} "
                        "descriptions")
 
-    if tr.interleaver.scheme == "bawp":
-        codeword = tr.fec_payload.n
-        codeword_symbols = codeword * 8 // tr.modem.bits_per_symbol
-        rows_per_codeword = int(np.ceil(codeword_symbols / tr.modem.n_data_cols))
-        if not bawp_admissible(tr.modem.n_data_rows, src.n_descriptions,
-                               tr.interleaver.burst_rows, rows_per_codeword * 1,
-                               tr.fec_payload.nsym):
-            # informative but non-fatal: the predicate is a sufficient, not a
-            # necessary, condition, so it only demotes the candidate
-            pass
+    ok_guarantee, why_guarantee = placement_guarantee(cand, src.n_descriptions)
+    if require_guarantee and not ok_guarantee:
+        return False, f"guarantee not established: {why_guarantee}"
 
     lat = budget_mod.compute_latency(
         tr.modem, il.accumulation_rows, shared.rasters_per_frame,
@@ -270,7 +389,8 @@ class Tuner:
 
     def __init__(self, shared: SharedBudget, master: MasterSecret,
                  channel_cfg: RasterChannelConfig, frame_h: int, frame_w: int,
-                 seed: int = 20240909) -> None:
+                 seed: int = 20240909, require_guarantee: bool = False) -> None:
+        self.require_guarantee = bool(require_guarantee)
         self.shared = shared
         self.master = master
         self.channel_cfg = channel_cfg
@@ -286,9 +406,11 @@ class Tuner:
                 "the test split must not be used for parameter selection; "
                 "freeze the configuration first and run it once through the "
                 "experiment runner")
-        ok, why = static_admissibility(cand, self.shared, self.frame_h)
+        ok, why = static_admissibility(cand, self.shared, self.frame_h,
+                                       require_guarantee=self.require_guarantee)
         if not ok:
             return ScoredCandidate(cand, False, why)
+        guaranteed, gnote = placement_guarantee(cand, cand.source.n_descriptions)
 
         from avsec.baselines import DigitalMethod
 
@@ -307,9 +429,11 @@ class Tuner:
         for si, src in enumerate(sources):
             method.reset()
             for fi, frame in enumerate(src.frames[:max_frames]):
-                rng = experiment_rng(self.seed, "tune", cand.key(), si, fi)
+                trace = ChannelTrace(seed=self.seed, scene=src.name,
+                                     repetition=0, profile="tune",
+                                     rasters_per_frame=self.shared.rasters_per_frame)
                 try:
-                    res = method.process(frame, fi, rng)
+                    res = method.process(frame, fi, trace)
                 except CapacityExceeded as exc:
                     return ScoredCandidate(cand, False,
                                            f"does not fit the shared budget: {exc}")
@@ -337,6 +461,8 @@ class Tuner:
             payload_efficiency=method.tx.budget.efficiency,
             units_per_raster=method.tx.budget.units_per_raster,
             n_frames=n,
+            guarantee_satisfied=guaranteed, guarantee_note=gnote,
+            fingerprint=effective_fingerprint(cand),
         )
 
     # -- search -----------------------------------------------------------
@@ -350,12 +476,38 @@ class Tuner:
         if max_candidates is not None:
             combos = combos[:max_candidates]
         out: List[ScoredCandidate] = []
+        seen: Dict[str, ScoredCandidate] = {}
+        self.aliases: Dict[str, List[str]] = {}
         for i, (sh, nd, codec, q, up, nsym, mo, il) in enumerate(combos):
             cand = build_candidate(self.shared, sh, nd, codec, q, up, nsym, il, mo, label)
+            fp = effective_fingerprint(cand)
+            twin = seen.get(fp)
+            if twin is not None:
+                # identical realised configuration: score it once, record the rest
+                # as aliases instead of spending the search budget again (F13)
+                self.aliases.setdefault(twin.candidate.key(), []).append(cand.key())
+                sc = replace(twin, candidate=cand)
+                out.append(sc)
+                if progress:
+                    progress(i + 1, len(combos), sc)
+                continue
             sc = self.score(cand, sources, max_frames)
+            sc.fingerprint = fp
+            seen[fp] = sc
             out.append(sc)
             if progress:
                 progress(i + 1, len(combos), sc)
+        return out
+
+    @staticmethod
+    def distinct(scored: Sequence[ScoredCandidate]) -> List[ScoredCandidate]:
+        """One entry per *realised* configuration, aliases removed."""
+        out, seen = [], set()
+        for s in scored:
+            if s.fingerprint and s.fingerprint in seen:
+                continue
+            seen.add(s.fingerprint)
+            out.append(s)
         return out
 
     @staticmethod
@@ -403,4 +555,5 @@ def split_sources(sources: Sequence[FrameSource], seed: int = 7,
 __all__ = [
     "SharedBudget", "ParameterSpace", "Candidate", "ScoredCandidate",
     "build_candidate", "static_admissibility", "Tuner", "split_sources",
+    "placement_guarantee", "effective_fingerprint",
 ]

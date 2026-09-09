@@ -388,6 +388,10 @@ FILL_INTERPOLATE = "interpolate"
 FILL_PREVIOUS = "previous"
 
 
+class IdentityMismatch(SourceCodingError):
+    """Units of different frames/sessions/epochs were offered for one picture."""
+
+
 @dataclass
 class AssembledFrame:
     image: np.ndarray                 # rendered picture (received + estimated)
@@ -396,6 +400,7 @@ class AssembledFrame:
     age_map: np.ndarray               # int: frames since this pixel was received
     fill_mode: str
     n_units_used: int = 0
+    identity: Optional[Tuple] = None  # (session_id, epoch, stream_id, frame_id)
 
     @property
     def coverage(self) -> float:
@@ -425,6 +430,26 @@ class FrameAssembler:
     def reset(self) -> None:
         self._prev = None
         self._prev_age = None
+
+    def assemble_verified(self, units: Sequence[object]) -> AssembledFrame:
+        """Assemble from authenticated units, all of one identity.
+
+        Every unit must carry the same ``(session_id, epoch, stream_id,
+        frame_id)``.  Mixing frames - which would let a late frame 0 be reported
+        as a complete frame 1 - raises instead of silently producing a picture
+        with inflated coverage (defect F04).
+        """
+        ids = {u.identity for u in units}
+        if len(ids) > 1:
+            raise IdentityMismatch(
+                f"refusing to assemble one picture from {len(ids)} different "
+                "authenticated identities: " + ", ".join(
+                    f"frame {i[3]} of session {i[0].hex()[:8]} epoch {i[1]}"
+                    for i in sorted(ids, key=lambda x: (x[0], x[1], x[3]))))
+        out = self.assemble([(u.geometry, u.samples) for u in units])
+        out.identity = next(iter(ids)) if ids else None
+        out.n_units_used = len(units)
+        return out
 
     def assemble(self, placements: Sequence[Tuple[Geometry, np.ndarray]]) -> AssembledFrame:
         canvas = np.zeros((self.h, self.w), dtype=np.float64)

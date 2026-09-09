@@ -34,8 +34,11 @@ from avsec.crypto import (
 )
 from avsec.fec import RSCodec
 from avsec.framing import (
+    HEADER_CORE_LEN,
     HEADER_LEN,
+    VERSION as PROTOCOL_VERSION,
     FramingError,
+    Geometry,
     UnitHeader,
     UnknownProfile,
     UnknownVersion,
@@ -60,6 +63,7 @@ class UnitStatus(str, Enum):
     AUTH_FAILED = "auth_failed"
     REPLAY = "replay"
     STALE = "stale"
+    STALE_EPOCH = "stale_epoch"
     DECODE_FAILED = "decode_failed"
     NO_SYNC = "no_sync"
     SESSION_LIMIT = "session_limit"
@@ -68,8 +72,40 @@ class UnitStatus(str, Enum):
 TERMINAL_REJECTIONS = {
     UnitStatus.HEADER_UNRECOVERABLE, UnitStatus.HEADER_INVALID, UnitStatus.UNKNOWN_VERSION,
     UnitStatus.UNKNOWN_PROFILE, UnitStatus.PAYLOAD_UNRECOVERABLE, UnitStatus.AUTH_FAILED,
-    UnitStatus.REPLAY, UnitStatus.STALE, UnitStatus.DECODE_FAILED,
+    UnitStatus.REPLAY, UnitStatus.STALE, UnitStatus.STALE_EPOCH, UnitStatus.DECODE_FAILED,
 }
+
+# (session_id, epoch, stream_id) - the key context a unit belongs to
+SessionContext = Tuple[bytes, int, int]
+
+
+@dataclass(frozen=True)
+class VerifiedUnit:
+    """Picture samples together with the identity that AEAD actually attested.
+
+    Frame assembly consumes these, never bare ``(geometry, samples)`` pairs, so
+    segments of two different frames, sessions or epochs cannot be merged into
+    one picture and then reported as full coverage (defect F04).
+    """
+
+    session_id: bytes
+    session_epoch: int
+    stream_id: int
+    frame_id: int
+    stripe_id: int
+    desc_id: int
+    seg_id: int
+    geometry: "Geometry"
+    samples: np.ndarray
+    received_at: float
+
+    @property
+    def identity(self) -> Tuple[bytes, int, int, int]:
+        return (self.session_id, self.session_epoch, self.stream_id, self.frame_id)
+
+    @property
+    def unit_key(self) -> Tuple[int, int, int, int]:
+        return (self.frame_id, self.stripe_id, self.desc_id, self.seg_id)
 
 
 @dataclass
@@ -79,6 +115,7 @@ class UnitOutcome:
     detail: str = ""
     header: Optional[UnitHeader] = None
     samples: Optional[np.ndarray] = None
+    unit: Optional[VerifiedUnit] = None
     header_corrected: int = 0
     payload_corrected: int = 0
     erasures_used: int = 0
@@ -165,29 +202,44 @@ class Receiver:
         self._placement = self.interleaver.place(
             [self.budget.unit_symbols] * u, [i % d for i in range(u)], d
         )
-        self._openers: "OrderedDict[bytes, Opener]" = OrderedDict()
-        self._newest_frame = -1
+        self._openers: "OrderedDict[SessionContext, Opener]" = OrderedDict()
+        # freshness watermarks, keyed by the *authenticated* context
+        self._newest_frame: Dict[SessionContext, int] = {}
+        self._highest_epoch: Dict[Tuple[bytes, int], int] = {}
         self._had_sync = False
         self.stats: Dict[str, int] = {}
+        self.clock: float = 0.0        # raster index; advanced by receive_raster
 
     # -- sessions ---------------------------------------------------------
-    def _opener(self, session_id: bytes) -> Optional[Opener]:
-        if session_id in self._openers:
-            self._openers.move_to_end(session_id)
-            return self._openers[session_id]
-        if len(self._openers) >= self.max_sessions:
-            self._openers.popitem(last=False)   # bounded memory
+    # Defect F01: nothing about the session cache may change before a unit has
+    # authenticated.  Lookup is read-only; an unknown context gets a throwaway
+    # opener that is never cached; eviction and LRU ordering happen only in
+    # _commit_session, which runs after a successful AEAD open.
+    def _lookup_opener(self, ctx: SessionContext) -> Optional[Opener]:
+        """Read-only lookup.  Does not insert, evict or reorder anything."""
+        return self._openers.get(ctx)
+
+    def _provisional_opener(self, ctx: SessionContext) -> Optional[Opener]:
+        """A fresh, uncached opener used to *attempt* verification."""
+        session_id, epoch, stream_id = ctx
         try:
             keys = derive_session_keys(
                 self.master, session_id, self.crypto_profile.direction,
-                self.crypto_profile.stream_id, self.crypto_profile.algorithm,
+                stream_id, self.crypto_profile.algorithm, epoch,
             )
         except Exception:
             return None
-        op = (Opener(keys, self.crypto_profile.replay_window) if self.secure
-              else NullOpener(keys, self.crypto_profile.replay_window))
-        self._openers[session_id] = op
-        return op
+        return (Opener(keys, self.crypto_profile.replay_window) if self.secure
+                else NullOpener(keys, self.crypto_profile.replay_window))
+
+    def _commit_session(self, ctx: SessionContext, opener: Opener) -> None:
+        """Install an opener after a unit under it authenticated successfully."""
+        if ctx not in self._openers:
+            while len(self._openers) >= self.max_sessions:
+                self._openers.popitem(last=False)      # bounded memory
+                self.stats["session_evicted"] = self.stats.get("session_evicted", 0) + 1
+        self._openers[ctx] = opener
+        self._openers.move_to_end(ctx)
 
     # -- one raster -------------------------------------------------------
     def receive_raster(self, raster: np.ndarray) -> RasterOutcome:
@@ -206,6 +258,7 @@ class Receiver:
             )
         resync = not self._had_sync
         self._had_sync = True
+        self.clock += 1.0
 
         bps = self.cfg.modem.bits_per_symbol
         sym_per_byte = 8 // bps
@@ -246,7 +299,7 @@ class Receiver:
 
         try:
             header = parse_header(
-                hdr_bytes, accepted_versions=(1,),
+                hdr_bytes, accepted_versions=(PROTOCOL_VERSION,),
                 accepted_profiles=(self.cfg.profile_id,),
                 max_payload_len=self.source_cfg.max_unit_payload,
             )
@@ -268,15 +321,30 @@ class Receiver:
                 return UnitOutcome(slot, UnitStatus.HEADER_INVALID,
                                    "description count differs from the agreed profile", header)
 
-        if self._newest_frame >= 0 and header.frame_id < self._newest_frame - self.max_frame_age:
+        # Freshness is tracked per authenticated context, not globally: a new
+        # session or a new epoch legitimately restarts frame numbering at zero
+        # (defect F02).  These pre-authentication checks may only *reject*; they
+        # never advance any watermark.
+        ctx: SessionContext = (header.session_id, header.session_epoch, header.stream_id)
+        epoch_key = (header.session_id, header.stream_id)
+        seen_epoch = self._highest_epoch.get(epoch_key)
+        if seen_epoch is not None and header.session_epoch < seen_epoch:
+            return UnitOutcome(slot, UnitStatus.STALE_EPOCH,
+                               f"epoch {header.session_epoch} retired "
+                               f"(current {seen_epoch})", header)
+        watermark = self._newest_frame.get(ctx)
+        if watermark is not None and header.frame_id < watermark - self.max_frame_age:
             return UnitOutcome(slot, UnitStatus.STALE,
                                f"frame {header.frame_id} older than the display deadline "
-                               f"(newest {self._newest_frame})", header)
+                               f"(newest {watermark} in this session/epoch)", header)
 
-        opener = self._opener(header.session_id)
+        opener = self._lookup_opener(ctx)
+        provisional = opener is None
+        if provisional:
+            opener = self._provisional_opener(ctx)
         if opener is None:
             return UnitOutcome(slot, UnitStatus.SESSION_LIMIT,
-                               "no key material for this session id", header)
+                               "no key material for this session context", header)
 
         with t("rx.fec_payload"):
             pay_block = wire[hdr_enc : hdr_enc + pay_enc]
@@ -291,14 +359,24 @@ class Receiver:
 
         with t("rx.aead"):
             try:
-                plain = opener.open(header.unit_seq, ct, hdr_bytes[:48])
+                plain = opener.open(header.unit_seq, ct, hdr_bytes[:HEADER_CORE_LEN])
             except ReplayDetected as exc:
                 return UnitOutcome(slot, UnitStatus.REPLAY, str(exc), header)
             except AuthenticationFailed as exc:
+                # Nothing was mutated: a forged unit cannot evict a live session,
+                # advance a watermark or consume replay history (defect F01).
                 return UnitOutcome(slot, UnitStatus.AUTH_FAILED, str(exc), header)
 
-        if header.frame_id > self._newest_frame:
-            self._newest_frame = header.frame_id
+        # ---- authenticated from here on; only now may state advance ----
+        self._commit_session(ctx, opener)
+        if seen_epoch is None or header.session_epoch > seen_epoch:
+            self._highest_epoch[epoch_key] = header.session_epoch
+        if header.frame_id > self._newest_frame.get(ctx, -1):
+            self._newest_frame[ctx] = header.frame_id
+        if len(self._newest_frame) > 8 * max(self.max_sessions, 1):
+            live = set(self._openers)
+            self._newest_frame = {k: v for k, v in self._newest_frame.items() if k in live}
+
         if header.codec_id == CODEC_FILLER or (header.flags & 0x04):
             return UnitOutcome(slot, UnitStatus.FILLER, "authenticated filler unit", header)
 
@@ -309,8 +387,14 @@ class Receiver:
             except Exception as exc:
                 return UnitOutcome(slot, UnitStatus.DECODE_FAILED, f"{type(exc).__name__}: {exc}",
                                    header)
+        unit = VerifiedUnit(
+            session_id=header.session_id, session_epoch=header.session_epoch,
+            stream_id=header.stream_id, frame_id=header.frame_id,
+            stripe_id=header.stripe_id, desc_id=header.desc_id, seg_id=header.seg_id,
+            geometry=header.geometry, samples=samples, received_at=self.clock,
+        )
         return UnitOutcome(
-            slot, UnitStatus.VERIFIED, "", header, samples,
+            slot, UnitStatus.VERIFIED, "", header, samples, unit,
             header_corrected=int(hstats.get("corrected_symbols", 0)),
             payload_corrected=int(pstats.get("corrected_symbols", 0)),
             erasures_used=int(pstats.get("erasures_used", 0)),
@@ -323,15 +407,15 @@ class Receiver:
         self._had_sync = False
 
     def reset_state(self) -> None:
-        """Forget sync, freshness and session state - used between sequences.
+        """Forget synchronisation only.
 
-        Frame numbering restarts with every independent sequence, so keeping the
-        previous newest-frame watermark would (correctly) reject the new
-        sequence as stale.  Independent sequences are independent sessions.
+        Session, epoch and freshness state is keyed by the authenticated
+        context, so a new session or epoch already restarts frame numbering
+        safely (defect F02) and there is nothing to clear here.  Wiping the
+        replay history between clips would be wrong: it would hide replays.
         """
         self._had_sync = False
-        self._newest_frame = -1
-        self._openers.clear()
 
 
-__all__ = ["UnitStatus", "UnitOutcome", "RasterOutcome", "Receiver", "TERMINAL_REJECTIONS"]
+__all__ = ["UnitStatus", "UnitOutcome", "RasterOutcome", "Receiver",
+           "TERMINAL_REJECTIONS", "VerifiedUnit", "SessionContext"]

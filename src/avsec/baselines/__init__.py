@@ -30,13 +30,19 @@ under test, not the implementation quality.
 from __future__ import annotations
 
 import hashlib
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 
 from avsec import evaluation as ev
-from avsec.channel import ChannelTruth, RasterChannel, RasterChannelConfig
+from avsec.channel import (
+    ChannelTrace,
+    ChannelTruth,
+    RasterChannel,
+    RasterChannelConfig,
+    resolve_trace,
+)
 from avsec.crypto import (
     TAG_LEN,
     AuthenticationFailed,
@@ -54,7 +60,7 @@ from avsec.framing import HEADER_LEN, FramingError, Geometry, UnitHeader, parse_
 from avsec.interleaving import Interleaver
 from avsec.lfsr import BlockScrambler, ScramblerConfig, invert_permutation
 from avsec.modem import RasterModem, prbs_symbols
-from avsec.receiver import Receiver, UnitStatus
+from avsec.receiver import Receiver, UnitStatus, VerifiedUnit
 from avsec.source_coding import (
     FILL_INTERPOLATE,
     AssembledFrame,
@@ -325,8 +331,10 @@ class AnalogPictureMethod(Method):
     def __init__(self, name: str, transport: TransportConfig,
                  channel_cfg: RasterChannelConfig, frame_h: int, frame_w: int,
                  transform=None, inverse=None, authenticated: bool = False,
-                 timer: Optional[StageTimer] = None, notes: str = "") -> None:
+                 timer: Optional[StageTimer] = None, notes: str = "",
+                 rasters_per_frame: int = 1) -> None:
         self.name = name
+        self.rasters_per_frame = max(1, int(rasters_per_frame))
         self.authenticated = authenticated
         self.cfg = transport
         m = transport.modem
@@ -348,14 +356,35 @@ class AnalogPictureMethod(Method):
             "notes": self.notes,
         }
 
+    def reset(self) -> None:
+        self.channel.reset_stream()
+
     def process(self, frame: np.ndarray, frame_id: int,
-                rng: np.random.Generator) -> MethodResult:
+                trace: Any) -> MethodResult:
         t = self.timer
+        tr = resolve_trace(trace, self.rasters_per_frame)
         with t(f"{self.name}.transform"):
             payload = self._transform(frame, frame_id) if self._transform else frame
         with t(f"{self.name}.modulation"):
             tx = self.carrier.transmit(payload)
-        rx, truth = self.channel.apply(tx, rng)
+        # The analog picture occupies the first raster slot of the shared budget,
+        # so it meets the same damage as slot 0 of any digital method (F08).
+        deliveries = self.channel.apply_stream(tx, tr.rng(frame_id, 0))
+        rx, truth = None, None
+        for img, tru in deliveries:
+            truth = truth or tru
+            if img is not None and rx is None:
+                rx = img
+        if rx is None:                       # raster dropped: nothing is displayed
+            blank = np.full_like(frame, 128)
+            avail = np.zeros_like(frame, dtype=bool)
+            q = ev.quality_pair(frame, blank, avail)
+            met = FrameMetrics(frame_id=frame_id, method=self.name, rasters=1,
+                               sync_found=False, **q)
+            met.extra.update({"authenticated": False, "channel_trace": tr.trace_id,
+                              "coverage_meaning": "raster dropped, nothing displayed"})
+            return MethodResult(self.name, frame_id, frame, tx, tx, blank, avail,
+                                np.zeros_like(avail), met, truth, self.notes)
         with t(f"{self.name}.demodulation"):
             got, info = self.carrier.receive(rx, (self.frame_h, self.frame_w))
         with t(f"{self.name}.inverse"):
@@ -445,10 +474,11 @@ class DigitalMethod(Method):
         self.notes = notes
 
     def reset(self) -> None:
-        """Begin an independent sequence: new session, clean receiver state."""
+        """Begin an independent sequence: new session, clean sync and channel."""
         self.assembler.reset()
         self.tx.new_session()
         self.rx.reset_state()
+        self.channel.reset_stream()
 
     def describe(self) -> Dict[str, Any]:
         d = self.tx.describe()
@@ -457,9 +487,10 @@ class DigitalMethod(Method):
         return d
 
     def process(self, frame: np.ndarray, frame_id: int,
-                rng: np.random.Generator) -> MethodResult:
+                trace: Any) -> MethodResult:
+        tr = resolve_trace(trace, self.cfg.max_rasters_per_frame)
         txf = self.tx.encode_frame(frame, frame_id)
-        placements: List[Tuple[Geometry, np.ndarray]] = []
+        units: List[Any] = []
         status_counts: Dict[str, int] = {}
         n_ok = n_rej = 0
         corrected = 0
@@ -470,34 +501,50 @@ class DigitalMethod(Method):
         truth0: Optional[ChannelTruth] = None
         resync = False
         sync_ok = True
+        n_delivered = 0
 
         for ri, raster in enumerate(txf.rasters):
-            rx_raster, truth = self.channel.apply(raster, rng)
-            if ri == 0:
-                first_rx, truth0 = rx_raster, truth
-            out = self.rx.receive_raster(rx_raster)
-            resync = resync or out.resynchronised
-            sync_ok = sync_ok and out.demod.sync_found
+            # One shared trace indexed by absolute raster time: every method that
+            # occupies this slot meets the same damage (defect F08).
+            rng = tr.rng(frame_id, ri)
+            deliveries = self.channel.apply_stream(raster, rng)
             ref = txf.symbols[ri]
             used = np.concatenate(self.tx.placement[: txf.occupied_slots[ri]]) \
                 if txf.occupied_slots[ri] else np.empty(0, dtype=np.int64)
-            if used.size:
-                sym_err += int((out.demod.symbols[used] != ref[used]).sum())
-                sym_den += int(used.size)
-            for o in out.outcomes:
-                status_counts[o.status.value] = status_counts.get(o.status.value, 0) + 1
-                corrected += o.payload_corrected + o.header_corrected
-                if o.ok and o.samples is not None and o.header is not None:
-                    placements.append((o.header.geometry, o.samples))
-                    n_ok += 1
-                elif o.status in (UnitStatus.VERIFIED, UnitStatus.FILLER,
-                                  UnitStatus.IDLE):
-                    pass
-                else:
-                    n_rej += 1
+            for rx_raster, truth in deliveries:
+                if first_rx is None and rx_raster is not None:
+                    first_rx, truth0 = rx_raster, truth
+                if truth0 is None:
+                    truth0 = truth
+                if rx_raster is None:           # dropped on the way: nothing arrives
+                    status_counts["raster_dropped"] = \
+                        status_counts.get("raster_dropped", 0) + 1
+                    sync_ok = False
+                    continue
+                n_delivered += 1
+                out = self.rx.receive_raster(rx_raster)
+                resync = resync or out.resynchronised
+                sync_ok = sync_ok and out.demod.sync_found
+                if used.size:
+                    sym_err += int((out.demod.symbols[used] != ref[used]).sum())
+                    sym_den += int(used.size)
+                for o in out.outcomes:
+                    status_counts[o.status.value] = status_counts.get(o.status.value, 0) + 1
+                    corrected += o.payload_corrected + o.header_corrected
+                    if o.ok and o.unit is not None:
+                        units.append(o.unit)
+                        n_ok += 1
+                    elif o.status in (UnitStatus.FILLER, UnitStatus.IDLE):
+                        pass
+                    else:
+                        n_rej += 1
 
         with self.timer(f"{self.name}.assembly"):
-            asm = self.assembler.assemble(placements)
+            # Assembly is keyed by the authenticated identity, so a late frame
+            # cannot be counted as the current one (defect F04).
+            current = [u for u in units if u.frame_id == frame_id]
+            n_ok = len(current)
+            asm = self.assembler.assemble_verified(current)
         q = ev.quality_pair(frame, asm.image, asm.available)
         met = FrameMetrics(
             frame_id=frame_id, method=self.name,
@@ -516,6 +563,9 @@ class DigitalMethod(Method):
             "authenticated": self.authenticated,
             "segments": txf.n_segments, "filler_units": txf.n_filler,
             "units_per_raster": self.tx.budget.units_per_raster,
+            "rasters_delivered": n_delivered,
+            "channel_trace": tr.trace_id,
+            "units_from_other_frames": len(units) - n_ok,
         })
         return MethodResult(self.name, frame_id, frame, first_tx,
                             first_rx if first_rx is not None else first_tx,
@@ -524,108 +574,105 @@ class DigitalMethod(Method):
 
 
 # ------------------------------------------------------- B3: whole-frame AEAD
-class WholeFrameAEADMethod(Method):
-    """B3: one AEAD unit per frame, fragmented over the same digital transport.
+@dataclass
+class _B3Fragment:
+    """One recovered fragment, described only by what the receiver could read."""
 
-    Authentication can only succeed after every fragment of the AEAD unit has
-    been recovered, so a single unrecoverable fragment costs the whole frame.
-    That is the property this baseline is meant to expose.
-    """
+    header: UnitHeader
+    payload: bytes
 
-    name = "B3"
-    authenticated = True
+
+class B3Transmitter:
+    """Codes a frame, seals it as ONE AEAD unit, fragments it over the transport."""
 
     def __init__(self, source_cfg: SourceCodingConfig, transport: TransportConfig,
-                 channel_cfg: RasterChannelConfig, master: MasterSecret,
-                 frame_h: int, frame_w: int,
+                 master: MasterSecret, frame_h: int, frame_w: int,
                  crypto_profile: Optional[CryptoProfile] = None,
-                 fill: str = FILL_INTERPOLATE, timer: Optional[StageTimer] = None) -> None:
+                 timer: Optional[StageTimer] = None) -> None:
+        from avsec import budget as budget_mod
+
         self.source_cfg = source_cfg
         self.cfg = transport
         self.crypto_profile = crypto_profile or CryptoProfile()
         self._master = master
+        self.frame_h, self.frame_w = frame_h, frame_w
+        self.timer = timer or StageTimer()
         self.session_id = new_session_id()
-        self.keys = derive_session_keys(master, self.session_id,
-                                        self.crypto_profile.direction,
-                                        self.crypto_profile.stream_id,
-                                        self.crypto_profile.algorithm)
-        self.sealer = Sealer(self.keys)
-        self.opener = Opener(self.keys, self.crypto_profile.replay_window)
+        self.session_epoch = 0
+        self._rebuild()
+
         self.modem = RasterModem(transport.modem)
         self.rs_payload = RSCodec(transport.fec_payload)
         self.rs_header = RSCodec(transport.fec_header)
-        self.channel = RasterChannel(channel_cfg)
-        self.assembler = FrameAssembler(frame_h, frame_w, fill)
-        self.frame_h, self.frame_w = frame_h, frame_w
-        self.timer = timer or StageTimer()
-
-        from avsec import budget as budget_mod
-
         self.budget = budget_mod.compute_budget(
             transport.modem, transport.fec_payload, transport.fec_header,
             source_cfg.max_unit_payload, transport.raster_rate_hz)
         self.interleaver = Interleaver(transport.interleaver, transport.modem.n_data_rows,
                                        transport.modem.n_data_cols)
+        from avsec.transmitter import _apply_placement_capacity
+
+        _apply_placement_capacity(self.budget, self.interleaver, 1)
         u = self.budget.units_per_raster
-        self.placement = self.interleaver.place([self.budget.unit_symbols] * u,
-                                                [0] * u, 1)
-        # a whole coded frame needs a codec that can code the frame in one piece
+        self.placement = self.interleaver.place([self.budget.unit_symbols] * u, [0] * u, 1)
         self.frame_coder = StripeCoder(SourceCodingConfig(
             stripe_height=frame_h, n_descriptions=1, codec=source_cfg.codec,
             quality=source_cfg.quality, max_unit_payload=1 << 24, max_segments=1))
 
-    def reset(self) -> None:
-        """Begin an independent sequence: new session, clean receiver state."""
-        self.assembler.reset()
-        self.session_id = new_session_id()
-        self.keys = derive_session_keys(self._master, self.session_id,
-                                        self.crypto_profile.direction,
-                                        self.crypto_profile.stream_id,
-                                        self.crypto_profile.algorithm)
+    def _rebuild(self) -> None:
+        self.keys = derive_session_keys(
+            self._master, self.session_id, self.crypto_profile.direction,
+            self.crypto_profile.stream_id, self.crypto_profile.algorithm,
+            self.session_epoch)
         self.sealer = Sealer(self.keys)
-        self.opener = Opener(self.keys, self.crypto_profile.replay_window)
 
-    def describe(self) -> Dict[str, Any]:
-        return {
-            "method": "B3", "family": "digital transport, whole-frame AEAD",
-            "authenticated": True,
-            "session_id": self.session_id.hex(),
-            "fragment_plain_bytes": self.source_cfg.max_unit_payload,
-            "budget": self.budget.to_dict(),
-            "notes": "one AEAD unit per frame; all fragments are required",
-        }
+    def new_session(self) -> None:
+        self.session_id = new_session_id()
+        self.session_epoch = 0
+        self._rebuild()
 
-    def _frame_header(self, frame_id: int, seq: int, n_frags: int, frag: int,
-                      total_len: int) -> UnitHeader:
+    def frame_header(self, frame_id: int, seq: int, n_frags: int, frag: int,
+                     coded_len: int) -> UnitHeader:
+        """Header of one fragment.  ``seg_id = 0`` is the canonical frame AAD."""
         return UnitHeader(
             profile_id=self.cfg.profile_id, session_id=self.session_id,
+            session_epoch=self.session_epoch,
             stream_id=self.crypto_profile.stream_id,
             codec_id=self.source_cfg.codec_id, frame_id=frame_id, stripe_id=0,
             desc_id=0, seg_id=min(frag, 255), n_segs=min(n_frags, 255), n_descs=1,
             unit_seq=seq,
             geometry=Geometry(0, 0, self.frame_w, self.frame_h, 1, 1, 0, 0),
-            payload_len=min(total_len, 0xFFFF), flags=0,
-        )
+            payload_len=min(coded_len, 0xFFFF), flags=0)
 
-    def process(self, frame: np.ndarray, frame_id: int,
-                rng: np.random.Generator) -> MethodResult:
+    def encode_frame(self, frame: np.ndarray, frame_id: int):
         t = self.timer
         with t("B3.source_coding"):
             segs = self.frame_coder.encode_frame(frame, frame_id)
             coded = b"".join(s.payload for s in segs)
+        if len(coded) > 0xFFFF:
+            raise CapacityExceeded(
+                f"B3 coded frame is {len(coded)} bytes; the header carries a "
+                "16-bit length, so the receiver could not recover it")
+
         frag_size = self.source_cfg.max_unit_payload
         n_frags = int(np.ceil((len(coded) + TAG_LEN) / frag_size))
-        seq = self.sealer.next_counter()
-        aad = self._frame_header(frame_id, seq, n_frags, 0, len(coded)).core_bytes()
+        # The counter is allocated by the sealer and the AAD is built inside the
+        # allocation, so no caller can pick or repeat a nonce (defect F03).
+        built: Dict[str, int] = {}
+
+        def _aad(counter: int) -> bytes:
+            built["seq"] = counter
+            return self.frame_header(frame_id, counter, n_frags, 0, len(coded)).core_bytes()
+
         with t("B3.crypto"):
-            _, ct = self.sealer.seal(coded, aad, counter=seq)
+            seq, ct = self.sealer.seal(coded, _aad)
         n_frags = int(np.ceil(len(ct) / frag_size))
+
         u = self.budget.units_per_raster
         n_rasters = int(np.ceil(n_frags / u))
         if n_rasters > self.cfg.max_rasters_per_frame:
             raise CapacityExceeded(
-                f"B3 needs {n_rasters} rasters for frame {frame_id}; "
-                f"profile allows {self.cfg.max_rasters_per_frame}")
+                f"B3 needs {n_rasters} rasters for frame {frame_id}; the profile "
+                f"allows {self.cfg.max_rasters_per_frame}")
 
         rasters: List[np.ndarray] = []
         ref_syms: List[np.ndarray] = []
@@ -639,7 +686,7 @@ class WholeFrameAEADMethod(Method):
                     break
                 chunk = ct[fi * frag_size : (fi + 1) * frag_size]
                 chunk = chunk + bytes(frag_size - len(chunk))
-                hdr = self._frame_header(frame_id, seq, n_frags, fi, len(coded))
+                hdr = self.frame_header(frame_id, seq, n_frags, fi, len(coded))
                 wire = self.rs_header.encode(hdr.to_bytes()) + self.rs_payload.encode(
                     chunk + bytes(TAG_LEN))
                 s = bytes_to_symbols(wire, self.cfg.modem.bits_per_symbol)
@@ -650,97 +697,302 @@ class WholeFrameAEADMethod(Method):
             rasters.append(self.modem.modulate(sym))
             ref_syms.append(sym)
             occupied.append(n_occ)
+        return rasters, ref_syms, occupied, len(coded), n_frags
 
-        # ---- channel + receive
-        frags: Dict[int, bytes] = {}
-        status_counts: Dict[str, int] = {}
+
+class B3Receiver:
+    """Recovers the AEAD unit from the signal alone.
+
+    Defect F05: this side never sees the transmitter's counter, associated data,
+    ciphertext length or slot occupancy.  Everything is read out of the received
+    headers, bounded before use, and checked for mutual consistency; the AEAD tag
+    over the canonical frame header is what finally decides.
+    """
+
+    def __init__(self, source_cfg: SourceCodingConfig, transport: TransportConfig,
+                 master: MasterSecret, frame_h: int, frame_w: int,
+                 crypto_profile: Optional[CryptoProfile] = None,
+                 timer: Optional[StageTimer] = None, max_sessions: int = 4) -> None:
+        from avsec import budget as budget_mod
+
+        self.source_cfg = source_cfg
+        self.cfg = transport
+        self.crypto_profile = crypto_profile or CryptoProfile()
+        self.master = master
+        self.frame_h, self.frame_w = frame_h, frame_w
+        self.timer = timer or StageTimer()
+        self.max_sessions = max_sessions
+
+        self.modem = RasterModem(transport.modem)
+        self.rs_payload = RSCodec(transport.fec_payload)
+        self.rs_header = RSCodec(transport.fec_header)
+        self.budget = budget_mod.compute_budget(
+            transport.modem, transport.fec_payload, transport.fec_header,
+            source_cfg.max_unit_payload, transport.raster_rate_hz)
+        self.interleaver = Interleaver(transport.interleaver, transport.modem.n_data_rows,
+                                       transport.modem.n_data_cols)
+        from avsec.transmitter import _apply_placement_capacity
+
+        _apply_placement_capacity(self.budget, self.interleaver, 1)
+        u = self.budget.units_per_raster
+        self.placement = self.interleaver.place([self.budget.unit_symbols] * u, [0] * u, 1)
+        self.frame_coder = StripeCoder(SourceCodingConfig(
+            stripe_height=frame_h, n_descriptions=1, codec=source_cfg.codec,
+            quality=source_cfg.quality, max_unit_payload=1 << 24, max_segments=1))
+        self._openers: Dict[Tuple[bytes, int, int], Opener] = {}
+        self._fragments: Dict[Tuple, Dict[int, bytes]] = {}
+        self.status_counts: Dict[str, int] = {}
+
+    def _bump(self, k: str, n: int = 1) -> None:
+        self.status_counts[k] = self.status_counts.get(k, 0) + n
+
+    def reset(self) -> None:
+        self._fragments.clear()
+
+    def _opener(self, ctx: Tuple[bytes, int, int]) -> Optional[Opener]:
+        op = self._openers.get(ctx)
+        if op is not None:
+            return op
+        try:
+            keys = derive_session_keys(
+                self.master, ctx[0], self.crypto_profile.direction, ctx[2],
+                self.crypto_profile.algorithm, ctx[1])
+        except Exception:
+            return None
+        return Opener(keys, self.crypto_profile.replay_window)   # not cached yet
+
+    def _commit(self, ctx: Tuple[bytes, int, int], opener: Opener) -> None:
+        if ctx not in self._openers and len(self._openers) >= self.max_sessions:
+            self._openers.pop(next(iter(self._openers)))
+        self._openers[ctx] = opener
+
+    def receive_raster(self, raster: np.ndarray) -> List[_B3Fragment]:
+        """Recover whatever fragments this raster carried.  No transmitter input."""
+        t = self.timer
+        with t("B3.demodulation"):
+            demod = self.modem.demodulate(raster)
+        if not demod.sync_found:
+            self._bump("no_sync")
+            return []
+
+        frag_size = self.source_cfg.max_unit_payload
+        hdr_enc = self.cfg.fec_header.encoded_len(HEADER_LEN)
+        pay_len = frag_size + TAG_LEN
+        pay_enc = self.cfg.fec_payload.encoded_len(pay_len)
+        sym_per_byte = 8 // self.cfg.modem.bits_per_symbol
+
+        out: List[_B3Fragment] = []
+        # every slot of the public schedule is examined; the receiver does not
+        # know which of them the transmitter actually filled
+        for slot, cells in enumerate(self.placement):
+            wire = symbols_to_bytes(demod.symbols[cells], self.cfg.modem.bits_per_symbol)
+            er = demod.erasures[cells]
+            byte_er = np.flatnonzero(
+                er[: (er.size // sym_per_byte) * sym_per_byte]
+                .reshape(-1, sym_per_byte).any(axis=1))
+            hdr_bytes, _ = self.rs_header.try_decode(
+                wire[:hdr_enc], HEADER_LEN, [int(b) for b in byte_er if b < hdr_enc])
+            if hdr_bytes is None:
+                self._bump("header_unrecoverable")
+                continue
+            try:
+                hdr = parse_header(hdr_bytes, accepted_profiles=(self.cfg.profile_id,),
+                                   max_payload_len=0xFFFF)
+            except FramingError:
+                self._bump("header_invalid")
+                continue
+            # bound every field that will drive an allocation, before using it
+            if hdr.n_segs < 1 or hdr.seg_id >= hdr.n_segs:
+                self._bump("header_invalid")
+                continue
+            if hdr.payload_len + TAG_LEN > hdr.n_segs * frag_size:
+                self._bump("header_invalid")
+                continue
+            if hdr.geometry.width != self.frame_w or hdr.geometry.height != self.frame_h:
+                self._bump("header_invalid")
+                continue
+            pay, _ = self.rs_payload.try_decode(
+                wire[hdr_enc : hdr_enc + pay_enc], pay_len,
+                [int(b) - hdr_enc for b in byte_er if hdr_enc <= b < hdr_enc + pay_enc])
+            if pay is None:
+                self._bump("payload_unrecoverable")
+                continue
+            self._bump("fragment_recovered")
+            out.append(_B3Fragment(hdr, pay[:frag_size]))
+        return out
+
+    def offer(self, fragments: Sequence[_B3Fragment]
+              ) -> List[Tuple[UnitHeader, np.ndarray]]:
+        """Collect fragments and try to open any AEAD unit that is now complete."""
+        frames: List[Tuple[UnitHeader, np.ndarray]] = []
+        for f in fragments:
+            h = f.header
+            # the group key uses only authenticated-to-be fields; if any of them
+            # was tampered with, the group simply will not verify
+            key = (h.session_id, h.session_epoch, h.stream_id, h.frame_id,
+                   h.n_segs, h.payload_len, h.unit_seq)
+            self._fragments.setdefault(key, {})[h.seg_id] = f.payload
+            if len(self._fragments) > 8:                      # bounded memory
+                self._fragments.pop(next(iter(self._fragments)))
+            group = self._fragments.get(key)
+            if group is None or len(group) < h.n_segs:
+                continue
+            got = self._try_open(h, group)
+            if got is not None:
+                frames.append(got)
+            self._fragments.pop(key, None)
+        return frames
+
+    def _try_open(self, h: UnitHeader, group: Dict[int, bytes]
+                  ) -> Optional[Tuple[UnitHeader, np.ndarray]]:
+        blob = b"".join(group[i] for i in range(h.n_segs))
+        ct_len = h.payload_len + TAG_LEN            # derived from the header, not the TX
+        if len(blob) < ct_len:
+            self._bump("frame_incomplete")
+            return None
+        ct = blob[:ct_len]
+        ctx = (h.session_id, h.session_epoch, h.stream_id)
+        opener = self._opener(ctx)
+        if opener is None:
+            self._bump("session_limit")
+            return None
+        # canonical frame AAD: the same header with seg_id = 0
+        aad = replace(h, seg_id=0).core_bytes()
+        try:
+            with self.timer("B3.aead"):
+                plain = opener.open(h.unit_seq, ct, aad)
+        except ReplayDetected:
+            self._bump("replay")
+            return None
+        except AuthenticationFailed:
+            self._bump("auth_failed")
+            return None
+        self._commit(ctx, opener)
+        try:
+            samples = self.frame_coder.decode_segment(plain, h.geometry)
+        except Exception:
+            self._bump("decode_failed")
+            return None
+        self._bump("frame_verified")
+        return h, samples
+
+
+class WholeFrameAEADMethod(Method):
+    """B3: one AEAD unit per frame, fragmented over the same digital transport.
+
+    Authentication can only succeed after every fragment of the AEAD unit has
+    been recovered, so a single unrecoverable fragment costs the whole frame.
+    Transmitter and receiver are separate objects and share nothing but the
+    signal, the public profile and the legitimate key material (defect F05).
+    """
+
+    name = "B3"
+    authenticated = True
+
+    def __init__(self, source_cfg: SourceCodingConfig, transport: TransportConfig,
+                 channel_cfg: RasterChannelConfig, master: MasterSecret,
+                 frame_h: int, frame_w: int,
+                 crypto_profile: Optional[CryptoProfile] = None,
+                 fill: str = FILL_INTERPOLATE,
+                 timer: Optional[StageTimer] = None) -> None:
+        self.source_cfg = source_cfg
+        self.cfg = transport
+        self.timer = timer or StageTimer()
+        self.tx = B3Transmitter(source_cfg, transport, master, frame_h, frame_w,
+                                crypto_profile, self.timer)
+        self.rx = B3Receiver(source_cfg, transport, master, frame_h, frame_w,
+                             crypto_profile, self.timer)
+        self.channel = RasterChannel(channel_cfg)
+        self.assembler = FrameAssembler(frame_h, frame_w, fill)
+        self.frame_h, self.frame_w = frame_h, frame_w
+        self.budget = self.tx.budget
+
+    def reset(self) -> None:
+        self.assembler.reset()
+        self.tx.new_session()
+        self.rx.reset()
+        self.channel.reset_stream()
+
+    def describe(self) -> Dict[str, Any]:
+        return {
+            "method": "B3", "family": "digital transport, whole-frame AEAD",
+            "authenticated": True,
+            "session_id": self.tx.session_id.hex(),
+            "session_epoch": self.tx.session_epoch,
+            "fragment_plain_bytes": self.source_cfg.max_unit_payload,
+            "budget": self.tx.budget.to_dict(),
+            "notes": "one AEAD unit per frame; all fragments are required; the "
+                     "receiver recovers length, counter and AAD from the signal",
+        }
+
+    def process(self, frame: np.ndarray, frame_id: int, trace: Any) -> MethodResult:
+        tr = resolve_trace(trace, self.cfg.max_rasters_per_frame)
+        rasters, ref_syms, occupied, coded_len, n_frags = self.tx.encode_frame(
+            frame, frame_id)
+
+        before = dict(self.rx.status_counts)
         sym_err = sym_den = 0
         first_rx = None
         truth0 = None
         sync_ok = True
+        verified: List[Tuple[UnitHeader, np.ndarray]] = []
+        n_recovered = 0
+
         for ri, raster in enumerate(rasters):
-            rx_raster, truth = self.channel.apply(raster, rng)
-            if ri == 0:
-                first_rx, truth0 = rx_raster, truth
-            demod = self.modem.demodulate(rx_raster)
-            sync_ok = sync_ok and demod.sync_found
-            if not demod.sync_found:
-                status_counts["no_sync"] = status_counts.get("no_sync", 0) + occupied[ri]
-                continue
-            used = np.concatenate(self.placement[: occupied[ri]]) if occupied[ri] else \
-                np.empty(0, dtype=np.int64)
-            if used.size:
-                sym_err += int((demod.symbols[used] != ref_syms[ri][used]).sum())
-                sym_den += int(used.size)
-            hdr_enc = self.cfg.fec_header.encoded_len(HEADER_LEN)
-            pay_len = frag_size + TAG_LEN
-            pay_enc = self.cfg.fec_payload.encoded_len(pay_len)
-            sym_per_byte = 8 // self.cfg.modem.bits_per_symbol
-            for slot in range(occupied[ri]):
-                cells = self.placement[slot]
-                wire = symbols_to_bytes(demod.symbols[cells],
-                                        self.cfg.modem.bits_per_symbol)
-                er = demod.erasures[cells]
-                byte_er = np.flatnonzero(
-                    er[: (er.size // sym_per_byte) * sym_per_byte]
-                    .reshape(-1, sym_per_byte).any(axis=1))
-                hdr_bytes, _ = self.rs_header.try_decode(
-                    wire[:hdr_enc], HEADER_LEN, [int(b) for b in byte_er if b < hdr_enc])
-                if hdr_bytes is None:
-                    status_counts["header_unrecoverable"] = \
-                        status_counts.get("header_unrecoverable", 0) + 1
+            for rx_raster, truth in self.channel.apply_stream(raster, tr.rng(frame_id, ri)):
+                if truth0 is None:
+                    truth0 = truth
+                if rx_raster is None:
+                    sync_ok = False
                     continue
-                try:
-                    hdr = parse_header(hdr_bytes, accepted_profiles=(self.cfg.profile_id,),
-                                       max_payload_len=0xFFFF)
-                except FramingError:
-                    status_counts["header_invalid"] = status_counts.get("header_invalid", 0) + 1
-                    continue
-                pay, _ = self.rs_payload.try_decode(
-                    wire[hdr_enc : hdr_enc + pay_enc], pay_len,
-                    [int(b) - hdr_enc for b in byte_er if hdr_enc <= b < hdr_enc + pay_enc])
-                if pay is None:
-                    status_counts["payload_unrecoverable"] = \
-                        status_counts.get("payload_unrecoverable", 0) + 1
-                    continue
-                frags[hdr.seg_id] = pay[:frag_size]
-                status_counts["fragment_ok"] = status_counts.get("fragment_ok", 0) + 1
+                if first_rx is None:
+                    first_rx = rx_raster
+                frags = self.rx.receive_raster(rx_raster)
+                n_recovered += len(frags)
+                verified.extend(self.rx.offer(frags))
+                used = np.concatenate(self.tx.placement[: occupied[ri]]) \
+                    if occupied[ri] else np.empty(0, dtype=np.int64)
+                if used.size:
+                    d = self.rx.modem.demodulate(rx_raster)
+                    sync_ok = sync_ok and d.sync_found
+                    sym_err += int((d.symbols[used] != ref_syms[ri][used]).sum())
+                    sym_den += int(used.size)
 
-        placements: List[Tuple[Geometry, np.ndarray]] = []
+        units: List[VerifiedUnit] = []
         note = ""
-        if len(frags) == n_frags:
-            blob = b"".join(frags[i] for i in range(n_frags))[: len(ct)]
-            try:
-                with t("B3.aead"):
-                    plain = self.opener.open(seq, blob, aad)
-                samples = self.frame_coder.decode_segment(
-                    plain, Geometry(0, 0, self.frame_w, self.frame_h, 1, 1, 0, 0))
-                placements.append(
-                    (Geometry(0, 0, self.frame_w, self.frame_h, 1, 1, 0, 0), samples))
-                status_counts["frame_verified"] = 1
-            except (AuthenticationFailed, ReplayDetected) as exc:
-                status_counts["auth_failed"] = 1
-                note = f"whole-frame AEAD rejected: {exc}"
-        else:
-            status_counts["frame_incomplete"] = 1
-            note = f"only {len(frags)}/{n_frags} fragments recovered - frame not authenticated"
+        for h, samples in verified:
+            if h.frame_id != frame_id:
+                continue
+            units.append(VerifiedUnit(
+                session_id=h.session_id, session_epoch=h.session_epoch,
+                stream_id=h.stream_id, frame_id=h.frame_id, stripe_id=0,
+                desc_id=0, seg_id=0, geometry=h.geometry, samples=samples,
+                received_at=float(frame_id)))
+        if not units:
+            note = (f"the AEAD unit of frame {frame_id} did not verify: "
+                    f"{n_recovered}/{n_frags} fragments recovered")
 
-        with t("B3.assembly"):
-            asm = self.assembler.assemble(placements)
+        with self.timer("B3.assembly"):
+            asm = self.assembler.assemble_verified(units)
         q = ev.quality_pair(frame, asm.image, asm.available)
+        status_counts = {k: self.rx.status_counts[k] - before.get(k, 0)
+                         for k in self.rx.status_counts
+                         if self.rx.status_counts[k] - before.get(k, 0) > 0}
         met = FrameMetrics(
             frame_id=frame_id, method="B3",
             stale_fraction=float(asm.from_previous.mean()),
             estimated_fraction=float(1.0 - asm.available.mean()),
-            units_sent=n_frags, units_verified=len(frags),
-            units_rejected=n_frags - len(frags), status_counts=status_counts,
+            units_sent=n_frags, units_verified=n_recovered,
+            units_rejected=max(0, n_frags - n_recovered), status_counts=status_counts,
             symbol_errors_pre_fec=(sym_err / sym_den) if sym_den else float("nan"),
             symbol_error_denominator=sym_den,
-            payload_bytes=len(coded), wire_bytes=n_frags * self.budget.unit_wire_bytes,
-            rasters=len(rasters), sync_found=sync_ok, **q,
-        )
+            payload_bytes=coded_len,
+            wire_bytes=n_frags * self.tx.budget.unit_wire_bytes,
+            rasters=len(rasters), sync_found=sync_ok, **q)
         met.extra.update({"authenticated": True, "fragments": n_frags,
-                          "fragments_recovered": len(frags)})
+                          "fragments_recovered": n_recovered,
+                          "channel_trace": tr.trace_id,
+                          "frame_verified": bool(units)})
         return MethodResult("B3", frame_id, frame, rasters[0],
                             first_rx if first_rx is not None else rasters[0],
                             asm.image, asm.available, asm.from_previous, met, truth0, note)
@@ -750,5 +1002,5 @@ __all__ = [
     "MethodResult", "Method", "AnalogCarrier", "AnalogPictureMethod",
     "CryptoPermutationScrambler", "crypto_permutation",
     "make_b0_analog", "make_b1_lfsr", "make_b2_cryptoperm",
-    "DigitalMethod", "WholeFrameAEADMethod",
+    "DigitalMethod", "WholeFrameAEADMethod", "B3Transmitter", "B3Receiver",
 ]
