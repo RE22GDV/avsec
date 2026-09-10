@@ -1,0 +1,14 @@
+{
+  "source_table": "dynamics.csv",
+  "figure": "G25",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Динаміка якості",
+  "title_en": "Quality dynamics",
+  "experiment": "E07",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

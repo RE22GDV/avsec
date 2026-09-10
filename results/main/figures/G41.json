@@ -1,0 +1,14 @@
+{
+  "source_table": "budgets.json",
+  "figure": "G41",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Пам'ять",
+  "title_en": "Memory",
+  "experiment": "E09",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

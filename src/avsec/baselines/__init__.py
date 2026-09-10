@@ -45,6 +45,8 @@ from avsec.channel import (
 )
 from avsec.crypto import (
     TAG_LEN,
+    SecureSessionIds,
+    SessionIdSource,
     AuthenticationFailed,
     CryptoProfile,
     MasterSecret,
@@ -433,8 +435,10 @@ def make_b1_lfsr(transport: TransportConfig, channel_cfg: RasterChannelConfig,
 def make_b2_cryptoperm(transport: TransportConfig, channel_cfg: RasterChannelConfig,
                        frame_h: int, frame_w: int, grid_rows: int, grid_cols: int,
                        master: MasterSecret, session_id: Optional[bytes] = None,
-                       timer=None) -> AnalogPictureMethod:
-    sid = session_id or new_session_id()
+                       timer=None,
+                       session_ids: Optional[SessionIdSource] = None
+                       ) -> AnalogPictureMethod:
+    sid = session_id or (session_ids or SecureSessionIds()).next("B2")
     keys = derive_session_keys(master, sid)
     sc = CryptoPermutationScrambler(grid_rows, grid_cols, keys.key, sid, per_frame=True)
     return AnalogPictureMethod(
@@ -447,6 +451,104 @@ def make_b2_cryptoperm(transport: TransportConfig, channel_cfg: RasterChannelCon
     )
 
 
+class AnalogRepetitionMethod(AnalogPictureMethod):
+    """B0a-R: the analog picture repeated over the slots the budget allows.
+
+    Defect F15 asks for a *strong* analog control.  Sending one raster and
+    leaving the other two slots idle wastes budget that every digital method
+    spends, so this control repeats the same picture in all available slots and
+    combines the received copies at the receiver.  The combining rule
+    (``mean`` or ``median``) is a profile parameter chosen on the validation
+    split, and the repetition schedule is public and agreed in advance.
+    """
+
+    def __init__(self, name: str, transport: TransportConfig,
+                 channel_cfg: RasterChannelConfig, frame_h: int, frame_w: int,
+                 repetitions: int = 3, combine: str = "median",
+                 transform=None, inverse=None,
+                 timer: Optional[StageTimer] = None, notes: str = "") -> None:
+        super().__init__(name, transport, channel_cfg, frame_h, frame_w,
+                         transform=transform, inverse=inverse, authenticated=False,
+                         timer=timer, notes=notes, rasters_per_frame=repetitions)
+        if combine not in ("mean", "median"):
+            raise ValueError("combine must be 'mean' or 'median'")
+        self.repetitions = max(1, int(repetitions))
+        self.combine = combine
+
+    def describe(self) -> Dict[str, Any]:
+        d = super().describe()
+        d.update({"family": "analog picture transport with repetition",
+                  "repetitions": self.repetitions, "combine": self.combine})
+        return d
+
+    def process(self, frame: np.ndarray, frame_id: int, trace: Any) -> MethodResult:
+        t = self.timer
+        tr = resolve_trace(trace, self.repetitions)
+        with t(f"{self.name}.transform"):
+            payload = self._transform(frame, frame_id) if self._transform else frame
+        with t(f"{self.name}.modulation"):
+            tx = self.carrier.transmit(payload)
+
+        copies: List[np.ndarray] = []
+        first_rx = None
+        truth0 = None
+        scores: List[float] = []
+        for slot in range(self.repetitions):
+            for rx_raster, tru in self.channel.apply_stream(tx, tr.rng(frame_id, slot)):
+                if truth0 is None:
+                    truth0 = tru
+                if rx_raster is None:
+                    continue
+                if first_rx is None:
+                    first_rx = rx_raster
+                with t(f"{self.name}.demodulation"):
+                    got, info = self.carrier.receive(rx_raster, (self.frame_h, self.frame_w))
+                copies.append(got.astype(np.float64))
+                scores.append(float(info["sync_score"]))
+
+        if not copies:
+            blank = np.full_like(frame, 128)
+            avail = np.zeros_like(frame, dtype=bool)
+            q = ev.quality_pair(frame, blank, avail)
+            met = FrameMetrics(frame_id=frame_id, method=self.name,
+                               rasters=self.repetitions, sync_found=False, **q)
+            met.extra.update({"authenticated": False, "channel_trace": tr.trace_id,
+                              "repetitions_received": 0})
+            return MethodResult(self.name, frame_id, frame, tx, tx, blank, avail,
+                                np.zeros_like(avail), met, truth0, self.notes)
+
+        stack = np.stack(copies)
+        combined = np.median(stack, axis=0) if self.combine == "median" else stack.mean(axis=0)
+        with t(f"{self.name}.inverse"):
+            got = np.clip(np.round(combined), 0, 255).astype(np.uint8)
+            recon = self._inverse(got, frame_id) if self._inverse else got
+        recon = recon[: self.frame_h, : self.frame_w]
+        avail = np.ones_like(frame, dtype=bool)
+        q = ev.quality_pair(frame, recon, avail)
+        met = FrameMetrics(frame_id=frame_id, method=self.name,
+                           rasters=self.repetitions,
+                           sync_found=bool(scores and max(scores) > 0.3), **q)
+        met.extra.update({
+            "authenticated": False, "channel_trace": tr.trace_id,
+            "repetitions_sent": self.repetitions,
+            "repetitions_received": len(copies),
+            "combine": self.combine,
+            "coverage_meaning": "picture displayed, not verified",
+        })
+        return MethodResult(self.name, frame_id, frame, tx,
+                            first_rx if first_rx is not None else tx,
+                            recon, avail, np.zeros_like(avail), met, truth0, self.notes)
+
+
+def make_b0a_repetition(transport: TransportConfig, channel_cfg: RasterChannelConfig,
+                        frame_h: int, frame_w: int, repetitions: int = 3,
+                        combine: str = "median", timer=None) -> AnalogRepetitionMethod:
+    return AnalogRepetitionMethod(
+        "B0a-R", transport, channel_cfg, frame_h, frame_w, repetitions, combine,
+        notes=("unprotected analog picture repeated over the slots the shared "
+               "budget allows, combined at the receiver; strong analog control"))
+
+
 # ------------------------------------------------------------ digital methods
 class DigitalMethod(Method):
     """B0d / B4 / P: independently protected units over the digital transport."""
@@ -456,13 +558,16 @@ class DigitalMethod(Method):
                  master: MasterSecret, frame_h: int, frame_w: int,
                  crypto_profile: Optional[CryptoProfile] = None, secure: bool = True,
                  fill: str = FILL_INTERPOLATE, max_frame_age: int = 2,
-                 timer: Optional[StageTimer] = None, notes: str = "") -> None:
+                 timer: Optional[StageTimer] = None, notes: str = "",
+                 session_ids: Optional[SessionIdSource] = None) -> None:
         self.name = name
         self.authenticated = secure
+        self.session_ids = session_ids or SecureSessionIds()
         self.source_cfg = source_cfg
         self.cfg = transport
         self.timer = timer or StageTimer()
         self.tx = Transmitter(source_cfg, transport, master, crypto_profile,
+                              session_id=self.session_ids.next(name),
                               frame_width=frame_w, frame_height=frame_h,
                               timer=self.timer, secure=secure)
         self.rx = Receiver(source_cfg, transport, master, crypto_profile,
@@ -476,7 +581,7 @@ class DigitalMethod(Method):
     def reset(self) -> None:
         """Begin an independent sequence: new session, clean sync and channel."""
         self.assembler.reset()
-        self.tx.new_session()
+        self.tx.new_session(self.session_ids.next(self.name))
         self.rx.reset_state()
         self.channel.reset_stream()
 
@@ -588,7 +693,8 @@ class B3Transmitter:
     def __init__(self, source_cfg: SourceCodingConfig, transport: TransportConfig,
                  master: MasterSecret, frame_h: int, frame_w: int,
                  crypto_profile: Optional[CryptoProfile] = None,
-                 timer: Optional[StageTimer] = None) -> None:
+                 timer: Optional[StageTimer] = None,
+                 session_ids: Optional[SessionIdSource] = None) -> None:
         from avsec import budget as budget_mod
 
         self.source_cfg = source_cfg
@@ -597,7 +703,8 @@ class B3Transmitter:
         self._master = master
         self.frame_h, self.frame_w = frame_h, frame_w
         self.timer = timer or StageTimer()
-        self.session_id = new_session_id()
+        self.session_ids = session_ids or SecureSessionIds()
+        self.session_id = self.session_ids.next("B3")
         self.session_epoch = 0
         self._rebuild()
 
@@ -626,7 +733,7 @@ class B3Transmitter:
         self.sealer = Sealer(self.keys)
 
     def new_session(self) -> None:
-        self.session_id = new_session_id()
+        self.session_id = self.session_ids.next("B3")
         self.session_epoch = 0
         self._rebuild()
 
@@ -894,12 +1001,14 @@ class WholeFrameAEADMethod(Method):
                  frame_h: int, frame_w: int,
                  crypto_profile: Optional[CryptoProfile] = None,
                  fill: str = FILL_INTERPOLATE,
-                 timer: Optional[StageTimer] = None) -> None:
+                 timer: Optional[StageTimer] = None,
+                 session_ids: Optional[SessionIdSource] = None) -> None:
         self.source_cfg = source_cfg
         self.cfg = transport
         self.timer = timer or StageTimer()
+        self.session_ids = session_ids or SecureSessionIds()
         self.tx = B3Transmitter(source_cfg, transport, master, frame_h, frame_w,
-                                crypto_profile, self.timer)
+                                crypto_profile, self.timer, self.session_ids)
         self.rx = B3Receiver(source_cfg, transport, master, frame_h, frame_w,
                              crypto_profile, self.timer)
         self.channel = RasterChannel(channel_cfg)
@@ -1002,5 +1111,6 @@ __all__ = [
     "MethodResult", "Method", "AnalogCarrier", "AnalogPictureMethod",
     "CryptoPermutationScrambler", "crypto_permutation",
     "make_b0_analog", "make_b1_lfsr", "make_b2_cryptoperm",
+    "AnalogRepetitionMethod", "make_b0a_repetition",
     "DigitalMethod", "WholeFrameAEADMethod", "B3Transmitter", "B3Receiver",
 ]

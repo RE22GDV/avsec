@@ -1,0 +1,14 @@
+{
+  "source_table": "attacks.json",
+  "figure": "G36",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Відомі або обрані кадри",
+  "title_en": "Known or chosen frames",
+  "experiment": "E08",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

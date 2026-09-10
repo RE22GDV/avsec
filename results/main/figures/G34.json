@@ -1,0 +1,14 @@
+{
+  "source_table": "ablations.csv",
+  "figure": "G34",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Політика відновлення пропусків",
+  "title_en": "Gap-fill policy",
+  "experiment": "E06",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

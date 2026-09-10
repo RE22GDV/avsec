@@ -1,0 +1,17 @@
+{
+  "grid": "noise_x_burst",
+  "x": "noise_sigma",
+  "y": "burst_len_lines",
+  "source_table": "interaction.csv",
+  "figure": "G23",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Спільний вплив шуму й burst",
+  "title_en": "Noise and burst interaction",
+  "experiment": "E04",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

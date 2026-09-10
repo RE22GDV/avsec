@@ -1,0 +1,15 @@
+{
+  "source_table": "codewords.csv",
+  "bound_holds": true,
+  "figure": "G29",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Перевірка аналітичної межі",
+  "title_en": "Analytic bound check",
+  "experiment": "E05",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

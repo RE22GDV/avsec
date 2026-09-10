@@ -13,7 +13,7 @@ interval, so the two are never added together or interchanged.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -175,6 +175,125 @@ def compute_latency(
     )
 
 
+def raster_overhead(modem: ModemConfig) -> Dict[str, object]:
+    """Where every pixel of a raster goes.
+
+    Defect F16 asks the budget diagram to account for *everything*: blanking,
+    synchronisation rows, pilot columns, the symbol grid that is left unused
+    because the raster is not an exact multiple of a cell, and the filler that
+    pads the last partially used unit slot.  Only what remains is payload.
+    """
+    total_px = modem.raster_width * modem.raster_height
+    active_px = ((modem.active_x1 - modem.active_x0)
+                 * (modem.active_y1 - modem.active_y0))
+    cell_px = modem.symbol_width * modem.symbol_height
+    grid_px = modem.n_rows * modem.n_cols * cell_px
+    sync_px = modem.sync_rows * modem.n_cols * cell_px
+    pilot_px = 2 * modem.pilot_cols * modem.n_data_rows * cell_px
+    return {
+        "raster_pixels": total_px,
+        "blanking_pixels": total_px - active_px,
+        "active_pixels": active_px,
+        "grid_remainder_pixels": active_px - grid_px,
+        "sync_pixels": sync_px,
+        "pilot_pixels": pilot_px,
+        "data_cell_pixels": grid_px - sync_px - pilot_px,
+        "data_symbols": modem.capacity_symbols,
+        "fractions": {
+            "blanking": round((total_px - active_px) / total_px, 4),
+            "grid_remainder": round((active_px - grid_px) / total_px, 4),
+            "sync": round(sync_px / total_px, 4),
+            "pilots": round(pilot_px / total_px, 4),
+            "data_cells": round((grid_px - sync_px - pilot_px) / total_px, 4),
+        },
+    }
+
+
+def budget_waterfall(budget: "TransportBudget", modem: ModemConfig,
+                     units_placed: Optional[int] = None) -> Dict[str, object]:
+    """Symbol-level waterfall from raster capacity down to delivered payload.
+
+    ``units_placed`` is the number of units the interleaver can actually place,
+    which may be below ``units_per_raster`` - the difference is real lost
+    capacity and appears here as ``placement_loss_symbols`` instead of being
+    quietly dropped.
+    """
+    placed = budget.units_per_raster if units_placed is None else int(units_placed)
+    placed = max(0, min(placed, budget.units_per_raster))
+    cap = budget.raster_capacity_symbols
+    bps = max(budget.bits_per_symbol, 1)
+    used = placed * budget.unit_symbols
+    sym_per_byte = 8.0 / bps
+    hdr_sym = placed * budget.header_bytes * sym_per_byte
+    hpar_sym = placed * (budget.header_encoded_bytes - budget.header_bytes) * sym_per_byte
+    tag_sym = placed * budget.tag_bytes * sym_per_byte
+    ppar_sym = placed * (budget.payload_encoded_bytes
+                         - budget.unit_plain_bytes - budget.tag_bytes) * sym_per_byte
+    pay_sym = placed * budget.unit_plain_bytes * sym_per_byte
+    pack_sym = used - (hdr_sym + hpar_sym + tag_sym + ppar_sym + pay_sym)
+    steps = [
+        ("raster capacity", cap),
+        ("placement loss", -((budget.units_per_raster - placed) * budget.unit_symbols)),
+        ("unused tail (filler)", -(cap - budget.units_per_raster * budget.unit_symbols)),
+        ("header", -hdr_sym),
+        ("header parity", -hpar_sym),
+        ("payload parity", -ppar_sym),
+        ("AEAD tag", -tag_sym),
+        ("byte->symbol padding", -pack_sym),
+    ]
+    return {
+        "steps": [{"label": k, "symbols": round(float(v), 2)} for k, v in steps],
+        "payload_symbols": round(float(pay_sym), 2),
+        "units_placed": placed,
+        "units_per_raster_nominal": budget.units_per_raster,
+        "payload_fraction_of_capacity": round(float(pay_sym) / cap, 4) if cap else 0.0,
+        "raster_overhead": raster_overhead(modem),
+        "note": "symbols, not pixels; the raster_overhead block accounts for the "
+                "pixels that never reach the symbol grid at all",
+    }
+
+
+def timeline_latency(modem: ModemConfig, interleaver_rows: int,
+                     rasters_per_frame: int, source_fps: float,
+                     stripe_height: int, source_height: int,
+                     units_per_frame: int, raster_rate_hz: float = 25.0,
+                     n_frames: int = 8, deadline_s: Optional[float] = None
+                     ) -> Dict[str, object]:
+    """Latency from **event timestamps**, not from a sum of stage durations.
+
+    Defect F16: adding stripe accumulation, interleaver accumulation and
+    serialisation double-counts the intervals during which those stages overlap.
+    Here each frame is placed on a virtual clock and its latency is the
+    difference ``display - capture``.  The old additive figure is returned next
+    to it as ``additive_upper_bound`` so the two can be compared honestly.
+    """
+    from avsec.timeline import Timeline, TimingProfile
+
+    stripes = max(1, int(np.ceil(source_height / max(stripe_height, 1))))
+    profile = TimingProfile(
+        raster_rate_hz=raster_rate_hz, total_lines=modem.raster_height,
+        active_lines=modem.active_y1 - modem.active_y0,
+        rasters_per_frame=rasters_per_frame, source_fps=source_fps,
+        symbol_height=modem.symbol_height, label="level-A raster")
+    tl = Timeline(profile)
+    for f in range(int(n_frames)):
+        tl.schedule_frame(f, stripes=stripes, units=max(1, int(units_per_frame)),
+                          rasters=rasters_per_frame,
+                          interleaver_rows=interleaver_rows,
+                          verified_units=range(max(1, int(units_per_frame))),
+                          display_deadline_s=deadline_s)
+    additive = compute_latency(modem, interleaver_rows, rasters_per_frame,
+                               1.0 / max(source_fps, 1e-9), stripe_height,
+                               source_height, raster_rate_hz)
+    summary = tl.summary()
+    summary["additive_upper_bound"] = additive.to_dict()
+    summary["overlap_saving_s"] = round(
+        additive.total_s - summary["latency_s"]["mean"], 6)
+    summary["stripes_per_frame"] = stripes
+    summary["events"] = tl.to_rows()
+    return summary
+
+
 def raw_video_bitrate(width: int, height: int, fps: float, bits: int = 8) -> float:
     """Sanity check used in the documentation: uncompressed grayscale bitrate."""
     return width * height * fps * bits
@@ -197,5 +316,6 @@ def capacity_check(budget: TransportBudget, units_needed_per_frame: int,
 
 __all__ = [
     "TransportBudget", "compute_budget", "LatencyBudget", "compute_latency",
+    "raster_overhead", "budget_waterfall", "timeline_latency",
     "raw_video_bitrate", "capacity_check",
 ]

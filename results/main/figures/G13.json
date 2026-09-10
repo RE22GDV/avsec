@@ -1,0 +1,14 @@
+{
+  "source_table": "sweeps_frames.csv",
+  "figure": "G13",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Корисні дані, отримані вчасно",
+  "title_en": "Useful data delivered in time",
+  "experiment": "E03",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

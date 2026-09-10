@@ -1,0 +1,14 @@
+{
+  "source_table": "budgets.json",
+  "figure": "G12",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Накладні витрати",
+  "title_en": "Overhead breakdown",
+  "experiment": "E01",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

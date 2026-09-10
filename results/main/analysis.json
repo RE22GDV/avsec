@@ -1,0 +1,202 @@
+{
+  "kind": "analysis",
+  "run_dir": "D:\\Zahist_dannih\\Chiper_signal\\runs\\main",
+  "plan": {
+    "metric": "psnr_full",
+    "secondary": [
+      "ssim_full",
+      "coverage",
+      "psnr_verified"
+    ],
+    "primary_comparison": [
+      "P",
+      "B4"
+    ],
+    "n_boot": 10000,
+    "seed": 20240909,
+    "criterion": {
+      "coverage_verified_min": 0.9,
+      "psnr_full_min": 20.0,
+      "note": "робочий критерій цього дослідження: поточне автентифіковане покриття >= 0.90 і PSNR усього показаного кадру >= 20 дБ; це інженерна вимога, а не універсальний стандарт"
+    },
+    "unit_of_independence": "parent scene",
+    "aggregation": "frames -> repetitions -> clips -> scenes, then a paired cluster bootstrap over scenes",
+    "multiplicity": "Holm step-down over the family of pairwise comparisons; the primary comparison is also reported unadjusted"
+  },
+  "channels": [
+    "bursty",
+    "clean",
+    "harsh",
+    "mild",
+    "moderate"
+  ],
+  "methods": [
+    "B0a",
+    "B0a-R",
+    "B0d",
+    "B1",
+    "B2",
+    "B3",
+    "B4",
+    "P"
+  ],
+  "n_scenes": 20,
+  "n_observations": 62675,
+  "primary": [
+    {
+      "a": "P",
+      "b": "B4",
+      "metric": "psnr_full",
+      "mean": 2.3488608638325963,
+      "lo": 1.4739235749973723,
+      "hi": 3.262573176219916,
+      "n_scenes": 19,
+      "significant_at_95": true,
+      "scenes_only_in_a": "",
+      "scenes_only_in_b": "",
+      "n_scenes_dropped": 0,
+      "method": "paired cluster bootstrap over parent scenes",
+      "n_boot": 10000,
+      "p_raw": 2.636188383435826e-07,
+      "p_holm": 3.163426060122991e-06,
+      "significant_holm": true,
+      "is_primary": true,
+      "channel": "bursty",
+      "family": "pairwise@bursty",
+      "reoriented": true
+    },
+    {
+      "a": "P",
+      "b": "B4",
+      "metric": "psnr_full",
+      "mean": -3.461935582028978,
+      "lo": -3.892739917951499,
+      "hi": -2.9512118471603683,
+      "n_scenes": 19,
+      "significant_at_95": true,
+      "scenes_only_in_a": "",
+      "scenes_only_in_b": "",
+      "n_scenes_dropped": 0,
+      "method": "paired cluster bootstrap over parent scenes",
+      "n_boot": 10000,
+      "p_raw": 4.2510988368907236e-47,
+      "p_holm": 5.1013186042688685e-46,
+      "significant_holm": true,
+      "is_primary": true,
+      "channel": "clean",
+      "family": "pairwise@clean",
+      "reoriented": true
+    },
+    {
+      "a": "P",
+      "b": "B4",
+      "metric": "psnr_full",
+      "mean": -0.000507523047171563,
+      "lo": -0.0015225691415146887,
+      "hi": -0.0,
+      "n_scenes": 19,
+      "significant_at_95": false,
+      "scenes_only_in_a": "",
+      "scenes_only_in_b": "",
+      "n_scenes_dropped": 0,
+      "method": "paired cluster bootstrap over parent scenes",
+      "n_boot": 10000,
+      "p_raw": 0.19132594418068202,
+      "p_holm": 1.0,
+      "significant_holm": false,
+      "is_primary": true,
+      "channel": "harsh",
+      "family": "pairwise@harsh",
+      "reoriented": true
+    },
+    {
+      "a": "P",
+      "b": "B4",
+      "metric": "psnr_full",
+      "mean": -3.461935582028978,
+      "lo": -3.892739917951499,
+      "hi": -2.9512118471603683,
+      "n_scenes": 19,
+      "significant_at_95": true,
+      "scenes_only_in_a": "",
+      "scenes_only_in_b": "",
+      "n_scenes_dropped": 0,
+      "method": "paired cluster bootstrap over parent scenes",
+      "n_boot": 10000,
+      "p_raw": 4.2510988368907236e-47,
+      "p_holm": 1.1903076743294025e-45,
+      "significant_holm": true,
+      "is_primary": true,
+      "channel": "mild",
+      "family": "pairwise@mild",
+      "reoriented": true
+    },
+    {
+      "a": "P",
+      "b": "B4",
+      "metric": "psnr_full",
+      "mean": -0.006329921294932536,
+      "lo": -0.5338779752768227,
+      "hi": 0.5902272814295747,
+      "n_scenes": 19,
+      "significant_at_95": false,
+      "scenes_only_in_a": "",
+      "scenes_only_in_b": "",
+      "n_scenes_dropped": 0,
+      "method": "paired cluster bootstrap over parent scenes",
+      "n_boot": 10000,
+      "p_raw": 0.9823890739894144,
+      "p_holm": 1.0,
+      "significant_holm": false,
+      "is_primary": true,
+      "channel": "moderate",
+      "family": "pairwise@moderate",
+      "reoriented": true
+    },
+    {
+      "a": "P",
+      "b": "B4",
+      "metric": "psnr_full",
+      "mean": 2.2729075289209812,
+      "lo": 1.4411275489445936,
+      "hi": 3.156774917210429,
+      "n_scenes": 19,
+      "significant_at_95": true,
+      "scenes_only_in_a": "",
+      "scenes_only_in_b": "",
+      "n_scenes_dropped": 0,
+      "method": "paired cluster bootstrap over parent scenes",
+      "n_boot": 10000,
+      "p_raw": 2.0664673381907778e-07,
+      "p_holm": 2.066467338190778e-06,
+      "significant_holm": true,
+      "is_primary": true,
+      "channel": "ALL",
+      "family": "pairwise@pooled",
+      "caveat": "об'єднання каналів усереднює різні умови; основний висновок читати за окремими каналами",
+      "reoriented": true
+    }
+  ],
+  "primary_verdict": {
+    "comparison": "P - B4",
+    "metric": "psnr_full",
+    "channels_where_a_is_better": [
+      "bursty"
+    ],
+    "channels_where_a_is_worse": [
+      "clean",
+      "mild"
+    ],
+    "channels_with_no_detectable_difference": [
+      "harsh",
+      "moderate"
+    ],
+    "statement": "перевага підтверджена лише в перелічених каналах; там, де інтервал містить нуль, різниця не встановлена - це не доказ рівності"
+  },
+  "n_effects": 168,
+  "operability_criterion": {
+    "coverage_verified_min": 0.9,
+    "psnr_full_min": 20.0,
+    "note": "робочий критерій цього дослідження: поточне автентифіковане покриття >= 0.90 і PSNR усього показаного кадру >= 20 дБ; це інженерна вимога, а не універсальний стандарт"
+  }
+}

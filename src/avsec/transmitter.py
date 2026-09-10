@@ -48,7 +48,7 @@ from avsec.source_coding import (
     SourceCodingConfig,
     StripeCoder,
 )
-from avsec.utils import StageTimer, bytes_to_symbols
+from avsec.utils import StageTimer, bytes_to_symbols, public_whiten
 
 FLAG_FILLER = 0x04
 
@@ -83,12 +83,20 @@ class TransportConfig:
     raster_rate_hz: float = 25.0
     send_filler: bool = True
     max_rasters_per_frame: int = 8
+    # Diagnostic control (F15): XOR the wire payload with a PUBLIC pseudo-random
+    # sequence.  It equalises the symbol statistics of an unencrypted transport
+    # with those of an encrypted one, so a difference cannot be attributed to
+    # "the ciphertext looks random".  It is NOT protection: the sequence is
+    # public and both endpoints derive it from the unit sequence number.
+    public_whitening: bool = False
 
     def describe(self) -> Dict[str, object]:
         return {
             "profile_id": self.profile_id,
             "raster_rate_hz": self.raster_rate_hz,
             "send_filler_units": self.send_filler,
+            "public_whitening": self.public_whitening,
+            "public_whitening_note": "diagnostic control, provides no confidentiality",
             "modem": self.modem.describe(),
             "fec_payload": self.fec_payload.describe(),
             "fec_header": self.fec_header.describe(),
@@ -242,6 +250,8 @@ class Transmitter:
 
         _, ct = self.sealer.seal(plain, _aad)
         hdr = built["header"]
+        if self.cfg.public_whitening:
+            ct = public_whiten(ct, hdr.unit_seq)
         wire = self.rs_header.encode(hdr.to_bytes()) + self.rs_payload.encode(ct)
         return hdr, wire
 

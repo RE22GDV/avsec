@@ -1,0 +1,16 @@
+{
+  "source_table": "attacks.json",
+  "measured_width_bits": 16,
+  "note": "проєкції позначені окремо і не називаються зламом",
+  "figure": "G37",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Перебір лабораторного LFSR",
+  "title_en": "Lab LFSR brute force",
+  "experiment": "E08",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

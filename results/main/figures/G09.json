@@ -1,0 +1,14 @@
+{
+  "source_table": "frames.csv",
+  "figure": "G09",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Залежність від вмісту",
+  "title_en": "Content dependence",
+  "experiment": "E02",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

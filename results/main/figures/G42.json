@@ -1,0 +1,14 @@
+{
+  "source_table": "cvbs.json",
+  "figure": "G42",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Перенесення рівень A -> B",
+  "title_en": "Transfer level A -> B",
+  "experiment": "E10",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

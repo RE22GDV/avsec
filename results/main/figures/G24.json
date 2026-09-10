@@ -1,0 +1,14 @@
+{
+  "source_table": "recovery.csv",
+  "figure": "G24",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Час відновлення",
+  "title_en": "Recovery time",
+  "experiment": "E07",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

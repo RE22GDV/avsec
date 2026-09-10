@@ -210,11 +210,18 @@ const TABS = [
   ["cvbs",       "CVBS (рівень B)",  runCvbs],
   ["budget",     "Бюджет каналу",    runBudget],
   ["report",     "Звіт",             runReport],
+  ["explorer",   "Збережені прогони", runExplorer],
 ];
 
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function fmt(v,d=2){ if(v===null||v===undefined) return "—";
-  if(typeof v==="number") return Number.isFinite(v)? v.toFixed(d) : "n/a";
+  if(typeof v==="number"){
+    if(!Number.isFinite(v)) return "n/a";
+    /* counts are integers; printing "4000.000" for a job count reads as a
+       measurement with three decimals of precision that does not exist */
+    if(Number.isInteger(v)) return String(v);
+    return v.toFixed(d);
+  }
   if(typeof v==="boolean") return v?"так":"ні"; return esc(v); }
 
 function setStatus(t, cls){ const s=$("status"); s.textContent=t; s.className="status "+(cls||""); }
@@ -229,9 +236,11 @@ function selectTab(id){
   CURRENT = id;
   document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("active", b.dataset.t===id));
   const t = TABS.find(x=>x[0]===id);
-  $("view").innerHTML = `<div class="panel"><button onclick="TABRUN['${id}']()">Запустити: ${t[1]}</button>
+  const label = id==="explorer" ? "Оновити список прогонів" : "Запустити: "+t[1];
+  $("view").innerHTML = `<div class="panel"><button onclick="TABRUN['${id}']()">${label}</button>
     <span style="margin-left:10px;color:var(--muted);font-size:12px">${TAB_HINT[id]||""}</span></div>
     <div id="out"></div>`;
+  if(id==="explorer") runExplorer();
 }
 const TAB_HINT = {
   demo: "один кадр через усі вибрані методи, з зображеннями і метриками",
@@ -243,9 +252,263 @@ const TAB_HINT = {
   cvbs: "композитний сигнал 625/50 зі спрощеннями, вказаними у профілі",
   budget: "точний облік накладних витрат і модельної затримки",
   report: "зібрати Markdown-звіт з наявних артефактів",
+  explorer: "переглянути збережений прогон: фільтри, парні порівняння, карти віку, готовність G01–G43",
 };
 const TABRUN = {};
 TABS.forEach(([id,,fn]) => TABRUN[id]=fn);
+
+
+/* ------------------------------------------------------------------ explorer
+   The saved-run browser. It only READS what `avsec analyze` and `avsec plots`
+   wrote: no endpoint here starts an experiment, so the interface cannot show a
+   number the command line would not produce. */
+const EX = { run:null, filters:null, metric:"psnr_full", methods:[], channels:[] };
+
+async function sync(action, payload){
+  const r = await fetch("/api/sync/"+action, {method:"POST",
+      headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload||{})});
+  const j = await r.json();
+  if(!r.ok) throw new Error(j.error || ("HTTP "+r.status));
+  return j;
+}
+
+async function runExplorer(){
+  setStatus("читаю каталог прогонів…");
+  try{
+    const {runs} = await sync("explorer_runs", {});
+    if(!runs.length){
+      $("out").innerHTML = `<div class="panel"><div class="note">У каталозі <code>runs/</code>
+        немає збережених прогонів. Запустіть <code>avsec matrix --plan configs/research_main.yaml
+        --output runs/main</code>, потім <code>avsec analyze --input runs/main</code>.</div></div>`;
+      setStatus("порожньо"); return;
+    }
+    const opts = runs.map(r=>`<option value="${esc(r.path)}">${esc(r.name)} · ${r.n_frames} кадрів · ${r.figures_ready}/${r.figures_total} рисунків</option>`).join("");
+    $("out").innerHTML = `<div class="panel">
+        <label>Прогін</label>
+        <select id="ex_run" onchange="exLoad()">${opts}</select>
+        ${table(runs.map(r=>({
+            прогін:r.name, run_id:(r.run_id||"").slice(0,12), commit:(r.commit||"").slice(0,10),
+            кадрів:r.n_frames, завдань:r.n_jobs, сцен:r.n_scenes,
+            повний:r.complete, рисунків:`${r.figures_ready}/${r.figures_total}`
+          })), ["прогін","run_id","commit","кадрів","завдань","сцен","повний","рисунків"])}
+      </div><div id="ex_body"></div>`;
+    await exLoad();
+    setStatus("готово","ok");
+  }catch(e){ setStatus(String(e),"err");
+    $("out").innerHTML = `<div class="panel err">${esc(e.message||e)}</div>`; }
+}
+
+async function exLoad(){
+  EX.run = $("ex_run").value;
+  setStatus("читаю прогін…");
+  const [ov, fl] = await Promise.all([
+    sync("explorer_overview", {run:EX.run}),
+    sync("explorer_filters",  {run:EX.run}),
+  ]);
+  EX.filters = fl;
+  EX.methods = fl.methods.slice();
+  EX.channels = fl.channels.slice();
+  const ds = ov.dataset||{};
+  const pv = ov.primary_verdict||{};
+  $("ex_body").innerHTML = `
+    <div class="panel">
+      <h3>Прогін <code>${esc(ov.run_id||"?")}</code></h3>
+      <div class="note">commit <code>${esc((ov.commit||"—").slice(0,12))}</code> ·
+        ${esc((ov.environment||{}).platform||"?")} · Python ${esc((ov.environment||{}).python||"?")} ·
+        ключі: <b>${esc((ov.seeds||{}).key_mode||"?")}</b></div>
+      ${table([{кадрів:(ov.scale||{}).n_frames, завдань:(ov.scale||{}).n_jobs,
+                сцен:(ov.scale||{}).n_scenes_analysed, кліпів:ds.n_clips,
+                "секунд роботи":(ov.scale||{}).wall_s,
+                повний:(ov.completeness||{}).complete,
+                "не виконано":(ov.completeness||{}).n_missing,
+                "з помилкою":(ov.completeness||{}).n_failed}],
+              ["кадрів","завдань","сцен","кліпів","секунд роботи","повний","не виконано","з помилкою"])}
+      ${(ov.caveats||[]).map(c=>`<div class="note warn">${esc(c)}</div>`).join("")}
+      ${pv.channels_where_a_is_better ? `<div class="note">
+         <b>P проти B4:</b> виграє на ${esc((pv.channels_where_a_is_better||[]).join(", ")||"—")};
+         програє на ${esc((pv.channels_where_a_is_worse||[]).join(", ")||"—")};
+         різниця не встановлена на ${esc((pv.channels_with_no_detectable_difference||[]).join(", ")||"—")}.
+       </div>` : ""}
+    </div>
+
+    <div class="panel">
+      <h3>Фільтри</h3>
+      <div class="row">
+        <div><label>Метрика</label>
+          <select id="ex_metric" onchange="exRefresh()">${fl.metrics.map(m=>`<option${m==="psnr_full"?" selected":""}>${m}</option>`).join("")}</select></div>
+        <div><label>Метод A</label>
+          <select id="ex_a">${fl.methods.map(m=>`<option${m==="P"?" selected":""}>${m}</option>`).join("")}</select></div>
+        <div><label>Метод B</label>
+          <select id="ex_b">${fl.methods.map(m=>`<option${m==="B4"?" selected":""}>${m}</option>`).join("")}</select></div>
+      </div>
+      <label style="margin-top:8px">Методи</label>
+      <div id="ex_methods">${fl.methods.map(m=>`<span class="chip on" data-m="${esc(m)}" onclick="this.classList.toggle('on');exRefresh()">${esc(m)}</span>`).join(" ")}</div>
+      <label style="margin-top:8px">Канали</label>
+      <div id="ex_channels">${fl.channels.map(c=>`<span class="chip on" data-c="${esc(c)}" onclick="this.classList.toggle('on');exRefresh()">${esc(c)}</span>`).join(" ")}</div>
+      <label style="margin-top:8px">Сцена для карти віку</label>
+      <div class="row">
+        <select id="ex_clip">${fl.clips.map(c=>`<option>${esc(c)}</option>`).join("")}</select>
+        <select id="ex_clipch">${fl.channels.map(c=>`<option${c==="bursty"?" selected":""}>${esc(c)}</option>`).join("")}</select>
+        <select id="ex_clipm">${fl.methods.map(m=>`<option${m==="P"?" selected":""}>${esc(m)}</option>`).join("")}</select>
+        <input id="ex_frame" type="number" value="3" min="0" step="1">
+        <button class="sec" onclick="exAgeMap()">Показати карту віку</button>
+      </div>
+    </div>
+
+    <div id="ex_summary"></div>
+    <div id="ex_paired"></div>
+    <div id="ex_scenes"></div>
+    <div id="ex_agemap"></div>
+    <div id="ex_failures"></div>
+    <div id="ex_figures"></div>`;
+  await exRefresh();
+  await exFailures();
+  await exFigures();
+  setStatus("готово","ok");
+}
+
+function exSel(id, attr){
+  return [...document.querySelectorAll("#"+id+" .chip.on")].map(c=>c.dataset[attr]);
+}
+
+async function exRefresh(){
+  const metric = $("ex_metric").value;
+  const methods = exSel("ex_methods","m"), channels = exSel("ex_channels","c");
+  const s = await sync("explorer_summary", {run:EX.run, metric, methods, channels});
+  if(s.error){ $("ex_summary").innerHTML = `<div class="panel"><div class="err">${esc(s.error)}</div></div>`; }
+  else {
+    $("ex_summary").innerHTML = `<div class="panel"><h3>Зведення · ${esc(metric)}</h3>
+      ${table(s.rows.map(r=>({
+        канал:r.channel, метод:r.method + (r.authenticated?"":" *"),
+        середнє:fmt(r.mean), "95% CI":`[${fmt(r.lo)}; ${fmt(r.hi)}]`,
+        сцен:r.n_scenes, спостережень:r.n_observations, відмов:r.n_failed
+      })), ["канал","метод","середнє","95% CI","сцен","спостережень","відмов"])}
+      <div class="note">Середнє за незалежними сценами з бутстреп-інтервалом.
+        <code>*</code> — метод не автентифікує того, що показує, тому його «покриття»
+        не порівнюване з рештою.</div></div>`;
+  }
+  const a = $("ex_a").value, b = $("ex_b").value;
+  const pr = await sync("explorer_paired", {run:EX.run, a, b, metric});
+  if(pr.error){ $("ex_paired").innerHTML = `<div class="panel"><div class="note">${esc(pr.error)}</div></div>`; }
+  else {
+    $("ex_paired").innerHTML = `<div class="panel"><h3>Парне порівняння ${esc(a)} − ${esc(b)}</h3>
+      ${table(pr.rows.map(r=>({
+        канал:r.channel, "різниця":fmt(r.mean), "95% CI":`[${fmt(r.lo)}; ${fmt(r.hi)}]`,
+        сцен:r.n_scenes, "відкинуто сцен":r.n_scenes_dropped,
+        "значуще":r.significant_at_95, "після Holm":r.significant_holm,
+        висновок:r.verdict
+      })), ["канал","різниця","95% CI","сцен","відкинуто сцен","значуще","після Holm","висновок"])}
+      <div class="note">${esc(pr.method||"")}</div></div>`;
+  }
+  const ch = channels[0] || EX.channels[0];
+  const ps = await sync("explorer_scenes", {run:EX.run, methods:[a,b], channel:ch, metric});
+  const rows = (ps.scenes||[]).map((sc,i)=>({
+      сцена:sc, [a]:fmt(ps.series[a] ? ps.series[a][i] : null),
+      [b]:fmt(ps.series[b] ? ps.series[b][i] : null),
+      "різниця":fmt((ps.series[a]&&ps.series[b]&&ps.series[a][i]!=null&&ps.series[b][i]!=null)
+                    ? ps.series[a][i]-ps.series[b][i] : null)}));
+  $("ex_scenes").innerHTML = `<div class="panel"><h3>Окремі сцени · ${esc(ch)}</h3>
+    ${table(rows, ["сцена",a,b,"різниця"])}
+    <div class="note">${esc(ps.note||"")} Порожня клітинка — метод не має результату
+      для цієї сцени (див. таблицю відмов нижче).</div></div>`;
+}
+
+async function exFailures(){
+  const f = await sync("explorer_failures", {run:EX.run});
+  if(!f.n_total){ $("ex_failures").innerHTML =
+      `<div class="panel"><h3>Відмови</h3><div class="note ok">Відмов немає.</div></div>`; return; }
+  const rows = Object.entries(f.by_kind).map(([k,v])=>({
+    категорія:k, завдань:v.n, методи:(v.methods||[]).join(", "),
+    кліпи:(v.clips||[]).join(", "), приклад:v.example}));
+  $("ex_failures").innerHTML = `<div class="panel"><h3>Відмови (${f.n_total})</h3>
+    ${table(rows, ["категорія","завдань","методи","кліпи","приклад"])}
+    <div class="note warn">${esc(f.note||"")}</div></div>`;
+}
+
+async function exFigures(){
+  const c = await sync("explorer_figures", {run:EX.run});
+  const rows = c.rows.map(r=>({
+    ID:r.figure, назва:r.title_uk, експеримент:r.experiment,
+    статус:r.status==="ready"?"готово":"pending", причина:(r.reason||"").slice(0,120)}));
+  const ready = c.rows.filter(r=>r.status==="ready").map(r=>r.figure);
+  $("ex_figures").innerHTML = `<div class="panel">
+    <h3>Каталог рисунків · готово ${c.n_ready}/${c.n_total}</h3>
+    <div class="row"><div><label>Показати рисунок</label>
+      <select id="ex_fig">${ready.map(g=>`<option>${g}</option>`).join("")}</select></div>
+      <div style="align-self:end"><button class="sec" onclick="exFigure()">Показати</button></div>
+      <div style="align-self:end"><button class="sec" onclick="exExport('svg')">Експорт SVG</button></div>
+      <div style="align-self:end"><button class="sec" onclick="exExport('pdf')">Експорт PDF</button></div>
+      <div style="align-self:end"><button class="sec" onclick="exExport('csv')">Дані CSV</button></div>
+    </div>
+    <div id="ex_figview"></div>
+    ${table(rows, ["ID","назва","експеримент","статус","причина"])}
+    <div class="note">${esc(c.note||"")} Рисунок зі статусом <code>pending</code>
+      не приховано — вказано, якого експерименту бракує.</div>
+    <h3 style="margin-top:14px">Програма E01–E11</h3>
+    ${table((c.programme||[]).map(e=>({
+      ID:e.id, дослідження:e.title_uk,
+      статус:({done:"виконано",partial:"частково",not_done:"не виконано",planned:"заплановано"})[e.status],
+      рисунків:`${e.figures_ready}/${e.figures_total}`, причина:(e.reason||"").slice(0,110)})),
+      ["ID","дослідження","статус","рисунків","причина"])}
+    </div>`;
+}
+
+async function exFigure(){
+  const gid = $("ex_fig").value;
+  setStatus("читаю "+gid+"…");
+  const f = await sync("explorer_figure", {run:EX.run, figure:gid});
+  if(f.error){ $("ex_figview").innerHTML = `<div class="note err">${esc(f.error)}</div>`;
+               setStatus("немає рисунка","err"); return; }
+  const params = f.params||{};
+  $("ex_figview").innerHTML = `
+    <figure style="margin:10px 0"><img src="${f.image}" style="max-width:100%;border-radius:8px">
+      <figcaption class="note">${esc(params.title_uk||gid)} ·
+        джерело: <code>${esc(params.source_table||"?")}</code> ·
+        експеримент ${esc(params.experiment||"?")} ·
+        run_id <code>${esc((params.run_dir||"").split("/").pop()||"")}</code></figcaption></figure>
+    <details><summary>Дані рисунка (перші рядки)</summary>
+      ${table((f.data_rows||[]).slice(0,25), Object.keys((f.data_rows||[{}])[0]||{}))}</details>`;
+  setStatus("готово","ok");
+}
+
+async function exExport(fmt){
+  const gid = $("ex_fig").value;
+  const r = await sync("explorer_export", {run:EX.run, figure:gid, format:fmt});
+  if(r.error){ setStatus(r.error,"err"); return; }
+  const bin = atob(r.base64);
+  const buf = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) buf[i]=bin.charCodeAt(i);
+  const url = URL.createObjectURL(new Blob([buf], {type:r.content_type}));
+  const a = document.createElement("a");
+  a.href = url; a.download = r.filename; a.click();
+  URL.revokeObjectURL(url);
+  setStatus(`збережено ${r.filename} (${r.bytes} Б)`, "ok");
+}
+
+async function exAgeMap(){
+  setStatus("відтворюю кадр…");
+  const r = await sync("explorer_agemap", {run:EX.run, clip:$("ex_clip").value,
+      method:$("ex_clipm").value, channel:$("ex_clipch").value,
+      frame_id:parseInt($("ex_frame").value||"0")});
+  if(r.error){ $("ex_agemap").innerHTML = `<div class="panel"><div class="err">${esc(r.error)}</div></div>`;
+               setStatus("помилка","err"); return; }
+  $("ex_agemap").innerHTML = `<div class="panel">
+    <h3>Карта віку · ${esc(r.clip)} · ${esc(r.method)} · ${esc(r.channel)} · кадр ${r.frame_id}</h3>
+    <div class="imgrid">
+      <figure><img src="${r.original}"><figcaption>оригінал</figcaption></figure>
+      <figure><img src="${r.received}"><figcaption>прийнятий растр</figcaption></figure>
+      <figure><img src="${r.reconstructed}"><figcaption>реконструкція</figcaption></figure>
+      <figure><img src="${r.overlay}"><figcaption>зелений — поточне перевірене,
+        бурштиновий — старе, червоний — домальоване</figcaption></figure>
+    </div>
+    ${table([{ "PSNR, дБ":fmt(r.psnr_full), "поточне перевірене":fmt(r.coverage,3),
+               "старе":fmt(r.stale_fraction,3), "домальоване":fmt(r.estimated_fraction,3),
+               "автентифіковано":r.authenticated }],
+            ["PSNR, дБ","поточне перевірене","старе","домальоване","автентифіковано"])}
+    <div class="note">Кадр відтворено з того самого seed каналу, що й у прогоні,
+      тому це саме той кадр, який дав ці числа.</div></div>`;
+  setStatus("готово","ok");
+}
 
 function cfg(){
   const [b4w,b4h] = ($("b4_cell").value||"8x2").split("x").map(Number);

@@ -1,0 +1,44 @@
+data_table,experiment,figure,files,params,reason,status,title_en,title_uk
+runs/main/figures\G01.csv,E02,G01,runs/main/figures\G01.png;runs/main/figures\G01.svg;runs/main/figures\G01.pdf,runs/main/figures\G01.json,,ready,End-to-end examples,Наскрізні приклади
+runs/main/figures\G02.csv,E02,G02,runs/main/figures\G02.png;runs/main/figures\G02.svg;runs/main/figures\G02.pdf,runs/main/figures\G02.json,,ready,Availability maps,Карти доступності
+runs/main/figures\G03.csv,E02,G03,runs/main/figures\G03.png;runs/main/figures\G03.svg;runs/main/figures\G03.pdf,runs/main/figures\G03.json,,ready,Quality across five profiles,Якість у п'яти профілях
+runs/main/figures\G04.csv,E02,G04,runs/main/figures\G04.png;runs/main/figures\G04.svg;runs/main/figures\G04.pdf,runs/main/figures\G04.json,,ready,Structural quality,Структурна якість
+runs/main/figures\G05.csv,E02,G05,runs/main/figures\G05.png;runs/main/figures\G05.svg;runs/main/figures\G05.pdf,runs/main/figures\G05.json,,ready,Current authenticated coverage,Поточне автентифіковане покриття
+runs/main/figures\G06.csv,E02,G06,runs/main/figures\G06.png;runs/main/figures\G06.svg;runs/main/figures\G06.pdf,runs/main/figures\G06.json,,ready,Operability,Працездатність
+runs/main/figures\G07.csv,E02,G07,runs/main/figures\G07.png;runs/main/figures\G07.svg;runs/main/figures\G07.pdf,runs/main/figures\G07.json,,ready,Paired advantage of P over B4,Парна перевага P над B4
+runs/main/figures\G08.csv,E02,G08,runs/main/figures\G08.png;runs/main/figures\G08.svg;runs/main/figures\G08.pdf,runs/main/figures\G08.json,,ready,Per-scene results,Результати окремих сцен
+runs/main/figures\G09.csv,E02,G09,runs/main/figures\G09.png;runs/main/figures\G09.svg;runs/main/figures\G09.pdf,runs/main/figures\G09.json,,ready,Content dependence,Залежність від вмісту
+runs/main/figures\G10.csv,E02,G10,runs/main/figures\G10.png;runs/main/figures\G10.svg;runs/main/figures\G10.pdf,runs/main/figures\G10.json,,ready,Distribution of the gain,Розподіл виграшу
+runs/main/figures\G11.csv,E01,G11,runs/main/figures\G11.png;runs/main/figures\G11.svg;runs/main/figures\G11.pdf,runs/main/figures\G11.json,,ready,Compression on a clean channel,Стиснення на чистому каналі
+runs/main/figures\G12.csv,E01,G12,runs/main/figures\G12.png;runs/main/figures\G12.svg;runs/main/figures\G12.pdf,runs/main/figures\G12.json,,ready,Overhead breakdown,Накладні витрати
+runs/main/figures\G13.csv,E03,G13,runs/main/figures\G13.png;runs/main/figures\G13.svg;runs/main/figures\G13.pdf,runs/main/figures\G13.json,,ready,Useful data delivered in time,"Корисні дані, отримані вчасно"
+runs/main/figures\G14.csv,E09,G14,runs/main/figures\G14.png;runs/main/figures\G14.svg;runs/main/figures\G14.pdf,runs/main/figures\G14.json,,ready,Rate Pareto front,Межа Парето за швидкістю
+runs/main/figures\G15.csv,E09,G15,runs/main/figures\G15.png;runs/main/figures\G15.svg;runs/main/figures\G15.pdf,runs/main/figures\G15.json,,ready,Latency Pareto front,Межа Парето за затримкою
+runs/main/figures\G16.csv,E09,G16,runs/main/figures\G16.png;runs/main/figures\G16.svg;runs/main/figures\G16.pdf,runs/main/figures\G16.json,,ready,Buffer Pareto front,Межа Парето за буфером
+runs/main/figures\G17.csv,E03,G17,runs/main/figures\G17.png;runs/main/figures\G17.svg;runs/main/figures\G17.pdf,runs/main/figures\G17.json,,ready,Noise sensitivity,Чутливість до шуму
+runs/main/figures\G18.csv,E03,G18,runs/main/figures\G18.png;runs/main/figures\G18.svg;runs/main/figures\G18.pdf,runs/main/figures\G18.json,,ready,Burst-length sensitivity,Чутливість до довжини burst
+runs/main/figures\G19.csv,E03,G19,runs/main/figures\G19.png;runs/main/figures\G19.svg;runs/main/figures\G19.pdf,runs/main/figures\G19.json,,ready,Burst-rate sensitivity,Чутливість до частоти burst
+runs/main/figures\G20.csv,E03,G20,runs/main/figures\G20.png;runs/main/figures\G20.svg;runs/main/figures\G20.pdf,runs/main/figures\G20.json,,ready,Jitter sensitivity,Чутливість до джитеру
+runs/main/figures\G21.csv,E03,G21,runs/main/figures\G21.png;runs/main/figures\G21.svg;runs/main/figures\G21.pdf,runs/main/figures\G21.json,,ready,Low-pass sensitivity,Чутливість до фільтрації
+runs/main/figures\G22.csv,E04,G22,runs/main/figures\G22.png;runs/main/figures\G22.svg;runs/main/figures\G22.pdf,runs/main/figures\G22.json,,ready,Gain and offset,Підсилення та зміщення
+runs/main/figures\G23.csv,E04,G23,runs/main/figures\G23.png;runs/main/figures\G23.svg;runs/main/figures\G23.pdf,runs/main/figures\G23.json,,ready,Noise and burst interaction,Спільний вплив шуму й burst
+runs/main/figures\G24.csv,E07,G24,runs/main/figures\G24.png;runs/main/figures\G24.svg;runs/main/figures\G24.pdf,runs/main/figures\G24.json,,ready,Recovery time,Час відновлення
+runs/main/figures\G25.csv,E07,G25,runs/main/figures\G25.png;runs/main/figures\G25.svg;runs/main/figures\G25.pdf,runs/main/figures\G25.json,,ready,Quality dynamics,Динаміка якості
+runs/main/figures\G26.csv,E07,G26,runs/main/figures\G26.png;runs/main/figures\G26.svg;runs/main/figures\G26.pdf,runs/main/figures\G26.json,,ready,Freshness of the display,Актуальність показу
+runs/main/figures\G27.csv,E05,G27,runs/main/figures\G27.png;runs/main/figures\G27.svg;runs/main/figures\G27.pdf,runs/main/figures\G27.json,,ready,Interleaver geometry,Геометрія перемежувачів
+runs/main/figures\G28.csv,E05,G28,runs/main/figures\G28.png;runs/main/figures\G28.svg;runs/main/figures\G28.pdf,runs/main/figures\G28.json,,ready,Codeword damage,Пошкодження кодових слів
+runs/main/figures\G29.csv,E05,G29,runs/main/figures\G29.png;runs/main/figures\G29.svg;runs/main/figures\G29.pdf,runs/main/figures\G29.json,,ready,Analytic bound check,Перевірка аналітичної межі
+runs/main/figures\G30.csv,E05,G30,runs/main/figures\G30.png;runs/main/figures\G30.svg;runs/main/figures\G30.pdf,runs/main/figures\G30.json,,ready,Joint description loss,Спільні втрати описів
+runs/main/figures\G31.csv,E06,G31,runs/main/figures\G31.png;runs/main/figures\G31.svg;runs/main/figures\G31.pdf,runs/main/figures\G31.json,,ready,MDC x placement ablation,Абляція MDC x розміщення
+runs/main/figures\G32.csv,E06,G32,runs/main/figures\G32.png;runs/main/figures\G32.svg;runs/main/figures\G32.pdf,runs/main/figures\G32.json,,ready,Unit size and FEC,Розмір одиниці та FEC
+runs/main/figures\G33.csv,E06,G33,runs/main/figures\G33.png;runs/main/figures\G33.svg;runs/main/figures\G33.pdf,runs/main/figures\G33.json,,ready,Window and latency,Вікно й затримка
+runs/main/figures\G34.csv,E06,G34,runs/main/figures\G34.png;runs/main/figures\G34.svg;runs/main/figures\G34.pdf,runs/main/figures\G34.json,,ready,Gap-fill policy,Політика відновлення пропусків
+runs/main/figures\G35.csv,E08,G35,runs/main/figures\G35.png;runs/main/figures\G35.svg;runs/main/figures\G35.pdf,runs/main/figures\G35.json,,ready,Boundary-consistency attack,Атака за сумісністю меж
+runs/main/figures\G36.csv,E08,G36,runs/main/figures\G36.png;runs/main/figures\G36.svg;runs/main/figures\G36.pdf,runs/main/figures\G36.json,,ready,Known or chosen frames,Відомі або обрані кадри
+runs/main/figures\G37.csv,E08,G37,runs/main/figures\G37.png;runs/main/figures\G37.svg;runs/main/figures\G37.pdf,runs/main/figures\G37.json,,ready,Lab LFSR brute force,Перебір лабораторного LFSR
+runs/main/figures\G38.csv,E08,G38,runs/main/figures\G38.png;runs/main/figures\G38.svg;runs/main/figures\G38.pdf,runs/main/figures\G38.json,,ready,Protocol checks,Перевірки протоколу
+runs/main/figures\G39.csv,E09,G39,runs/main/figures\G39.png;runs/main/figures\G39.svg;runs/main/figures\G39.pdf,runs/main/figures\G39.json,,ready,Pipeline stage timing,Час етапів конвеєра
+runs/main/figures\G40.csv,E09,G40,runs/main/figures\G40.png;runs/main/figures\G40.svg;runs/main/figures\G40.pdf,runs/main/figures\G40.json,,ready,Scaling,Масштабування
+runs/main/figures\G41.csv,E09,G41,runs/main/figures\G41.png;runs/main/figures\G41.svg;runs/main/figures\G41.pdf,runs/main/figures\G41.json,,ready,Memory,Пам'ять
+runs/main/figures\G42.csv,E10,G42,runs/main/figures\G42.png;runs/main/figures\G42.svg;runs/main/figures\G42.pdf,runs/main/figures\G42.json,,ready,Transfer level A -> B,Перенесення рівень A -> B
+runs/main/figures\G43.csv,E07,G43,runs/main/figures\G43.png;runs/main/figures\G43.svg;runs/main/figures\G43.pdf,runs/main/figures\G43.json,,ready,Event schedule,Подієвий розклад

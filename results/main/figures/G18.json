@@ -1,0 +1,19 @@
+{
+  "axis": "burst_len_lines",
+  "metrics": [
+    "psnr_full",
+    "coverage"
+  ],
+  "source_table": "sweeps.csv",
+  "figure": "G18",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Чутливість до довжини burst",
+  "title_en": "Burst-length sensitivity",
+  "experiment": "E03",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

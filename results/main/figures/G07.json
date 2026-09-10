@@ -1,0 +1,15 @@
+{
+  "comparison": "P - B4",
+  "source_table": "paired_effects.csv",
+  "figure": "G07",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Парна перевага P над B4",
+  "title_en": "Paired advantage of P over B4",
+  "experiment": "E02",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

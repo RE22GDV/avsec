@@ -8,6 +8,7 @@ keys are never written.
 from __future__ import annotations
 
 import copy
+import dataclasses
 import os
 import time
 from dataclasses import dataclass, field
@@ -30,6 +31,7 @@ from avsec.baselines import (
     MethodResult,
     WholeFrameAEADMethod,
     make_b0_analog,
+    make_b0a_repetition,
     make_b1_lfsr,
     make_b2_cryptoperm,
 )
@@ -69,8 +71,8 @@ def _trace(cfg: ExperimentConfig, scene: str, repetition: int) -> "ChannelTrace"
     Deliberately independent of which method is being measured: that is what
     makes the paired comparison paired (defect F08).
     """
-    return ChannelTrace(seed=cfg.seed, scene=scene, repetition=int(repetition),
-                        profile=cfg.channel_preset,
+    return ChannelTrace(seed=cfg.channel_seed_value, scene=scene,
+                        repetition=int(repetition), profile=cfg.channel_preset,
                         rasters_per_frame=cfg.budget.rasters_per_frame)
 
 
@@ -89,6 +91,7 @@ def build_methods(cfg: ExperimentConfig, timer: Optional[StageTimer] = None
     """Instantiate the requested methods under the shared budget."""
     timer = timer or StageTimer()
     master = cfg.master_secret()
+    sids = cfg.session_id_source()
     chan = cfg.channel_config()
     H, W = cfg.frame_height, cfg.frame_width
     ref_transport = cfg.profile("B4").transport_config(cfg.budget)
@@ -97,24 +100,34 @@ def build_methods(cfg: ExperimentConfig, timer: Optional[StageTimer] = None
     for name in cfg.methods:
         if name == "B0a":
             out[name] = make_b0_analog(ref_transport, chan, H, W, timer)
+        elif name == "B0a-R":
+            out[name] = make_b0a_repetition(ref_transport, chan, H, W,
+                                            cfg.budget.rasters_per_frame,
+                                            cfg.b0ar_combine, timer)
         elif name == "B1":
             out[name] = make_b1_lfsr(ref_transport, chan, H, W, cfg.lfsr, timer)
         elif name == "B2":
             out[name] = make_b2_cryptoperm(ref_transport, chan, H, W, cfg.b2_grid[0],
-                                           cfg.b2_grid[1], master, timer=timer)
-        elif name in ("B0d", "B4", "P"):
-            prof = cfg.profile(name)
+                                           cfg.b2_grid[1], master, timer=timer,
+                                           session_ids=sids)
+        elif name in ("B0d", "B0d-W", "B4", "P"):
+            prof = cfg.profile("B0d" if name == "B0d-W" else name)
+            transport = prof.transport_config(cfg.budget)
+            secure = name not in ("B0d", "B0d-W")
+            if name == "B0d-W":
+                transport = dataclasses.replace(transport, public_whitening=True)
             out[name] = DigitalMethod(
-                name, prof.source_config(), prof.transport_config(cfg.budget), chan,
-                master, H, W, cfg.crypto, secure=(name != "B0d"), fill=cfg.fill,
-                timer=timer,
+                name, prof.source_config(), transport, chan,
+                master, H, W, cfg.crypto, secure=secure, fill=cfg.fill,
+                timer=timer, session_ids=sids,
                 notes=("diagnostic transport without cryptography - authenticates "
-                       "nothing" if name == "B0d" else ""))
+                       "nothing" + (", public bit whitening only" if name == "B0d-W"
+                                    else "") if not secure else ""))
         elif name == "B3":
             prof = cfg.profile("B3")
             out[name] = WholeFrameAEADMethod(
                 prof.source_config(), prof.transport_config(cfg.budget), chan, master,
-                H, W, cfg.crypto, fill=cfg.fill, timer=timer)
+                H, W, cfg.crypto, fill=cfg.fill, timer=timer, session_ids=sids)
         else:
             raise KeyError(f"unknown method {name!r}; have {ALL_METHODS}")
     return out
@@ -908,8 +921,76 @@ def run_sweeps(cfg: ExperimentConfig, output_dir: str,
 
 
 # --------------------------------------------------------------- budget run
+#: What each method actually provides.  Stated once, in code, so that a table
+#: cannot claim protection a method does not implement (defect F15).
+SECURITY_PROPERTIES = {
+    "B0a":   {"confidentiality": "none", "authentication": "none",
+              "integrity": "none", "notes": "unprotected analog picture"},
+    "B0a-R": {"confidentiality": "none", "authentication": "none",
+              "integrity": "none", "notes": "unprotected analog, repeated"},
+    "B0d":   {"confidentiality": "none", "authentication": "none",
+              "integrity": "CRC-like via RS only", "notes": "digital, no crypto"},
+    "B0d-W": {"confidentiality": "none (public whitening)",
+              "authentication": "none", "integrity": "RS only",
+              "notes": "public keystream; statistics control, NOT encryption"},
+    "B1":    {"confidentiality": "broken (LFSR block permutation)",
+              "authentication": "none", "integrity": "none",
+              "notes": "2021 baseline reproduced"},
+    "B2":    {"confidentiality": "weak (keyed permutation, no diffusion)",
+              "authentication": "none", "integrity": "none",
+              "notes": "permutation with a cryptographic PRNG"},
+    "B3":    {"confidentiality": "AEAD", "authentication": "AEAD, whole frame",
+              "integrity": "128-bit tag", "notes": "one unit per frame"},
+    "B4":    {"confidentiality": "AEAD", "authentication": "AEAD, per unit",
+              "integrity": "128-bit tag per unit", "notes": "segmented"},
+    "P":     {"confidentiality": "AEAD", "authentication": "AEAD, per unit",
+              "integrity": "128-bit tag per unit",
+              "notes": "segmented + MDC + burst-aware placement"},
+}
+
+
+def _timing_profiles(cfg: ExperimentConfig) -> Dict[str, Any]:
+    """Level A and level B do not share a line count, so both are stated.
+
+    Level A is the abstract raster the modem writes into; level B is the
+    625/50 CVBS waveform of BT.470/BT.1700, where 625 total lines carry 576
+    active ones.  Quoting one method's active-line figure for the other would
+    misstate the available time, so they are reported side by side.
+    """
+    from avsec.timeline import CVBS_625_50, TimingProfile
+
+    tr = cfg.profile("P").transport_config(cfg.budget)
+    a = TimingProfile(raster_rate_hz=cfg.budget.raster_rate_hz,
+                      total_lines=tr.modem.raster_height,
+                      active_lines=tr.modem.active_y1 - tr.modem.active_y0,
+                      rasters_per_frame=cfg.budget.rasters_per_frame,
+                      source_fps=cfg.budget.source_fps,
+                      symbol_height=tr.modem.symbol_height)
+    b = CVBS_625_50
+    b.rasters_per_frame = cfg.budget.rasters_per_frame
+    b.source_fps = cfg.budget.source_fps
+    b.symbol_height = tr.modem.symbol_height
+    return {
+        "level_A": a.describe(),
+        "level_B_cvbs": b.describe(),
+        "note": ("рівень A - абстрактний растр модема; рівень B - реальна форма "
+                 "CVBS 625/50, де 625 рядків загалом і 576 активних. Числа рядків "
+                 "не взаємозамінні: активний час рядка на рівні B менший, і саме "
+                 "він визначає доступний час для символів у моделі рівня B."),
+    }
+
+
 def run_budget(cfg: ExperimentConfig) -> Dict[str, Any]:
-    """Pure accounting: capacity, overhead breakdown and virtual latency."""
+    """Capacity, overhead waterfall, event-based latency and memory model.
+
+    Latency comes from event timestamps (defect F16), never from a sum of stage
+    durations, and memory is reported as three separate quantities that are not
+    interchangeable: process peak, logical protocol buffers, model arrays.
+    """
+    from avsec.budget import budget_waterfall, compute_budget, timeline_latency
+    from avsec.interleaving import Interleaver
+    from avsec.timeline import MemoryReport, logical_buffers, model_arrays, process_peak_bytes
+
     out: Dict[str, Any] = {
         "raw_grayscale_reference_bps": raw_video_bitrate(
             cfg.frame_width, cfg.frame_height, cfg.budget.source_fps),
@@ -918,11 +999,12 @@ def run_budget(cfg: ExperimentConfig) -> Dict[str, Any]:
             f"{cfg.budget.source_fps} кадр/с; ця величина НЕ вважається автоматично "
             "доступною в обраному тракті"),
         "budget": cfg.budget.describe(),
+        "security_properties": SECURITY_PROPERTIES,
+        "timing_profiles": _timing_profiles(cfg),
         "methods": {},
     }
-    from avsec.budget import compute_budget
-    from avsec.interleaving import Interleaver
 
+    peak_bytes, peak_method = process_peak_bytes()
     for name in ("B0d", "B3", "B4", "P"):
         prof = cfg.profile(name)
         tr = prof.transport_config(cfg.budget)
@@ -930,21 +1012,55 @@ def run_budget(cfg: ExperimentConfig) -> Dict[str, Any]:
                            prof.max_unit_payload, cfg.budget.raster_rate_hz)
         il = Interleaver(tr.interleaver, tr.modem.n_data_rows, tr.modem.n_data_cols)
         placeable = il.max_units(b.unit_symbols, prof.n_descriptions, b.units_per_raster)
-        lat = compute_latency(tr.modem, il.accumulation_rows,
-                              cfg.budget.rasters_per_frame, 1.0 / cfg.budget.source_fps,
-                              prof.stripe_height, cfg.frame_height,
-                              cfg.budget.raster_rate_hz)
+        units_per_frame = max(1, placeable * cfg.budget.rasters_per_frame)
+
+        lat = timeline_latency(
+            tr.modem, il.accumulation_rows, cfg.budget.rasters_per_frame,
+            cfg.budget.source_fps, prof.stripe_height, cfg.frame_height,
+            units_per_frame, cfg.budget.raster_rate_hz, n_frames=8,
+            deadline_s=cfg.budget.max_virtual_latency_s)
+        events = lat.pop("events", [])
+
+        mem = MemoryReport(
+            process_peak_bytes=peak_bytes, process_method=peak_method,
+            logical_buffers=logical_buffers(
+                unit_wire_bytes=b.unit_wire_bytes, units_per_raster=placeable,
+                rasters_per_frame=cfg.budget.rasters_per_frame,
+                interleaver_rows=il.accumulation_rows,
+                n_data_cols=tr.modem.n_data_cols,
+                bits_per_symbol=tr.modem.bits_per_symbol,
+                display_queue_frames=1,
+                frame_bytes=cfg.frame_width * cfg.frame_height),
+            model_arrays=model_arrays(
+                tr.modem.raster_height, tr.modem.raster_width,
+                cfg.budget.rasters_per_frame))
+
         d = b.to_dict()
         d["units_per_raster_after_placement"] = placeable
+        d["placement_loss_units"] = b.units_per_raster - placeable
         d["accumulation_rows"] = il.accumulation_rows
-        d["latency"] = lat.to_dict()
+        d["waterfall"] = budget_waterfall(b, tr.modem, placeable)
+        d["latency"] = lat
+        # Keep whole frames, not the first N events: truncating mid-frame
+        # would drop the assembled/display events the latency is measured from.
+        d["latency_events_sample"] = [e for e in events if e.get("frame_id", 0) < 2
+                                      and e.get("kind") != "unit_verified"]
+        d["memory"] = mem.to_dict()
+        d["memory"]["within_protocol_limit"] = bool(
+            mem.logical_total_bytes <= cfg.budget.max_receiver_buffer_kb * 1024)
+        d["security"] = SECURITY_PROPERTIES.get(name, {})
         d["profile"] = prof.to_dict()
         out["methods"][name] = d
+
+    out["memory_note"] = (
+        "логічний буфер протоколу порівнюється з лімітом "
+        f"{cfg.budget.max_receiver_buffer_kb:.0f} кБ; це НЕ пікова пам'ять процесу "
+        "і не розмір масивів симулятора - три величини вимірюються окремо")
     return out
 
 
 __all__ = [
     "build_sources", "build_methods", "run_demo", "run_comparison", "run_attacks",
     "run_protocol_checks", "run_cvbs", "run_tuning", "run_ablations", "run_sweeps",
-    "run_budget", "ABLATIONS",
+    "run_budget", "SECURITY_PROPERTIES", "ABLATIONS",
 ]

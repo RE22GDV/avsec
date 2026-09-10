@@ -141,6 +141,25 @@ def symbols_to_bytes(symbols: np.ndarray, bits_per_symbol: int) -> bytes:
     return np.packbits(flat).tobytes()
 
 
+def public_whiten(data: bytes, seq: int) -> bytes:
+    """XOR with a PUBLIC keystream derived from the unit sequence number.
+
+    Diagnostic control only (defect F15).  Both endpoints can compute it and so
+    can an eavesdropper: it equalises symbol statistics between an encrypted and
+    an unencrypted transport so that a measured difference cannot be explained
+    by "one of them looks random".  It provides no confidentiality whatsoever.
+    """
+    if not data:
+        return data
+    seed = hashlib.sha256(b"avsec/public-whitening|" + int(seq).to_bytes(8, "big")).digest()
+    stream = bytearray()
+    block = seed
+    while len(stream) < len(data):
+        block = hashlib.sha256(block).digest()
+        stream += block
+    return bytes(a ^ b for a, b in zip(data, stream[: len(data)]))
+
+
 def symbols_needed(n_bytes: int, bits_per_symbol: int) -> int:
     return int(np.ceil(n_bytes * 8 / bits_per_symbol))
 

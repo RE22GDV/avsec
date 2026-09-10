@@ -1,0 +1,3121 @@
+{
+  "raw_grayscale_reference_bps": 3276668.9280000003,
+  "raw_grayscale_reference_note": "нестиснене 256x192, 8 біт, 8.333 кадр/с; ця величина НЕ вважається автоматично доступною в обраному тракті",
+  "budget": {
+    "rasters_per_frame": 3,
+    "raster_rate_hz": 25.0,
+    "source_fps": 8.333,
+    "effective_display_fps": 8.333333333333334,
+    "max_accumulation_rows": 300,
+    "max_virtual_latency_s": 0.8,
+    "max_receiver_buffer_kb": 512,
+    "raster": "720x576",
+    "active_window": [
+      24,
+      8,
+      696,
+      568
+    ],
+    "amplitude_window": [
+      40,
+      216
+    ],
+    "note": "однакові геометрія растру, частота растрів і амплітудне вікно для всіх методів; порядок модуляції та розмір комірки символу входять до простору пошуку, тому жодна схема не отримує непомітно додаткового часу, смуги чи потужності сигналу"
+  },
+  "security_properties": {
+    "B0a": {
+      "confidentiality": "none",
+      "authentication": "none",
+      "integrity": "none",
+      "notes": "unprotected analog picture"
+    },
+    "B0a-R": {
+      "confidentiality": "none",
+      "authentication": "none",
+      "integrity": "none",
+      "notes": "unprotected analog, repeated"
+    },
+    "B0d": {
+      "confidentiality": "none",
+      "authentication": "none",
+      "integrity": "CRC-like via RS only",
+      "notes": "digital, no crypto"
+    },
+    "B0d-W": {
+      "confidentiality": "none (public whitening)",
+      "authentication": "none",
+      "integrity": "RS only",
+      "notes": "public keystream; statistics control, NOT encryption"
+    },
+    "B1": {
+      "confidentiality": "broken (LFSR block permutation)",
+      "authentication": "none",
+      "integrity": "none",
+      "notes": "2021 baseline reproduced"
+    },
+    "B2": {
+      "confidentiality": "weak (keyed permutation, no diffusion)",
+      "authentication": "none",
+      "integrity": "none",
+      "notes": "permutation with a cryptographic PRNG"
+    },
+    "B3": {
+      "confidentiality": "AEAD",
+      "authentication": "AEAD, whole frame",
+      "integrity": "128-bit tag",
+      "notes": "one unit per frame"
+    },
+    "B4": {
+      "confidentiality": "AEAD",
+      "authentication": "AEAD, per unit",
+      "integrity": "128-bit tag per unit",
+      "notes": "segmented"
+    },
+    "P": {
+      "confidentiality": "AEAD",
+      "authentication": "AEAD, per unit",
+      "integrity": "128-bit tag per unit",
+      "notes": "segmented + MDC + burst-aware placement"
+    }
+  },
+  "timing_profiles": {
+    "level_A": {
+      "label": "level-A raster",
+      "raster_rate_hz": 25.0,
+      "raster_period_ms": 40.0,
+      "total_lines": 576,
+      "active_lines": 560,
+      "line_period_us": 69.4444,
+      "rasters_per_frame": 3,
+      "source_fps": 8.333,
+      "frame_period_ms": 120.0048
+    },
+    "level_B_cvbs": {
+      "label": "level-B CVBS 625/50",
+      "raster_rate_hz": 25.0,
+      "raster_period_ms": 40.0,
+      "total_lines": 625,
+      "active_lines": 576,
+      "line_period_us": 64.0,
+      "rasters_per_frame": 3,
+      "source_fps": 8.333,
+      "frame_period_ms": 120.0048
+    },
+    "note": "рівень A - абстрактний растр модема; рівень B - реальна форма CVBS 625/50, де 625 рядків загалом і 576 активних. Числа рядків не взаємозамінні: активний час рядка на рівні B менший, і саме він визначає доступний час для символів у моделі рівня B."
+  },
+  "methods": {
+    "B0d": {
+      "unit_plain_bytes": 640,
+      "header_bytes": 56,
+      "tag_bytes": 16,
+      "header_encoded_bytes": 152,
+      "payload_encoded_bytes": 1136,
+      "unit_wire_bytes": 1288,
+      "unit_symbols": 5152,
+      "raster_capacity_symbols": 21128,
+      "units_per_raster": 4,
+      "unused_symbols": 520,
+      "raster_fill_fraction": 0.9754,
+      "bits_per_symbol": 2,
+      "raster_rate_hz": 25.0,
+      "gross_bitrate_bps": 1056400.0,
+      "wire_bitrate_bps": 1030400.0,
+      "payload_bitrate_bps": 512000.0,
+      "payload_efficiency": 0.4847,
+      "overhead_breakdown_per_unit": {
+        "payload": 640,
+        "aead_tag": 16,
+        "header": 56,
+        "header_parity": 96,
+        "payload_parity": 480
+      },
+      "units_per_raster_after_placement": 4,
+      "placement_loss_units": 0,
+      "accumulation_rows": 278,
+      "waterfall": {
+        "steps": [
+          {
+            "label": "raster capacity",
+            "symbols": 21128.0
+          },
+          {
+            "label": "placement loss",
+            "symbols": 0.0
+          },
+          {
+            "label": "unused tail (filler)",
+            "symbols": -520.0
+          },
+          {
+            "label": "header",
+            "symbols": -896.0
+          },
+          {
+            "label": "header parity",
+            "symbols": -1536.0
+          },
+          {
+            "label": "payload parity",
+            "symbols": -7680.0
+          },
+          {
+            "label": "AEAD tag",
+            "symbols": -256.0
+          },
+          {
+            "label": "byte->symbol padding",
+            "symbols": -0.0
+          }
+        ],
+        "payload_symbols": 10240.0,
+        "units_placed": 4,
+        "units_per_raster_nominal": 4,
+        "payload_fraction_of_capacity": 0.4847,
+        "raster_overhead": {
+          "raster_pixels": 414720,
+          "blanking_pixels": 38400,
+          "active_pixels": 376320,
+          "grid_remainder_pixels": 0,
+          "sync_pixels": 2688,
+          "pilot_pixels": 35584,
+          "data_cell_pixels": 338048,
+          "data_symbols": 21128,
+          "fractions": {
+            "blanking": 0.0926,
+            "grid_remainder": 0.0,
+            "sync": 0.0065,
+            "pilots": 0.0858,
+            "data_cells": 0.8151
+          }
+        },
+        "note": "symbols, not pixels; the raster_overhead block accounts for the pixels that never reach the symbol grid at all"
+      },
+      "latency": {
+        "profile": {
+          "label": "level-A raster",
+          "raster_rate_hz": 25.0,
+          "raster_period_ms": 40.0,
+          "total_lines": 576,
+          "active_lines": 560,
+          "line_period_us": 69.4444,
+          "rasters_per_frame": 3,
+          "source_fps": 8.333,
+          "frame_period_ms": 120.0048
+        },
+        "n_events": 376,
+        "n_frames": 8,
+        "latency_s": {
+          "mean": 0.15861111111111112,
+          "median": 0.15861111111111115,
+          "p95": 0.15861111111111115,
+          "max": 0.15861111111111115
+        },
+        "deadline_misses": 0,
+        "note": "virtual schedule from event timestamps; wall-clock simulator time is a different metric and is never added to it",
+        "additive_upper_bound": {
+          "stripe_accumulation_s": 0.015001,
+          "interleaver_accumulation_s": 0.038611,
+          "serialisation_s": 0.12,
+          "reception_s": 0.04,
+          "display_hold_s": 0.120005,
+          "virtual_total_s": 0.333617
+        },
+        "overlap_saving_s": 0.175005,
+        "stripes_per_frame": 8
+      },
+      "latency_events_sample": [
+        {
+          "t": 0.0,
+          "kind": "capture",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.01500060002400096,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 0,
+          "detail": ""
+        },
+        {
+          "t": 0.03000120004800192,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 1,
+          "detail": ""
+        },
+        {
+          "t": 0.045001800072002884,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 2,
+          "detail": ""
+        },
+        {
+          "t": 0.06000240009600384,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 3,
+          "detail": ""
+        },
+        {
+          "t": 0.0750030001200048,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 4,
+          "detail": ""
+        },
+        {
+          "t": 0.09000360014400577,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 5,
+          "detail": ""
+        },
+        {
+          "t": 0.10500420016800673,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 6,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 7,
+          "detail": ""
+        },
+        {
+          "t": 0.01500060002400096,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 0,
+          "detail": ""
+        },
+        {
+          "t": 0.03000120004800192,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 1,
+          "detail": ""
+        },
+        {
+          "t": 0.045001800072002884,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 2,
+          "detail": ""
+        },
+        {
+          "t": 0.06000240009600384,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 3,
+          "detail": ""
+        },
+        {
+          "t": 0.0750030001200048,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 4,
+          "detail": ""
+        },
+        {
+          "t": 0.09000360014400577,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 5,
+          "detail": ""
+        },
+        {
+          "t": 0.10500420016800673,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 6,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 7,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 8,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 9,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 10,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 11,
+          "detail": ""
+        },
+        {
+          "t": 0.03861111111111111,
+          "kind": "tx_start",
+          "frame_id": 0,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.0786111111111111,
+          "kind": "tx_end",
+          "frame_id": 0,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.03861111111111111,
+          "kind": "rx_start",
+          "frame_id": 0,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.0786111111111111,
+          "kind": "rx_end",
+          "frame_id": 0,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.0786111111111111,
+          "kind": "tx_start",
+          "frame_id": 0,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.11861111111111111,
+          "kind": "tx_end",
+          "frame_id": 0,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.0786111111111111,
+          "kind": "rx_start",
+          "frame_id": 0,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.11861111111111111,
+          "kind": "rx_end",
+          "frame_id": 0,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.11861111111111111,
+          "kind": "tx_start",
+          "frame_id": 0,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.15861111111111112,
+          "kind": "tx_end",
+          "frame_id": 0,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.11861111111111111,
+          "kind": "rx_start",
+          "frame_id": 0,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.15861111111111112,
+          "kind": "rx_end",
+          "frame_id": 0,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.1586111111111111,
+          "kind": "assembled",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.1586111111111111,
+          "kind": "display",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "capture",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.13500540021600865,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 0,
+          "detail": ""
+        },
+        {
+          "t": 0.1500060002400096,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 1,
+          "detail": ""
+        },
+        {
+          "t": 0.16500660026401057,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 2,
+          "detail": ""
+        },
+        {
+          "t": 0.18000720028801154,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 3,
+          "detail": ""
+        },
+        {
+          "t": 0.19500780031201248,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 4,
+          "detail": ""
+        },
+        {
+          "t": 0.21000840033601345,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 5,
+          "detail": ""
+        },
+        {
+          "t": 0.22500900036001442,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 6,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 7,
+          "detail": ""
+        },
+        {
+          "t": 0.13500540021600865,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 0,
+          "detail": ""
+        },
+        {
+          "t": 0.1500060002400096,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 1,
+          "detail": ""
+        },
+        {
+          "t": 0.16500660026401057,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 2,
+          "detail": ""
+        },
+        {
+          "t": 0.18000720028801154,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 3,
+          "detail": ""
+        },
+        {
+          "t": 0.19500780031201248,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 4,
+          "detail": ""
+        },
+        {
+          "t": 0.21000840033601345,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 5,
+          "detail": ""
+        },
+        {
+          "t": 0.22500900036001442,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 6,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 7,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 8,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 9,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 10,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 11,
+          "detail": ""
+        },
+        {
+          "t": 0.1586159113031188,
+          "kind": "tx_start",
+          "frame_id": 1,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.19861591130311881,
+          "kind": "tx_end",
+          "frame_id": 1,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.1586159113031188,
+          "kind": "rx_start",
+          "frame_id": 1,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.19861591130311881,
+          "kind": "rx_end",
+          "frame_id": 1,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.19861591130311881,
+          "kind": "tx_start",
+          "frame_id": 1,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.23861591130311882,
+          "kind": "tx_end",
+          "frame_id": 1,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.19861591130311881,
+          "kind": "rx_start",
+          "frame_id": 1,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.23861591130311882,
+          "kind": "rx_end",
+          "frame_id": 1,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.23861591130311882,
+          "kind": "tx_start",
+          "frame_id": 1,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.2786159113031188,
+          "kind": "tx_end",
+          "frame_id": 1,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.23861591130311882,
+          "kind": "rx_start",
+          "frame_id": 1,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.2786159113031188,
+          "kind": "rx_end",
+          "frame_id": 1,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.2786159113031188,
+          "kind": "assembled",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.2786159113031188,
+          "kind": "display",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        }
+      ],
+      "memory": {
+        "process_peak_bytes": 47632384,
+        "process_peak_mb": 47.632,
+        "process_method": "GetProcessMemoryInfo/PeakWorkingSetSize",
+        "python_peak_bytes": 0,
+        "python_peak_mb": 0.0,
+        "logical_buffers": {
+          "reassembly_units": 15456,
+          "interleaver_window": 5282,
+          "display_queue": 49152
+        },
+        "logical_total_kb": 68.25,
+        "model_arrays": {
+          "transmitted_rasters": 1244160,
+          "received_rasters": 1244160,
+          "cvbs_samples_float32": 0
+        },
+        "model_total_mb": 2.488,
+        "note": "the protocol buffer limit applies to logical_total_kb only; it is NOT a limit on process memory, and the model arrays are simulator overhead a real implementation would not hold",
+        "within_protocol_limit": true
+      },
+      "security": {
+        "confidentiality": "none",
+        "authentication": "none",
+        "integrity": "CRC-like via RS only",
+        "notes": "digital, no crypto"
+      },
+      "profile": {
+        "stripe_height": 24,
+        "n_descriptions": 1,
+        "codec": "dct",
+        "quality": 12,
+        "max_unit_payload": 640,
+        "fec_nsym": 96,
+        "fec_header_nsym": 48,
+        "modulation": [
+          4,
+          8,
+          2
+        ],
+        "interleaver": [
+          "block",
+          278,
+          0
+        ],
+        "interleaver_window": 0
+      }
+    },
+    "B3": {
+      "unit_plain_bytes": 640,
+      "header_bytes": 56,
+      "tag_bytes": 16,
+      "header_encoded_bytes": 152,
+      "payload_encoded_bytes": 1136,
+      "unit_wire_bytes": 1288,
+      "unit_symbols": 5152,
+      "raster_capacity_symbols": 21128,
+      "units_per_raster": 4,
+      "unused_symbols": 520,
+      "raster_fill_fraction": 0.9754,
+      "bits_per_symbol": 2,
+      "raster_rate_hz": 25.0,
+      "gross_bitrate_bps": 1056400.0,
+      "wire_bitrate_bps": 1030400.0,
+      "payload_bitrate_bps": 512000.0,
+      "payload_efficiency": 0.4847,
+      "overhead_breakdown_per_unit": {
+        "payload": 640,
+        "aead_tag": 16,
+        "header": 56,
+        "header_parity": 96,
+        "payload_parity": 480
+      },
+      "units_per_raster_after_placement": 4,
+      "placement_loss_units": 0,
+      "accumulation_rows": 278,
+      "waterfall": {
+        "steps": [
+          {
+            "label": "raster capacity",
+            "symbols": 21128.0
+          },
+          {
+            "label": "placement loss",
+            "symbols": 0.0
+          },
+          {
+            "label": "unused tail (filler)",
+            "symbols": -520.0
+          },
+          {
+            "label": "header",
+            "symbols": -896.0
+          },
+          {
+            "label": "header parity",
+            "symbols": -1536.0
+          },
+          {
+            "label": "payload parity",
+            "symbols": -7680.0
+          },
+          {
+            "label": "AEAD tag",
+            "symbols": -256.0
+          },
+          {
+            "label": "byte->symbol padding",
+            "symbols": -0.0
+          }
+        ],
+        "payload_symbols": 10240.0,
+        "units_placed": 4,
+        "units_per_raster_nominal": 4,
+        "payload_fraction_of_capacity": 0.4847,
+        "raster_overhead": {
+          "raster_pixels": 414720,
+          "blanking_pixels": 38400,
+          "active_pixels": 376320,
+          "grid_remainder_pixels": 0,
+          "sync_pixels": 2688,
+          "pilot_pixels": 35584,
+          "data_cell_pixels": 338048,
+          "data_symbols": 21128,
+          "fractions": {
+            "blanking": 0.0926,
+            "grid_remainder": 0.0,
+            "sync": 0.0065,
+            "pilots": 0.0858,
+            "data_cells": 0.8151
+          }
+        },
+        "note": "symbols, not pixels; the raster_overhead block accounts for the pixels that never reach the symbol grid at all"
+      },
+      "latency": {
+        "profile": {
+          "label": "level-A raster",
+          "raster_rate_hz": 25.0,
+          "raster_period_ms": 40.0,
+          "total_lines": 576,
+          "active_lines": 560,
+          "line_period_us": 69.4444,
+          "rasters_per_frame": 3,
+          "source_fps": 8.333,
+          "frame_period_ms": 120.0048
+        },
+        "n_events": 376,
+        "n_frames": 8,
+        "latency_s": {
+          "mean": 0.15861111111111112,
+          "median": 0.15861111111111115,
+          "p95": 0.15861111111111115,
+          "max": 0.15861111111111115
+        },
+        "deadline_misses": 0,
+        "note": "virtual schedule from event timestamps; wall-clock simulator time is a different metric and is never added to it",
+        "additive_upper_bound": {
+          "stripe_accumulation_s": 0.015001,
+          "interleaver_accumulation_s": 0.038611,
+          "serialisation_s": 0.12,
+          "reception_s": 0.04,
+          "display_hold_s": 0.120005,
+          "virtual_total_s": 0.333617
+        },
+        "overlap_saving_s": 0.175005,
+        "stripes_per_frame": 8
+      },
+      "latency_events_sample": [
+        {
+          "t": 0.0,
+          "kind": "capture",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.01500060002400096,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 0,
+          "detail": ""
+        },
+        {
+          "t": 0.03000120004800192,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 1,
+          "detail": ""
+        },
+        {
+          "t": 0.045001800072002884,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 2,
+          "detail": ""
+        },
+        {
+          "t": 0.06000240009600384,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 3,
+          "detail": ""
+        },
+        {
+          "t": 0.0750030001200048,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 4,
+          "detail": ""
+        },
+        {
+          "t": 0.09000360014400577,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 5,
+          "detail": ""
+        },
+        {
+          "t": 0.10500420016800673,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 6,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 7,
+          "detail": ""
+        },
+        {
+          "t": 0.01500060002400096,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 0,
+          "detail": ""
+        },
+        {
+          "t": 0.03000120004800192,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 1,
+          "detail": ""
+        },
+        {
+          "t": 0.045001800072002884,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 2,
+          "detail": ""
+        },
+        {
+          "t": 0.06000240009600384,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 3,
+          "detail": ""
+        },
+        {
+          "t": 0.0750030001200048,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 4,
+          "detail": ""
+        },
+        {
+          "t": 0.09000360014400577,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 5,
+          "detail": ""
+        },
+        {
+          "t": 0.10500420016800673,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 6,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 7,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 8,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 9,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 10,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 11,
+          "detail": ""
+        },
+        {
+          "t": 0.03861111111111111,
+          "kind": "tx_start",
+          "frame_id": 0,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.0786111111111111,
+          "kind": "tx_end",
+          "frame_id": 0,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.03861111111111111,
+          "kind": "rx_start",
+          "frame_id": 0,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.0786111111111111,
+          "kind": "rx_end",
+          "frame_id": 0,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.0786111111111111,
+          "kind": "tx_start",
+          "frame_id": 0,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.11861111111111111,
+          "kind": "tx_end",
+          "frame_id": 0,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.0786111111111111,
+          "kind": "rx_start",
+          "frame_id": 0,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.11861111111111111,
+          "kind": "rx_end",
+          "frame_id": 0,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.11861111111111111,
+          "kind": "tx_start",
+          "frame_id": 0,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.15861111111111112,
+          "kind": "tx_end",
+          "frame_id": 0,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.11861111111111111,
+          "kind": "rx_start",
+          "frame_id": 0,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.15861111111111112,
+          "kind": "rx_end",
+          "frame_id": 0,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.1586111111111111,
+          "kind": "assembled",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.1586111111111111,
+          "kind": "display",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "capture",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.13500540021600865,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 0,
+          "detail": ""
+        },
+        {
+          "t": 0.1500060002400096,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 1,
+          "detail": ""
+        },
+        {
+          "t": 0.16500660026401057,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 2,
+          "detail": ""
+        },
+        {
+          "t": 0.18000720028801154,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 3,
+          "detail": ""
+        },
+        {
+          "t": 0.19500780031201248,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 4,
+          "detail": ""
+        },
+        {
+          "t": 0.21000840033601345,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 5,
+          "detail": ""
+        },
+        {
+          "t": 0.22500900036001442,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 6,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 7,
+          "detail": ""
+        },
+        {
+          "t": 0.13500540021600865,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 0,
+          "detail": ""
+        },
+        {
+          "t": 0.1500060002400096,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 1,
+          "detail": ""
+        },
+        {
+          "t": 0.16500660026401057,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 2,
+          "detail": ""
+        },
+        {
+          "t": 0.18000720028801154,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 3,
+          "detail": ""
+        },
+        {
+          "t": 0.19500780031201248,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 4,
+          "detail": ""
+        },
+        {
+          "t": 0.21000840033601345,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 5,
+          "detail": ""
+        },
+        {
+          "t": 0.22500900036001442,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 6,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 7,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 8,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 9,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 10,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 11,
+          "detail": ""
+        },
+        {
+          "t": 0.1586159113031188,
+          "kind": "tx_start",
+          "frame_id": 1,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.19861591130311881,
+          "kind": "tx_end",
+          "frame_id": 1,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.1586159113031188,
+          "kind": "rx_start",
+          "frame_id": 1,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.19861591130311881,
+          "kind": "rx_end",
+          "frame_id": 1,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.19861591130311881,
+          "kind": "tx_start",
+          "frame_id": 1,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.23861591130311882,
+          "kind": "tx_end",
+          "frame_id": 1,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.19861591130311881,
+          "kind": "rx_start",
+          "frame_id": 1,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.23861591130311882,
+          "kind": "rx_end",
+          "frame_id": 1,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.23861591130311882,
+          "kind": "tx_start",
+          "frame_id": 1,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.2786159113031188,
+          "kind": "tx_end",
+          "frame_id": 1,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.23861591130311882,
+          "kind": "rx_start",
+          "frame_id": 1,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.2786159113031188,
+          "kind": "rx_end",
+          "frame_id": 1,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.2786159113031188,
+          "kind": "assembled",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.2786159113031188,
+          "kind": "display",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        }
+      ],
+      "memory": {
+        "process_peak_bytes": 47632384,
+        "process_peak_mb": 47.632,
+        "process_method": "GetProcessMemoryInfo/PeakWorkingSetSize",
+        "python_peak_bytes": 0,
+        "python_peak_mb": 0.0,
+        "logical_buffers": {
+          "reassembly_units": 15456,
+          "interleaver_window": 5282,
+          "display_queue": 49152
+        },
+        "logical_total_kb": 68.25,
+        "model_arrays": {
+          "transmitted_rasters": 1244160,
+          "received_rasters": 1244160,
+          "cvbs_samples_float32": 0
+        },
+        "model_total_mb": 2.488,
+        "note": "the protocol buffer limit applies to logical_total_kb only; it is NOT a limit on process memory, and the model arrays are simulator overhead a real implementation would not hold",
+        "within_protocol_limit": true
+      },
+      "security": {
+        "confidentiality": "AEAD",
+        "authentication": "AEAD, whole frame",
+        "integrity": "128-bit tag",
+        "notes": "one unit per frame"
+      },
+      "profile": {
+        "stripe_height": 24,
+        "n_descriptions": 1,
+        "codec": "dct",
+        "quality": 12,
+        "max_unit_payload": 640,
+        "fec_nsym": 96,
+        "fec_header_nsym": 48,
+        "modulation": [
+          4,
+          8,
+          2
+        ],
+        "interleaver": [
+          "block",
+          278,
+          0
+        ],
+        "interleaver_window": 0
+      }
+    },
+    "B4": {
+      "unit_plain_bytes": 640,
+      "header_bytes": 56,
+      "tag_bytes": 16,
+      "header_encoded_bytes": 152,
+      "payload_encoded_bytes": 1136,
+      "unit_wire_bytes": 1288,
+      "unit_symbols": 5152,
+      "raster_capacity_symbols": 21128,
+      "units_per_raster": 4,
+      "unused_symbols": 520,
+      "raster_fill_fraction": 0.9754,
+      "bits_per_symbol": 2,
+      "raster_rate_hz": 25.0,
+      "gross_bitrate_bps": 1056400.0,
+      "wire_bitrate_bps": 1030400.0,
+      "payload_bitrate_bps": 512000.0,
+      "payload_efficiency": 0.4847,
+      "overhead_breakdown_per_unit": {
+        "payload": 640,
+        "aead_tag": 16,
+        "header": 56,
+        "header_parity": 96,
+        "payload_parity": 480
+      },
+      "units_per_raster_after_placement": 4,
+      "placement_loss_units": 0,
+      "accumulation_rows": 278,
+      "waterfall": {
+        "steps": [
+          {
+            "label": "raster capacity",
+            "symbols": 21128.0
+          },
+          {
+            "label": "placement loss",
+            "symbols": 0.0
+          },
+          {
+            "label": "unused tail (filler)",
+            "symbols": -520.0
+          },
+          {
+            "label": "header",
+            "symbols": -896.0
+          },
+          {
+            "label": "header parity",
+            "symbols": -1536.0
+          },
+          {
+            "label": "payload parity",
+            "symbols": -7680.0
+          },
+          {
+            "label": "AEAD tag",
+            "symbols": -256.0
+          },
+          {
+            "label": "byte->symbol padding",
+            "symbols": -0.0
+          }
+        ],
+        "payload_symbols": 10240.0,
+        "units_placed": 4,
+        "units_per_raster_nominal": 4,
+        "payload_fraction_of_capacity": 0.4847,
+        "raster_overhead": {
+          "raster_pixels": 414720,
+          "blanking_pixels": 38400,
+          "active_pixels": 376320,
+          "grid_remainder_pixels": 0,
+          "sync_pixels": 2688,
+          "pilot_pixels": 35584,
+          "data_cell_pixels": 338048,
+          "data_symbols": 21128,
+          "fractions": {
+            "blanking": 0.0926,
+            "grid_remainder": 0.0,
+            "sync": 0.0065,
+            "pilots": 0.0858,
+            "data_cells": 0.8151
+          }
+        },
+        "note": "symbols, not pixels; the raster_overhead block accounts for the pixels that never reach the symbol grid at all"
+      },
+      "latency": {
+        "profile": {
+          "label": "level-A raster",
+          "raster_rate_hz": 25.0,
+          "raster_period_ms": 40.0,
+          "total_lines": 576,
+          "active_lines": 560,
+          "line_period_us": 69.4444,
+          "rasters_per_frame": 3,
+          "source_fps": 8.333,
+          "frame_period_ms": 120.0048
+        },
+        "n_events": 376,
+        "n_frames": 8,
+        "latency_s": {
+          "mean": 0.15861111111111112,
+          "median": 0.15861111111111115,
+          "p95": 0.15861111111111115,
+          "max": 0.15861111111111115
+        },
+        "deadline_misses": 0,
+        "note": "virtual schedule from event timestamps; wall-clock simulator time is a different metric and is never added to it",
+        "additive_upper_bound": {
+          "stripe_accumulation_s": 0.015001,
+          "interleaver_accumulation_s": 0.038611,
+          "serialisation_s": 0.12,
+          "reception_s": 0.04,
+          "display_hold_s": 0.120005,
+          "virtual_total_s": 0.333617
+        },
+        "overlap_saving_s": 0.175005,
+        "stripes_per_frame": 8
+      },
+      "latency_events_sample": [
+        {
+          "t": 0.0,
+          "kind": "capture",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.01500060002400096,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 0,
+          "detail": ""
+        },
+        {
+          "t": 0.03000120004800192,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 1,
+          "detail": ""
+        },
+        {
+          "t": 0.045001800072002884,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 2,
+          "detail": ""
+        },
+        {
+          "t": 0.06000240009600384,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 3,
+          "detail": ""
+        },
+        {
+          "t": 0.0750030001200048,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 4,
+          "detail": ""
+        },
+        {
+          "t": 0.09000360014400577,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 5,
+          "detail": ""
+        },
+        {
+          "t": 0.10500420016800673,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 6,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 7,
+          "detail": ""
+        },
+        {
+          "t": 0.01500060002400096,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 0,
+          "detail": ""
+        },
+        {
+          "t": 0.03000120004800192,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 1,
+          "detail": ""
+        },
+        {
+          "t": 0.045001800072002884,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 2,
+          "detail": ""
+        },
+        {
+          "t": 0.06000240009600384,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 3,
+          "detail": ""
+        },
+        {
+          "t": 0.0750030001200048,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 4,
+          "detail": ""
+        },
+        {
+          "t": 0.09000360014400577,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 5,
+          "detail": ""
+        },
+        {
+          "t": 0.10500420016800673,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 6,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 7,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 8,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 9,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 10,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 11,
+          "detail": ""
+        },
+        {
+          "t": 0.03861111111111111,
+          "kind": "tx_start",
+          "frame_id": 0,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.0786111111111111,
+          "kind": "tx_end",
+          "frame_id": 0,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.03861111111111111,
+          "kind": "rx_start",
+          "frame_id": 0,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.0786111111111111,
+          "kind": "rx_end",
+          "frame_id": 0,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.0786111111111111,
+          "kind": "tx_start",
+          "frame_id": 0,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.11861111111111111,
+          "kind": "tx_end",
+          "frame_id": 0,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.0786111111111111,
+          "kind": "rx_start",
+          "frame_id": 0,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.11861111111111111,
+          "kind": "rx_end",
+          "frame_id": 0,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.11861111111111111,
+          "kind": "tx_start",
+          "frame_id": 0,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.15861111111111112,
+          "kind": "tx_end",
+          "frame_id": 0,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.11861111111111111,
+          "kind": "rx_start",
+          "frame_id": 0,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.15861111111111112,
+          "kind": "rx_end",
+          "frame_id": 0,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.1586111111111111,
+          "kind": "assembled",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.1586111111111111,
+          "kind": "display",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "capture",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.13500540021600865,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 0,
+          "detail": ""
+        },
+        {
+          "t": 0.1500060002400096,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 1,
+          "detail": ""
+        },
+        {
+          "t": 0.16500660026401057,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 2,
+          "detail": ""
+        },
+        {
+          "t": 0.18000720028801154,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 3,
+          "detail": ""
+        },
+        {
+          "t": 0.19500780031201248,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 4,
+          "detail": ""
+        },
+        {
+          "t": 0.21000840033601345,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 5,
+          "detail": ""
+        },
+        {
+          "t": 0.22500900036001442,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 6,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 7,
+          "detail": ""
+        },
+        {
+          "t": 0.13500540021600865,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 0,
+          "detail": ""
+        },
+        {
+          "t": 0.1500060002400096,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 1,
+          "detail": ""
+        },
+        {
+          "t": 0.16500660026401057,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 2,
+          "detail": ""
+        },
+        {
+          "t": 0.18000720028801154,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 3,
+          "detail": ""
+        },
+        {
+          "t": 0.19500780031201248,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 4,
+          "detail": ""
+        },
+        {
+          "t": 0.21000840033601345,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 5,
+          "detail": ""
+        },
+        {
+          "t": 0.22500900036001442,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 6,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 7,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 8,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 9,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 10,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 11,
+          "detail": ""
+        },
+        {
+          "t": 0.1586159113031188,
+          "kind": "tx_start",
+          "frame_id": 1,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.19861591130311881,
+          "kind": "tx_end",
+          "frame_id": 1,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.1586159113031188,
+          "kind": "rx_start",
+          "frame_id": 1,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.19861591130311881,
+          "kind": "rx_end",
+          "frame_id": 1,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.19861591130311881,
+          "kind": "tx_start",
+          "frame_id": 1,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.23861591130311882,
+          "kind": "tx_end",
+          "frame_id": 1,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.19861591130311881,
+          "kind": "rx_start",
+          "frame_id": 1,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.23861591130311882,
+          "kind": "rx_end",
+          "frame_id": 1,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.23861591130311882,
+          "kind": "tx_start",
+          "frame_id": 1,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.2786159113031188,
+          "kind": "tx_end",
+          "frame_id": 1,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.23861591130311882,
+          "kind": "rx_start",
+          "frame_id": 1,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.2786159113031188,
+          "kind": "rx_end",
+          "frame_id": 1,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.2786159113031188,
+          "kind": "assembled",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.2786159113031188,
+          "kind": "display",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        }
+      ],
+      "memory": {
+        "process_peak_bytes": 47632384,
+        "process_peak_mb": 47.632,
+        "process_method": "GetProcessMemoryInfo/PeakWorkingSetSize",
+        "python_peak_bytes": 0,
+        "python_peak_mb": 0.0,
+        "logical_buffers": {
+          "reassembly_units": 15456,
+          "interleaver_window": 5282,
+          "display_queue": 49152
+        },
+        "logical_total_kb": 68.25,
+        "model_arrays": {
+          "transmitted_rasters": 1244160,
+          "received_rasters": 1244160,
+          "cvbs_samples_float32": 0
+        },
+        "model_total_mb": 2.488,
+        "note": "the protocol buffer limit applies to logical_total_kb only; it is NOT a limit on process memory, and the model arrays are simulator overhead a real implementation would not hold",
+        "within_protocol_limit": true
+      },
+      "security": {
+        "confidentiality": "AEAD",
+        "authentication": "AEAD, per unit",
+        "integrity": "128-bit tag per unit",
+        "notes": "segmented"
+      },
+      "profile": {
+        "stripe_height": 24,
+        "n_descriptions": 1,
+        "codec": "dct",
+        "quality": 12,
+        "max_unit_payload": 640,
+        "fec_nsym": 96,
+        "fec_header_nsym": 48,
+        "modulation": [
+          4,
+          8,
+          2
+        ],
+        "interleaver": [
+          "block",
+          278,
+          0
+        ],
+        "interleaver_window": 0
+      }
+    },
+    "P": {
+      "unit_plain_bytes": 320,
+      "header_bytes": 56,
+      "tag_bytes": 16,
+      "header_encoded_bytes": 152,
+      "payload_encoded_bytes": 720,
+      "unit_wire_bytes": 872,
+      "unit_symbols": 3488,
+      "raster_capacity_symbols": 21128,
+      "units_per_raster": 6,
+      "unused_symbols": 200,
+      "raster_fill_fraction": 0.9905,
+      "bits_per_symbol": 2,
+      "raster_rate_hz": 25.0,
+      "gross_bitrate_bps": 1056400.0,
+      "wire_bitrate_bps": 1046400.0,
+      "payload_bitrate_bps": 384000.0,
+      "payload_efficiency": 0.3635,
+      "overhead_breakdown_per_unit": {
+        "payload": 320,
+        "aead_tag": 16,
+        "header": 56,
+        "header_parity": 96,
+        "payload_parity": 384
+      },
+      "units_per_raster_after_placement": 6,
+      "placement_loss_units": 0,
+      "accumulation_rows": 278,
+      "waterfall": {
+        "steps": [
+          {
+            "label": "raster capacity",
+            "symbols": 21128.0
+          },
+          {
+            "label": "placement loss",
+            "symbols": 0.0
+          },
+          {
+            "label": "unused tail (filler)",
+            "symbols": -200.0
+          },
+          {
+            "label": "header",
+            "symbols": -1344.0
+          },
+          {
+            "label": "header parity",
+            "symbols": -2304.0
+          },
+          {
+            "label": "payload parity",
+            "symbols": -9216.0
+          },
+          {
+            "label": "AEAD tag",
+            "symbols": -384.0
+          },
+          {
+            "label": "byte->symbol padding",
+            "symbols": -0.0
+          }
+        ],
+        "payload_symbols": 7680.0,
+        "units_placed": 6,
+        "units_per_raster_nominal": 6,
+        "payload_fraction_of_capacity": 0.3635,
+        "raster_overhead": {
+          "raster_pixels": 414720,
+          "blanking_pixels": 38400,
+          "active_pixels": 376320,
+          "grid_remainder_pixels": 0,
+          "sync_pixels": 2688,
+          "pilot_pixels": 35584,
+          "data_cell_pixels": 338048,
+          "data_symbols": 21128,
+          "fractions": {
+            "blanking": 0.0926,
+            "grid_remainder": 0.0,
+            "sync": 0.0065,
+            "pilots": 0.0858,
+            "data_cells": 0.8151
+          }
+        },
+        "note": "symbols, not pixels; the raster_overhead block accounts for the pixels that never reach the symbol grid at all"
+      },
+      "latency": {
+        "profile": {
+          "label": "level-A raster",
+          "raster_rate_hz": 25.0,
+          "raster_period_ms": 40.0,
+          "total_lines": 576,
+          "active_lines": 560,
+          "line_period_us": 69.4444,
+          "rasters_per_frame": 3,
+          "source_fps": 8.333,
+          "frame_period_ms": 120.0048
+        },
+        "n_events": 472,
+        "n_frames": 8,
+        "latency_s": {
+          "mean": 0.15861111111111112,
+          "median": 0.15861111111111115,
+          "p95": 0.15861111111111115,
+          "max": 0.15861111111111115
+        },
+        "deadline_misses": 0,
+        "note": "virtual schedule from event timestamps; wall-clock simulator time is a different metric and is never added to it",
+        "additive_upper_bound": {
+          "stripe_accumulation_s": 0.015001,
+          "interleaver_accumulation_s": 0.038611,
+          "serialisation_s": 0.12,
+          "reception_s": 0.04,
+          "display_hold_s": 0.120005,
+          "virtual_total_s": 0.333617
+        },
+        "overlap_saving_s": 0.175005,
+        "stripes_per_frame": 8
+      },
+      "latency_events_sample": [
+        {
+          "t": 0.0,
+          "kind": "capture",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.01500060002400096,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 0,
+          "detail": ""
+        },
+        {
+          "t": 0.03000120004800192,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 1,
+          "detail": ""
+        },
+        {
+          "t": 0.045001800072002884,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 2,
+          "detail": ""
+        },
+        {
+          "t": 0.06000240009600384,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 3,
+          "detail": ""
+        },
+        {
+          "t": 0.0750030001200048,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 4,
+          "detail": ""
+        },
+        {
+          "t": 0.09000360014400577,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 5,
+          "detail": ""
+        },
+        {
+          "t": 0.10500420016800673,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 6,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "stripe_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 7,
+          "detail": ""
+        },
+        {
+          "t": 0.01500060002400096,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 0,
+          "detail": ""
+        },
+        {
+          "t": 0.01500060002400096,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 1,
+          "detail": ""
+        },
+        {
+          "t": 0.03000120004800192,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 2,
+          "detail": ""
+        },
+        {
+          "t": 0.03000120004800192,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 3,
+          "detail": ""
+        },
+        {
+          "t": 0.045001800072002884,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 4,
+          "detail": ""
+        },
+        {
+          "t": 0.045001800072002884,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 5,
+          "detail": ""
+        },
+        {
+          "t": 0.06000240009600384,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 6,
+          "detail": ""
+        },
+        {
+          "t": 0.06000240009600384,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 7,
+          "detail": ""
+        },
+        {
+          "t": 0.0750030001200048,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 8,
+          "detail": ""
+        },
+        {
+          "t": 0.0750030001200048,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 9,
+          "detail": ""
+        },
+        {
+          "t": 0.09000360014400577,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 10,
+          "detail": ""
+        },
+        {
+          "t": 0.09000360014400577,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 11,
+          "detail": ""
+        },
+        {
+          "t": 0.10500420016800673,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 12,
+          "detail": ""
+        },
+        {
+          "t": 0.10500420016800673,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 13,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 14,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 15,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 16,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "unit_ready",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": 17,
+          "detail": ""
+        },
+        {
+          "t": 0.03861111111111111,
+          "kind": "tx_start",
+          "frame_id": 0,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.0786111111111111,
+          "kind": "tx_end",
+          "frame_id": 0,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.03861111111111111,
+          "kind": "rx_start",
+          "frame_id": 0,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.0786111111111111,
+          "kind": "rx_end",
+          "frame_id": 0,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.0786111111111111,
+          "kind": "tx_start",
+          "frame_id": 0,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.11861111111111111,
+          "kind": "tx_end",
+          "frame_id": 0,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.0786111111111111,
+          "kind": "rx_start",
+          "frame_id": 0,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.11861111111111111,
+          "kind": "rx_end",
+          "frame_id": 0,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.11861111111111111,
+          "kind": "tx_start",
+          "frame_id": 0,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.15861111111111112,
+          "kind": "tx_end",
+          "frame_id": 0,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.11861111111111111,
+          "kind": "rx_start",
+          "frame_id": 0,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.15861111111111112,
+          "kind": "rx_end",
+          "frame_id": 0,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.1586111111111111,
+          "kind": "assembled",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.1586111111111111,
+          "kind": "display",
+          "frame_id": 0,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.12000480019200768,
+          "kind": "capture",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.13500540021600865,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 0,
+          "detail": ""
+        },
+        {
+          "t": 0.1500060002400096,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 1,
+          "detail": ""
+        },
+        {
+          "t": 0.16500660026401057,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 2,
+          "detail": ""
+        },
+        {
+          "t": 0.18000720028801154,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 3,
+          "detail": ""
+        },
+        {
+          "t": 0.19500780031201248,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 4,
+          "detail": ""
+        },
+        {
+          "t": 0.21000840033601345,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 5,
+          "detail": ""
+        },
+        {
+          "t": 0.22500900036001442,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 6,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "stripe_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 7,
+          "detail": ""
+        },
+        {
+          "t": 0.13500540021600865,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 0,
+          "detail": ""
+        },
+        {
+          "t": 0.13500540021600865,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 1,
+          "detail": ""
+        },
+        {
+          "t": 0.1500060002400096,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 2,
+          "detail": ""
+        },
+        {
+          "t": 0.1500060002400096,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 3,
+          "detail": ""
+        },
+        {
+          "t": 0.16500660026401057,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 4,
+          "detail": ""
+        },
+        {
+          "t": 0.16500660026401057,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 5,
+          "detail": ""
+        },
+        {
+          "t": 0.18000720028801154,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 6,
+          "detail": ""
+        },
+        {
+          "t": 0.18000720028801154,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 7,
+          "detail": ""
+        },
+        {
+          "t": 0.19500780031201248,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 8,
+          "detail": ""
+        },
+        {
+          "t": 0.19500780031201248,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 9,
+          "detail": ""
+        },
+        {
+          "t": 0.21000840033601345,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 10,
+          "detail": ""
+        },
+        {
+          "t": 0.21000840033601345,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 11,
+          "detail": ""
+        },
+        {
+          "t": 0.22500900036001442,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 12,
+          "detail": ""
+        },
+        {
+          "t": 0.22500900036001442,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 13,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 14,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 15,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 16,
+          "detail": ""
+        },
+        {
+          "t": 0.24000960038401536,
+          "kind": "unit_ready",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": 17,
+          "detail": ""
+        },
+        {
+          "t": 0.1586159113031188,
+          "kind": "tx_start",
+          "frame_id": 1,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.19861591130311881,
+          "kind": "tx_end",
+          "frame_id": 1,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.1586159113031188,
+          "kind": "rx_start",
+          "frame_id": 1,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.19861591130311881,
+          "kind": "rx_end",
+          "frame_id": 1,
+          "raster": 0,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.19861591130311881,
+          "kind": "tx_start",
+          "frame_id": 1,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.23861591130311882,
+          "kind": "tx_end",
+          "frame_id": 1,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.19861591130311881,
+          "kind": "rx_start",
+          "frame_id": 1,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.23861591130311882,
+          "kind": "rx_end",
+          "frame_id": 1,
+          "raster": 1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.23861591130311882,
+          "kind": "tx_start",
+          "frame_id": 1,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.2786159113031188,
+          "kind": "tx_end",
+          "frame_id": 1,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.23861591130311882,
+          "kind": "rx_start",
+          "frame_id": 1,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.2786159113031188,
+          "kind": "rx_end",
+          "frame_id": 1,
+          "raster": 2,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.2786159113031188,
+          "kind": "assembled",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        },
+        {
+          "t": 0.2786159113031188,
+          "kind": "display",
+          "frame_id": 1,
+          "raster": -1,
+          "unit": -1,
+          "detail": ""
+        }
+      ],
+      "memory": {
+        "process_peak_bytes": 47632384,
+        "process_peak_mb": 47.632,
+        "process_method": "GetProcessMemoryInfo/PeakWorkingSetSize",
+        "python_peak_bytes": 0,
+        "python_peak_mb": 0.0,
+        "logical_buffers": {
+          "reassembly_units": 15696,
+          "interleaver_window": 5282,
+          "display_queue": 49152
+        },
+        "logical_total_kb": 68.49,
+        "model_arrays": {
+          "transmitted_rasters": 1244160,
+          "received_rasters": 1244160,
+          "cvbs_samples_float32": 0
+        },
+        "model_total_mb": 2.488,
+        "note": "the protocol buffer limit applies to logical_total_kb only; it is NOT a limit on process memory, and the model arrays are simulator overhead a real implementation would not hold",
+        "within_protocol_limit": true
+      },
+      "security": {
+        "confidentiality": "AEAD",
+        "authentication": "AEAD, per unit",
+        "integrity": "128-bit tag per unit",
+        "notes": "segmented + MDC + burst-aware placement"
+      },
+      "profile": {
+        "stripe_height": 24,
+        "n_descriptions": 2,
+        "codec": "dct",
+        "quality": 8,
+        "max_unit_payload": 320,
+        "fec_nsym": 128,
+        "fec_header_nsym": 48,
+        "modulation": [
+          4,
+          8,
+          2
+        ],
+        "interleaver": [
+          "bawp",
+          0,
+          8
+        ],
+        "interleaver_window": 0
+      }
+    }
+  },
+  "memory_note": "логічний буфер протоколу порівнюється з лімітом 512 кБ; це НЕ пікова пам'ять процесу і не розмір масивів симулятора - три величини вимірюються окремо"
+}

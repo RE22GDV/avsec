@@ -1,0 +1,32 @@
+{
+  "metric": "coverage",
+  "channels": [
+    "clean",
+    "mild",
+    "moderate",
+    "bursty",
+    "harsh"
+  ],
+  "methods": [
+    "B0a",
+    "B0a-R",
+    "B0d",
+    "B1",
+    "B2",
+    "B3",
+    "B4",
+    "P"
+  ],
+  "source_table": "summary.csv",
+  "figure": "G05",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Поточне автентифіковане покриття",
+  "title_en": "Current authenticated coverage",
+  "experiment": "E02",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

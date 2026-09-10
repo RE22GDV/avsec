@@ -1,0 +1,15 @@
+{
+  "source_table": "attacks.json",
+  "attack": "boundary_compatibility",
+  "figure": "G35",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Атака за сумісністю меж",
+  "title_en": "Boundary-consistency attack",
+  "experiment": "E08",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

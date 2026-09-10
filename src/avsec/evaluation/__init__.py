@@ -30,11 +30,19 @@ def mse(a: np.ndarray, b: np.ndarray, mask: Optional[np.ndarray] = None) -> floa
 
 def psnr(a: np.ndarray, b: np.ndarray, mask: Optional[np.ndarray] = None,
          peak: float = 255.0) -> float:
+    """PSNR in dB, or ``+inf`` when the reconstruction is bit-exact.
+
+    A zero MSE means the frame came back exactly; substituting a finite
+    stand-in such as 99 dB would report a measurement that was never made and
+    would pull an average toward an arbitrary constant.  Callers therefore see
+    ``inf``, record ``bit_exact`` alongside the MSE, and the statistics layer
+    counts those frames separately instead of averaging them in.
+    """
     m = mse(a, b, mask)
     if not np.isfinite(m):
         return float("nan")
     if m <= 1e-12:
-        return 99.0
+        return float("inf")
     return float(10.0 * np.log10(peak * peak / m))
 
 
@@ -67,6 +75,37 @@ def correlation(a: np.ndarray, b: np.ndarray) -> float:
     x, y = x[:n] - x[:n].mean(), y[:n] - y[:n].mean()
     den = float(np.sqrt((x * x).sum() * (y * y).sum()))
     return float((x * y).sum() / den) if den > 0 else 0.0
+
+
+def signal_statistics(raster, active=None) -> Dict[str, float]:
+    """Level, variance, RMS and crest factor of what is actually transmitted.
+
+    Defect F15: an identical *amplitude range* is not the same as identical
+    signal power.  Two schemes can use the window [40, 216] and still differ in
+    mean level, variance and peak-to-average ratio, so those are measured and
+    reported instead of being assumed equal.
+    """
+    a = np.asarray(raster, dtype=np.float64)
+    if active is not None:
+        x0, y0, x1, y1 = active
+        a = a[y0:y1, x0:x1]
+    flat = a.ravel()
+    if flat.size == 0:
+        return {}
+    mean = float(flat.mean())
+    rms = float(np.sqrt((flat ** 2).mean()))
+    ac = flat - mean
+    return {
+        "mean_level": mean,
+        "min_level": float(flat.min()),
+        "max_level": float(flat.max()),
+        "peak_to_peak": float(flat.max() - flat.min()),
+        "rms": rms,
+        "variance": float(flat.var()),
+        "ac_rms": float(np.sqrt((ac ** 2).mean())),
+        "crest_factor": float(np.abs(flat).max() / rms) if rms > 0 else float("nan"),
+        "n_samples": int(flat.size),
+    }
 
 
 # ---------------------------------------------------- illustrative statistics
@@ -117,6 +156,10 @@ class FrameMetrics:
     psnr_verified: float = float("nan")
     ssim_verified: float = float("nan")
     coverage: float = 0.0
+    mse_full: float = float("nan")
+    #: True when the displayed frame matched the source exactly.  Reported as a
+    #: count, never converted into a finite PSNR stand-in (defect F18).
+    bit_exact: bool = False
     stale_fraction: float = 0.0
     estimated_fraction: float = 0.0
     max_age_frames: float = 0.0
@@ -145,13 +188,21 @@ class FrameMetrics:
 
 def quality_pair(original: np.ndarray, rendered: np.ndarray,
                  available: np.ndarray) -> Dict[str, float]:
-    """The mandatory two-view quality report."""
+    """The mandatory two-view quality report, with MSE and exactness kept.
+
+    ``mse_full`` is always finite and is the metric to use when a comparison
+    must include bit-exact frames; ``bit_exact`` says whether this frame was
+    reproduced without a single differing sample.
+    """
+    m_full = mse(original, rendered)
     return {
         "psnr_full": psnr(original, rendered),
         "ssim_full": ssim(original, rendered),
         "psnr_verified": psnr(original, rendered, mask=available),
         "ssim_verified": ssim(original, rendered, mask=available),
         "coverage": float(available.mean()),
+        "mse_full": m_full,
+        "bit_exact": bool(m_full <= 1e-12),
     }
 
 
@@ -277,7 +328,8 @@ def availability_overlay(image: np.ndarray, available: np.ndarray,
 
 
 __all__ = [
-    "mse", "psnr", "ssim", "correlation", "entropy_bits", "npcr_uaci",
+    "mse", "psnr", "ssim", "correlation", "signal_statistics",
+    "entropy_bits", "npcr_uaci",
     "adjacent_correlation", "FrameMetrics", "quality_pair", "aggregate",
     "paired_difference", "save_line_plot", "save_bar_plot", "save_image",
     "availability_overlay",

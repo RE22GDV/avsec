@@ -301,6 +301,114 @@ def cmd_hardware(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_dataset(args: argparse.Namespace) -> int:
+    """Validate the dataset manifest: duplicates, split leakage, provenance."""
+    from avsec.dataset import DatasetManifest, build_manifest
+    from avsec.experiments import build_sources
+
+    if getattr(args, "manifest", None) and os.path.exists(args.manifest):
+        manifest = DatasetManifest.load(args.manifest)
+        sources = None
+    else:
+        cfg = _cfg(args)
+        sources = build_sources(cfg)
+        manifest = build_manifest(sources, seed=cfg.seed)
+    report = manifest.validate()
+    out = _out(args, "runs/_dataset")
+    manifest.save(out)
+    write_json(os.path.join(out, "dataset_validation.json"), report)
+    print(json.dumps(report, indent=2, ensure_ascii=False))
+    if not report["ok"]:
+        print(f"\nFAIL: {len(report['problems'])} problem(s); manifest written to {out}",
+              file=sys.stderr)
+        return 1
+    print(f"\nOK: {report['n_clips']} clips, {report['n_scenes']} scenes, "
+          f"no duplicates across splits; written to {out}")
+    return 0
+
+
+def cmd_protocol_check(args: argparse.Namespace) -> int:
+    """Run the AEAD/framing protocol checks and fail loudly on any regression."""
+    from avsec.experiments import run_protocol_checks
+
+    cfg = _cfg(args)
+    checks = run_protocol_checks(cfg)
+    n_pass = sum(1 for c in checks if c.get("passed"))
+    out = _out(args, "runs/_protocol")
+    payload = {"checks": checks, "n_checks": len(checks), "n_passed": n_pass,
+               "all_passed": n_pass == len(checks), "config": cfg.name}
+    write_json(os.path.join(out, "protocol_checks.json"), payload)
+    for c in checks:
+        if not c.get("passed"):
+            print(f"FAIL  {c.get('name')}: expected {c.get('expected')!r}, "
+                  f"got {c.get('observed')!r}", file=sys.stderr)
+    print(f"{n_pass}/{len(checks)} protocol checks passed -> {out}")
+    return 0 if n_pass == len(checks) else 1
+
+
+def cmd_matrix(args: argparse.Namespace) -> int:
+    """Run (or estimate) one experiment matrix; resumes by default."""
+    from avsec.matrix import MatrixRunner, MatrixSpec
+
+    plan = args.plan or args.config
+    if not plan:
+        print("--plan is required", file=sys.stderr)
+        return 2
+    cfg, spec = MatrixSpec.from_plan(plan)
+    out = _out(args, os.path.join("runs", spec.name))
+    workers = args.workers if args.workers else spec.workers
+    runner = MatrixRunner(cfg, spec, out, workers=workers)
+    est = runner.estimate(measure=not args.no_measure).to_dict()
+    if args.dry_run:
+        print(json.dumps(est, indent=2, ensure_ascii=False))
+        return 0
+    if not args.resume and runner.completed():
+        print(f"{len(runner.completed())} jobs already done in {out}; "
+              "pass --resume to continue, or choose another --output",
+              file=sys.stderr)
+        return 1
+    print(f"pending {est['n_jobs']} jobs, estimate {est['estimated_wall_human']}",
+          file=sys.stderr)
+    res = runner.run(progress=_progress, limit=args.limit)
+    print(json.dumps({k: v for k, v in res.items()
+                      if k not in ("failures", "completeness")},
+                     indent=2, ensure_ascii=False))
+    c = res["completeness"]
+    print(f"complete={c['complete']} missing={c['n_missing']} failed={c['n_failed']}")
+    return 0 if c["complete"] else 1
+
+
+def cmd_analyze(args: argparse.Namespace) -> int:
+    """Estimate every effect from a finished run.  Runs no new experiment."""
+    from avsec.analysis import AnalysisPlan, analyse
+
+    plan = AnalysisPlan.load(args.plan)
+    res = analyse(args.input, plan, _out(args, None) or args.input)
+    print(json.dumps({"n_scenes": res["n_scenes"],
+                      "n_observations": res["n_observations"],
+                      "channels": res["channels"], "methods": res["methods"],
+                      "primary_verdict": res["primary_verdict"]},
+                     indent=2, ensure_ascii=False))
+    return 0
+
+
+def cmd_plots(args: argparse.Namespace) -> int:
+    """Build the G01-G43 catalogue from a finished run.  Reads only."""
+    from avsec.figures import FigureContext, build
+
+    out = _out(args, os.path.join(args.input, "figures"))
+    ctx = FigureContext(run_dir=args.input, out_dir=out, lang=args.lang,
+                        formats=tuple(args.formats))
+    rows = build(ctx, args.only.split(",") if args.only else None)
+    ready = [r["figure"] for r in rows if r["status"] == "ready"]
+    pending = [(r["figure"], r["reason"]) for r in rows if r["status"] != "ready"]
+    print(f"ready {len(ready)}/{len(rows)}: {', '.join(ready)}")
+    for gid, reason in pending:
+        print(f"  pending {gid}: {reason}")
+    print(f"index -> {os.path.join(out, 'figure_index.csv')}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="avsec",
@@ -390,6 +498,46 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--runs", default="runs", help="directory for run outputs")
     sp.add_argument("--no-browser", action="store_true")
     sp.set_defaults(func=cmd_ui)
+
+    sp = sub.add_parser("dataset", help="validate the dataset manifest")
+    _common(sp)
+    sp.add_argument("--manifest", help="existing dataset_manifest.csv to check")
+    sp.add_argument("validate", nargs="?", default="validate",
+                    help="the only subcommand; kept for `avsec dataset validate`")
+    sp.set_defaults(func=cmd_dataset)
+
+    sp = sub.add_parser("protocol-check", help="AEAD and framing protocol checks")
+    _common(sp)
+    sp.set_defaults(func=cmd_protocol_check)
+
+    sp = sub.add_parser("matrix", help="run one experiment matrix (resumable)")
+    _common(sp)
+    sp.add_argument("--plan", help="matrix plan file (a config with a matrix: block)")
+    sp.add_argument("--dry-run", action="store_true",
+                    help="estimate time and output size, run nothing")
+    sp.add_argument("--resume", action="store_true",
+                    help="continue an existing run directory without duplicating jobs")
+    sp.add_argument("--workers", type=int, default=0,
+                    help="process workers (0 = the plan's value)")
+    sp.add_argument("--limit", type=int, default=0,
+                    help="run at most this many jobs, then stop")
+    sp.add_argument("--no-measure", action="store_true",
+                    help="skip the per-method cost probe in the estimate")
+    sp.set_defaults(func=cmd_matrix)
+
+    sp = sub.add_parser("analyze", help="statistics from a finished run")
+    sp.add_argument("--input", required=True, help="run directory")
+    sp.add_argument("--output", help="where to write the tables (default: --input)")
+    sp.add_argument("--plan", help="statistics plan YAML")
+    sp.set_defaults(func=cmd_analyze)
+
+    sp = sub.add_parser("plots", help="build the G01-G43 figure catalogue")
+    sp.add_argument("--input", required=True, help="run directory")
+    sp.add_argument("--output", help="figure directory (default: <input>/figures)")
+    sp.add_argument("--lang", default="uk", choices=("uk", "en"))
+    sp.add_argument("--formats", nargs="+", default=["png", "svg", "pdf"])
+    sp.add_argument("--only", help="comma separated figure ids, e.g. G03,G07")
+    sp.set_defaults(func=cmd_plots)
 
     sp = sub.add_parser("hardware", help="capture from a real video device")
     _common(sp)

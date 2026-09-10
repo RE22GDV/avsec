@@ -1,0 +1,15 @@
+{
+  "x": "payload_bitrate_bps",
+  "source_table": "budgets.json",
+  "figure": "G14",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Межа Парето за швидкістю",
+  "title_en": "Rate Pareto front",
+  "experiment": "E09",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

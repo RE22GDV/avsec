@@ -1,0 +1,80 @@
+{
+  "kind": "E07",
+  "scenarios": [
+    "clean_burst_clean",
+    "dropouts",
+    "degrade_recover"
+  ],
+  "n_frames": 48,
+  "impairment_windows": {
+    "clean_burst_clean": [
+      12,
+      24
+    ],
+    "dropouts": [
+      12,
+      24
+    ],
+    "degrade_recover": [
+      12,
+      24
+    ]
+  },
+  "schedules": {
+    "clean_burst_clean": [
+      [
+        0,
+        "mild"
+      ],
+      [
+        12,
+        "harsh"
+      ],
+      [
+        24,
+        "mild"
+      ]
+    ],
+    "dropouts": [
+      [
+        0,
+        "mild"
+      ],
+      [
+        12,
+        "mild[frame_drop_prob=0.25]"
+      ],
+      [
+        24,
+        "mild"
+      ]
+    ],
+    "degrade_recover": [
+      [
+        0,
+        "clean"
+      ],
+      [
+        12,
+        "mild"
+      ],
+      [
+        16,
+        "moderate"
+      ],
+      [
+        20,
+        "harsh"
+      ],
+      [
+        24,
+        "mild"
+      ]
+    ]
+  },
+  "n_rows": 5184,
+  "n_recovery_cases": 108,
+  "n_censored": 0,
+  "session_continuity": "увесь кліп - одне завдання; приймач не скидається на межі фази, змінюється лише модель спотворень",
+  "recovery_definition": "від кінця завади до першого показаного кадру з поточним покриттям >= 0.9; випадки без відновлення до кінця кліпу залишені в розподілі як цензуровані"
+}

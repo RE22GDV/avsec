@@ -1,0 +1,16 @@
+{
+  "grid_rows": 60,
+  "grid_cols": 40,
+  "source_table": "placement_geometry.csv",
+  "figure": "G27",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Геометрія перемежувачів",
+  "title_en": "Interleaver geometry",
+  "experiment": "E05",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

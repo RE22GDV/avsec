@@ -1,0 +1,5 @@
+accumulation_rows,grid,n_units,scheme
+1,60x40,8,sequential
+60,60x40,8,block-278
+60,60x40,8,diagonal-64
+60,60x40,8,bawp-8

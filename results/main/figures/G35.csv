@@ -1,0 +1,5 @@
+assumptions,content,direct_accuracy,n_blocks,neighbour_accuracy,reconstruction_psnr_db
+ciphertext-only; public grid; natural image continuity across seams,smooth,0.0,192.0,0.949438202247191,24.681112285187794
+ciphertext-only; public grid; natural image continuity across seams,edges,0.010416666666666666,192.0,0.033707865168539325,6.033210412854942
+ciphertext-only; public grid; natural image continuity across seams,text,0.0,192.0,0.03089887640449438,13.027386367024139
+ciphertext-only; public grid; natural image continuity across seams,texture,0.005208333333333333,192.0,0.6741573033707865,14.620146310552848

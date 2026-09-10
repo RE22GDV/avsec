@@ -19,7 +19,7 @@ from avsec.optimization import SharedBudget
 from avsec.source_coding import SourceCodingConfig
 from avsec.transmitter import TransportConfig
 
-ALL_METHODS = ("B0a", "B0d", "B1", "B2", "B3", "B4", "P")
+ALL_METHODS = ("B0a", "B0a-R", "B0d", "B0d-W", "B1", "B2", "B3", "B4", "P")
 
 
 @dataclass
@@ -35,6 +35,10 @@ class MethodProfile:
     fec_header_nsym: int = 48
     modulation: Tuple[int, int, int] = (4, 8, 2)
     interleaver: Tuple[str, int, int] = ("block", 278, 0)
+    #: BAWP placement window in symbol rows; 0 = the whole raster.  It is a
+    #: separate field because it is not interchangeable with the block
+    #: interleaver's depth and E06 varies it on its own.
+    interleaver_window: int = 0
 
     def source_config(self) -> SourceCodingConfig:
         return SourceCodingConfig(
@@ -50,7 +54,8 @@ class MethodProfile:
             fec_payload=FECConfig(k=max(1, 255 - self.fec_nsym), nsym=self.fec_nsym),
             fec_header=FECConfig(k=52, nsym=self.fec_header_nsym),
             interleaver=InterleaverConfig(
-                scheme=scheme, depth=max(1, depth), window_rows=0,
+                scheme=scheme, depth=max(1, depth),
+                window_rows=max(0, int(self.interleaver_window)),
                 burst_rows=max(1, burst) if scheme == "bawp" else 4),
             raster_rate_hz=budget.raster_rate_hz,
             max_rasters_per_frame=budget.rasters_per_frame,
@@ -100,6 +105,10 @@ class ExperimentConfig:
 
     name: str = "smoke"
     seed: int = 20240909
+    # Separate seeds so a repetition of the cryptographic material is an explicit,
+    # documented factor and never entangled with the channel realisation (F09).
+    channel_seed: Optional[int] = None
+    crypto_seed: Optional[int] = None
     frame_width: int = 256
     frame_height: int = 192
     n_frames: int = 4
@@ -114,6 +123,7 @@ class ExperimentConfig:
     lfsr: ScramblerConfig = field(default_factory=lambda: ScramblerConfig(
         grid_rows=12, grid_cols=16, lfsr=LFSRConfig(seed=44257), per_frame=False))
     b2_grid: Tuple[int, int] = (12, 16)
+    b0ar_combine: str = "median"      # receiver combining for the B0a-R control
     fill: str = "interpolate"
     key_mode: str = "lab"          # 'lab' (reproducible benchmark) | 'secure'
     key_file: Optional[str] = None
@@ -134,16 +144,49 @@ class ExperimentConfig:
     def profile(self, method: str) -> MethodProfile:
         return self.profiles.get(method, DEFAULT_PROFILES.get(method, MethodProfile()))
 
+    # -- seeds and run identity (F09) ---------------------------------
+    @property
+    def channel_seed_value(self) -> int:
+        return int(self.seed if self.channel_seed is None else self.channel_seed)
+
+    @property
+    def crypto_seed_value(self) -> int:
+        return int(self.seed if self.crypto_seed is None else self.crypto_seed)
+
+    def run_identity(self) -> str:
+        """Canonical hash of the effective configuration.
+
+        Two runs with the same identity must produce identical lab ciphertext,
+        identical signals and identical metrics; only wall-clock timings and
+        timestamps may differ.
+        """
+        import hashlib
+        import json as _json
+
+        payload = self.to_dict()
+        payload.pop("notes", None)
+        canonical = _json.dumps(payload, sort_keys=True, ensure_ascii=False,
+                                default=str)
+        return hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:16]
+
     def master_secret(self):
         from avsec.crypto import lab_master_secret, load_master_secret
 
         if self.key_mode == "lab":
-            return lab_master_secret(self.seed)
+            return lab_master_secret(self.crypto_seed_value)
         return load_master_secret(self.key_file)
+
+    def session_id_source(self):
+        """Deterministic in lab mode, OS CSPRNG in secure mode (defect F09)."""
+        from avsec.crypto import make_session_id_source
+
+        return make_session_id_source(self.key_mode, self.crypto_seed_value,
+                                      self.run_identity())
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "name": self.name, "seed": self.seed,
+            "channel_seed": self.channel_seed, "crypto_seed": self.crypto_seed,
             "frame": {"width": self.frame_width, "height": self.frame_height,
                       "n_frames": self.n_frames},
             "sources": self.sources,
@@ -154,7 +197,7 @@ class ExperimentConfig:
             "profiles": {k: v.to_dict() for k, v in self.profiles.items()},
             "crypto": self.crypto.describe(),
             "lfsr": self.lfsr.describe(),
-            "b2_grid": list(self.b2_grid),
+            "b2_grid": list(self.b2_grid), "b0ar_combine": self.b0ar_combine,
             "fill": self.fill,
             "key_mode": self.key_mode,
             "max_frames_per_source": self.max_frames_per_source,
@@ -176,6 +219,8 @@ def config_from_dict(d: Dict[str, Any]) -> ExperimentConfig:
     cfg = ExperimentConfig()
     cfg.name = d.get("name", cfg.name)
     cfg.seed = int(d.get("seed", cfg.seed))
+    cfg.channel_seed = d.get("channel_seed")
+    cfg.crypto_seed = d.get("crypto_seed")
     fr = d.get("frame", {})
     cfg.frame_width = int(fr.get("width", cfg.frame_width))
     cfg.frame_height = int(fr.get("height", cfg.frame_height))
@@ -207,6 +252,7 @@ def config_from_dict(d: Dict[str, Any]) -> ExperimentConfig:
         size_policy=lf.get("size_policy", "pad"),
         per_frame=bool(lf.get("per_frame", False)))
     cfg.b2_grid = tuple(d.get("b2_grid", [12, 16]))
+    cfg.b0ar_combine = d.get("b0ar_combine", "median")
     cfg.fill = d.get("fill", cfg.fill)
     cfg.key_mode = d.get("key_mode", cfg.key_mode)
     cfg.key_file = d.get("key_file")

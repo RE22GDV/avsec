@@ -215,6 +215,78 @@ def new_session_id() -> bytes:
     return secrets.token_bytes(SESSION_ID_LEN)
 
 
+class SessionIdSource:
+    """Where session identifiers come from.
+
+    Defect F09: in ``lab`` mode a benchmark must be bit-for-bit reproducible, and
+    a session id drawn from ``os.urandom`` breaks that - two identical runs
+    produced different ciphertext and therefore different channel outcomes on the
+    margin.  Operational mode must keep using the OS CSPRNG.  The two are
+    separate classes so a report can never confuse them.
+    """
+
+    origin = "secure"
+
+    def next(self, context: str = "") -> bytes:
+        raise NotImplementedError
+
+    def describe(self) -> Dict[str, object]:
+        return {"origin": self.origin, "class": type(self).__name__}
+
+
+class SecureSessionIds(SessionIdSource):
+    """Operational: fresh, unpredictable identifiers from the OS CSPRNG."""
+
+    origin = "secure"
+
+    def next(self, context: str = "") -> bytes:
+        return secrets.token_bytes(SESSION_ID_LEN)
+
+
+class LabSessionIds(SessionIdSource):
+    """Benchmark only: deterministic identifiers derived from a recorded seed.
+
+    Derived with HKDF from ``(crypto_seed, run_identity, context, counter)``, so
+    two identical lab runs produce identical ciphertext, identical signals and
+    identical metrics.  Never use this to protect anything: the identifiers are
+    predictable by construction, and the flag ``origin='lab'`` says so.
+    """
+
+    origin = "lab"
+
+    def __init__(self, crypto_seed: int, run_identity: str = "") -> None:
+        self.crypto_seed = int(crypto_seed)
+        self.run_identity = str(run_identity)
+        self._counters: Dict[str, int] = {}
+
+    def next(self, context: str = "") -> bytes:
+        n = self._counters.get(context, 0)
+        self._counters[context] = n + 1
+        material = "|".join([self.run_identity, context, str(n)]).encode("utf-8")
+        return _hkdf(
+            int(self.crypto_seed).to_bytes(8, "big", signed=False),
+            b"avsec-lab-session-id", PROTOCOL_LABEL + b"|sid|" + material,
+            SESSION_ID_LEN)
+
+    def reset(self) -> None:
+        self._counters.clear()
+
+    def describe(self) -> Dict[str, object]:
+        d = super().describe()
+        d.update({"crypto_seed": self.crypto_seed, "run_identity": self.run_identity,
+                  "warning": "predictable identifiers; benchmarks only"})
+        return d
+
+
+def make_session_id_source(mode: str, crypto_seed: int = 0,
+                           run_identity: str = "") -> SessionIdSource:
+    if mode == "lab":
+        return LabSessionIds(crypto_seed, run_identity)
+    if mode == "secure":
+        return SecureSessionIds()
+    raise CryptoError(f"session id mode must be 'lab' or 'secure', got {mode!r}")
+
+
 # ------------------------------------------------------------------ transmitter
 @dataclass
 class SessionState:
@@ -524,6 +596,8 @@ __all__ = [
     "CryptoError", "NonceExhausted", "AuthenticationFailed", "ReplayDetected",
     "MasterSecret", "generate_master_secret", "lab_master_secret", "load_master_secret",
     "SessionKeys", "derive_session_keys", "new_session_id", "SessionState",
+    "SessionIdSource", "SecureSessionIds", "LabSessionIds",
+    "make_session_id_source",
     "Sealer", "Opener", "ReplayWindow", "CryptoProfile", "make_session",
     "NullSealer", "NullOpener",
 ]

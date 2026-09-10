@@ -48,7 +48,7 @@ from avsec.interleaving import Interleaver
 from avsec.modem import DemodResult, RasterModem
 from avsec.source_coding import CODEC_FILLER, SourceCodingConfig, StripeCoder
 from avsec.transmitter import TransportConfig
-from avsec.utils import StageTimer, symbols_to_bytes
+from avsec.utils import StageTimer, public_whiten, symbols_to_bytes
 
 
 class UnitStatus(str, Enum):
@@ -357,6 +357,8 @@ class Receiver:
                                str(pstats.get("error", "")), header,
                                header_corrected=int(hstats.get("corrected_symbols", 0)))
 
+        if self.cfg.public_whitening:
+            ct = public_whiten(ct, header.unit_seq)
         with t("rx.aead"):
             try:
                 plain = opener.open(header.unit_seq, ct, hdr_bytes[:HEADER_CORE_LEN])

@@ -11,6 +11,18 @@ countermeasure only - it is public, it is never relied on for confidentiality.
     a ``depth x L`` matrix by rows, read it out by columns.  Accumulation depth
     ``depth`` symbol rows.
 
+``diagonal``
+    Helical placement: logical symbol ``l`` goes to row ``l mod n_rows`` and
+    column ``(l // n_rows + l mod n_rows) mod n_cols``.  Consecutive symbols
+    always land in different rows, so it is the natural strong comparator for
+    BAWP - and it needs the whole raster buffered, exactly like BAWP does.
+
+``random``
+    A **public** pseudo-random permutation of the data cells, derived from a
+    fixed constant and the grid size.  It is public by construction and is
+    never a confidentiality mechanism; it exists so that "is BAWP better than
+    just shuffling?" has a measured answer.
+
 ``bawp`` - Burst-Aware Window Placement (proposed)
     See :func:`bawp_placement` for the exact rule, its admissibility predicate
     and its complexity.  Accumulation depth = the window height in symbol rows.
@@ -22,7 +34,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 
-SCHEMES = ("sequential", "block", "bawp")
+SCHEMES = ("sequential", "block", "diagonal", "random", "bawp")
 
 
 class PlacementError(Exception):
@@ -78,6 +90,34 @@ def block_placement(n_rows: int, n_cols: int, depth: int) -> np.ndarray:
         out[pos : pos + g * n_cols] = block.T.ravel()
         pos += g * n_cols
     return out
+
+
+
+def diagonal_placement(n_rows: int, n_cols: int, step: int = 1) -> np.ndarray:
+    """Helical interleaver: consecutive symbols never share a row.
+
+    ``l -> (row = l mod R, col = (l // R + step * (l mod R)) mod C)``.  For
+    ``gcd(step, C)`` arbitrary this is still a bijection onto the grid because
+    the row index alone already partitions the stream into ``R`` classes and
+    each class fills its row's ``C`` columns exactly once.
+    """
+    R, C = int(n_rows), int(n_cols)
+    l = np.arange(R * C, dtype=np.int64)
+    row = l % R
+    col = (l // R + int(step) * row) % C
+    return row * C + col
+
+
+def random_placement(n_rows: int, n_cols: int, seed: int = 0x415653) -> np.ndarray:
+    """Public pseudo-random permutation of the data cells.
+
+    The seed is a published constant, not a key: both endpoints and any
+    eavesdropper can reproduce this permutation.  It is a burst-spreading
+    comparator, never a confidentiality mechanism.
+    """
+    n = int(n_rows) * int(n_cols)
+    rng = np.random.default_rng([int(seed), int(n_rows), int(n_cols)])
+    return rng.permutation(n).astype(np.int64)
 
 
 def bawp_bands(window_rows: int, n_descriptions: int, burst_rows: int) -> List[Tuple[int, int]]:
@@ -314,6 +354,11 @@ class Interleaver:
             self._table = sequential_placement(self.capacity)
         elif cfg.scheme == "block":
             self._table = block_placement(self.n_rows, self.n_cols, cfg.depth)
+        elif cfg.scheme == "diagonal":
+            self._table = diagonal_placement(self.n_rows, self.n_cols,
+                                             max(1, cfg.column_twist))
+        elif cfg.scheme == "random":
+            self._table = random_placement(self.n_rows, self.n_cols)
 
     @property
     def accumulation_rows(self) -> int:
@@ -322,6 +367,10 @@ class Interleaver:
             return 1
         if self.cfg.scheme == "block":
             return max(1, min(self.cfg.depth, self.n_rows))
+        if self.cfg.scheme in ("diagonal", "random"):
+            # both scatter a unit over the whole grid, so the receiver cannot
+            # start before the last row of the raster has arrived
+            return self.n_rows
         return self.n_rows if self.cfg.window_rows <= 0 else min(self.cfg.window_rows, self.n_rows)
 
     def max_units(self, unit_symbols: int, n_descriptions: int = 1,
@@ -368,7 +417,8 @@ class Interleaver:
 
 __all__ = [
     "SCHEMES", "PlacementError", "InterleaverConfig", "Interleaver",
-    "sequential_placement", "block_placement", "bawp_bands", "bawp_placement",
+    "sequential_placement", "block_placement", "diagonal_placement",
+    "random_placement", "bawp_bands", "bawp_placement",
     "bawp_admissible", "PlacementInfo", "worst_case_codeword_damage",
     "burst_rows_from_lines",
 ]

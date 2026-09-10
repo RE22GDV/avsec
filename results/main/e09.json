@@ -1,0 +1,32 @@
+{
+  "kind": "E09",
+  "resolutions": [
+    "128x96",
+    "256x192",
+    "320x240",
+    "384x288"
+  ],
+  "warmup": 1,
+  "repeats": 5,
+  "workers": 1,
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "cpu_count": 32,
+    "packages": {
+      "numpy": "2.1.2",
+      "scipy": "1.16.0",
+      "cv2": "4.13.0",
+      "cryptography": "50.0.1",
+      "reedsolo": "unknown",
+      "PIL": "11.0.0",
+      "matplotlib": "3.9.2",
+      "yaml": "6.0.2"
+    },
+    "avsec_version": "0.1.0",
+    "git_commit": "26dcb4a75436e5ac0db9c369cbef8ff20128a44a"
+  },
+  "note": "wall-clock симулятора на ПК; це не вимір на Raspberry Pi 5 і не оцінка апаратної реалізації. Наявність GPU не прискорює цей код: він виконується на CPU у NumPy та чистому Python"
+}

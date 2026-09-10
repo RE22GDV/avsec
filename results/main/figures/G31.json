@@ -1,0 +1,14 @@
+{
+  "source_table": "ablations.csv",
+  "figure": "G31",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Абляція MDC x розміщення",
+  "title_en": "MDC x placement ablation",
+  "experiment": "E06",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

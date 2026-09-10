@@ -1,0 +1,15 @@
+{
+  "scenario": "clean_burst_clean",
+  "source_table": "dynamics.csv",
+  "figure": "G26",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Актуальність показу",
+  "title_en": "Freshness of the display",
+  "experiment": "E07",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

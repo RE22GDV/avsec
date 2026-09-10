@@ -1,0 +1,14 @@
+{
+  "source_table": "frames.csv",
+  "figure": "G02",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Карти доступності",
+  "title_en": "Availability maps",
+  "experiment": "E02",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

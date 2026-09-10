@@ -148,6 +148,100 @@ def pattern_illumination(h: int, w: int, phase: float = 0.0) -> np.ndarray:
     return np.clip(base * gain, 0, 255).astype(np.uint8)
 
 
+def pattern_horizon(h: int, w: int, phase: float = 0.0) -> np.ndarray:
+    """Sky over ground with a tilting horizon - the commonest UAV downlink frame."""
+    yy, xx = _grid(h, w)
+    tilt = 0.18 * np.sin(2 * np.pi * phase)
+    horizon = h * (0.42 + 0.06 * np.cos(2 * np.pi * phase)) + tilt * (xx - w / 2)
+    sky = 190 - 40 * yy / max(h, 1)
+    ground = 95 + 30 * np.sin(2 * np.pi * (xx / max(w, 1) * 2.0 + phase))
+    ground += 18 * np.sin(2 * np.pi * (yy / max(h, 1) * 5.0 - phase))
+    img = np.where(yy < horizon, sky, ground)
+    band = np.abs(yy - horizon) < 1.5
+    img = np.where(band, 235, img)
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
+def pattern_road(h: int, w: int, phase: float = 0.0) -> np.ndarray:
+    """Converging lines: strong geometry, sensitive to horizontal jitter."""
+    yy, xx = _grid(h, w)
+    depth = np.clip(yy / max(h, 1), 0.02, 1.0)
+    centre = w * (0.5 + 0.12 * np.sin(2 * np.pi * phase))
+    half = w * 0.06 + w * 0.42 * depth
+    img = np.full((h, w), 120.0)
+    img += 45 * np.sin(2 * np.pi * (yy / max(h, 1) * 3.0 + phase * 2))
+    road = np.abs(xx - centre) < half
+    img = np.where(road, 70.0, img)
+    dash = (np.abs(xx - centre) < half * 0.06) & (((yy / max(h, 1) * 14 + phase * 9) % 2) < 1)
+    img = np.where(dash, 240.0, img)
+    edge = np.abs(np.abs(xx - centre) - half) < 1.2
+    img = np.where(edge, 215.0, img)
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
+def pattern_targets(h: int, w: int, phase: float = 0.0, seed: int = 11) -> np.ndarray:
+    """Small high-contrast objects on a soft background - detail that matters."""
+    rng = experiment_rng(seed, "targets")
+    img = pattern_smooth(h, w, 0.25 * phase).astype(np.float64) * 0.55 + 70.0
+    n = 9
+    for i in range(n):
+        cy = float(rng.uniform(0.12, 0.88) * h)
+        cx = float((rng.uniform(0.08, 0.92) + 0.15 * np.sin(2 * np.pi * (phase + i / n))) * w)
+        r = float(rng.uniform(0.018, 0.05) * min(h, w))
+        yy, xx = _grid(h, w)
+        d = np.sqrt((yy - cy) ** 2 + (xx - cx) ** 2)
+        val = 245.0 if i % 2 == 0 else 20.0
+        img = np.where(d < r, val, img)
+        img = np.where((d >= r) & (d < r + 1.2), 0.5 * (val + img), img)
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
+def pattern_grid(h: int, w: int, phase: float = 0.0) -> np.ndarray:
+    """Regular grid - deliberately close to the symbol cell pitch, aliasing-prone."""
+    yy, xx = _grid(h, w)
+    period = 12.0
+    gx = (np.mod(xx + phase * period * 4, period) < 2.0)
+    gy = (np.mod(yy + phase * period * 2, period) < 2.0)
+    img = np.full((h, w), 205.0)
+    img = np.where(gx | gy, 40.0, img)
+    img += 12 * np.sin(2 * np.pi * (xx + yy) / max(w, 1))
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
+def pattern_clouds(h: int, w: int, phase: float = 0.0, seed: int = 23) -> np.ndarray:
+    """Low-frequency field: easy to compress, unforgiving of banding."""
+    from scipy import ndimage
+
+    rng = experiment_rng(seed, "clouds")
+    base = rng.normal(0.0, 1.0, size=(h, w))
+    field = np.zeros_like(base)
+    for octave, weight in ((18.0, 1.0), (7.0, 0.5), (3.0, 0.25)):
+        field += weight * ndimage.gaussian_filter(base, octave)
+    field = field / max(float(field.std()), 1e-6)
+    yy, xx = _grid(h, w)
+    drift = ndimage.shift(field, (0.0, phase * w * 0.25), mode="wrap", order=1)
+    return np.clip(150 + 45 * drift + 12 * np.cos(2 * np.pi * yy / max(h, 1)),
+                   0, 255).astype(np.uint8)
+
+
+def pattern_lowlight(h: int, w: int, phase: float = 0.0, seed: int = 31) -> np.ndarray:
+    """Dark scene with sensor noise: little headroom above the black level."""
+    from scipy import ndimage
+
+    rng = experiment_rng(seed, "lowlight", round(phase, 6))
+    yy, xx = _grid(h, w)
+    # a few dim sources in the dark, not a darkened copy of another pattern
+    base = np.full((h, w), 14.0)
+    for i, (fy, fx, amp) in enumerate(((0.30, 0.22, 70.0), (0.68, 0.55, 46.0),
+                                       (0.44, 0.81, 58.0))):
+        cy = (fy + 0.03 * np.sin(2 * np.pi * (phase + i * 0.3))) * h
+        cx = (fx + 0.05 * np.cos(2 * np.pi * (phase + i * 0.2))) * w
+        d2 = (yy - cy) ** 2 + (xx - cx) ** 2
+        base += amp * np.exp(-d2 / (2 * (0.09 * min(h, w)) ** 2))
+    grain = ndimage.gaussian_filter(rng.normal(0.0, 1.0, size=(h, w)), 0.7) * 9.0
+    return np.clip(base + grain, 0, 255).astype(np.uint8)
+
+
 def pattern_blocks(h: int, w: int, rows: int, cols: int) -> np.ndarray:
     """Uniquely identifiable tiles - the chosen-plaintext frame for permutation attacks."""
     img = np.zeros((h, w), dtype=np.uint8)
@@ -173,6 +267,22 @@ PATTERNS = {
     "texture": pattern_texture,
     "text": pattern_text,
     "illumination": pattern_illumination,
+    "horizon": pattern_horizon,
+    "road": pattern_road,
+    "targets": pattern_targets,
+    "grid": pattern_grid,
+    "clouds": pattern_clouds,
+    "lowlight": pattern_lowlight,
+}
+
+#: Content category of each pattern, used by the dataset manifest so that a
+#: result can be reported per category instead of per individual clip.
+PATTERN_CATEGORY = {
+    "smooth": "low-detail", "clouds": "low-detail", "illumination": "low-detail",
+    "edges": "structure", "road": "structure", "grid": "structure",
+    "horizon": "structure",
+    "texture": "high-detail", "targets": "high-detail", "lowlight": "high-detail",
+    "text": "text",
 }
 
 
@@ -228,6 +338,118 @@ def default_suite(h: int, w: int, n_frames: int = 6) -> List[FrameSource]:
         synthetic_sequence("edges", h, w, n_frames, "slow"),
         synthetic_sequence("texture", h, w, n_frames, "fast"),
     ]
+    return out
+
+
+
+
+def _scene_variant(frame: np.ndarray, variant: int) -> np.ndarray:
+    """Deterministic viewpoint and exposure change that defines a *new scene*.
+
+    Two clips of the same pattern with different motion are not two scenes -
+    they are one scene filmed twice, and the duplicate detector says so.  A
+    variant applies a fixed rotation, zoom, mirror and exposure, i.e. what
+    actually distinguishes two shots of the same kind of terrain.  The same
+    variant is applied to every frame of a clip, so motion is preserved.
+    """
+    if variant == 0:
+        return frame
+    import cv2
+
+    h, w = frame.shape
+    angle = ((variant * 37) % 21) - 10.0            # -10..+10 degrees
+    zoom = 1.0 + 0.06 * ((variant * 13) % 5)        # 1.00..1.24
+    mirror = bool(variant % 2)
+    gain = 0.80 + 0.09 * ((variant * 7) % 5)        # 0.80..1.16
+    offset = -14.0 + 7.0 * ((variant * 11) % 5)     # -14..+14
+    m = cv2.getRotationMatrix2D((w / 2.0, h / 2.0), angle, zoom)
+    out = cv2.warpAffine(frame, m, (w, h), flags=cv2.INTER_LINEAR,
+                         borderMode=cv2.BORDER_REFLECT_101)
+    if mirror:
+        out = out[:, ::-1]
+    return np.clip(out.astype(np.float64) * gain + offset, 0, 255).astype(np.uint8)
+
+
+#: The research material of E02, declared before anything is run.
+#:
+#: Each entry is ``(pattern, motion, phase0, viewpoint variant, split)``.  A
+#: variant is a fixed rotation, zoom, mirror and exposure, so two clips of the
+#: same pattern are two different shots of that kind of terrain - not the same
+#: scene twice.  The duplicate detector in :mod:`avsec.dataset` is run over the
+#: whole set and must find nothing; the splits below are fixed here rather than
+#: drawn at run time so that a later run cannot move a scene between them.
+#:
+#: 20 test scenes, 8 calibration, 6 validation.  All of it is SYNTHETIC.
+RESEARCH_SCENES = (
+    # ---- test (20) -----------------------------------------------------
+    ("horizon", "slow", 0.00, 0, "test"),
+    ("horizon", "fast", 0.37, 3, "test"),
+    ("road", "slow", 0.00, 0, "test"),
+    ("road", "fast", 0.51, 5, "test"),
+    ("targets", "slow", 0.00, 0, "test"),
+    ("targets", "fast", 0.29, 7, "test"),
+    ("texture", "slow", 0.00, 0, "test"),
+    ("texture", "fast", 0.61, 2, "test"),
+    ("edges", "slow", 0.00, 0, "test"),
+    ("edges", "fast", 0.13, 9, "test"),
+    ("clouds", "slow", 0.00, 0, "test"),
+    ("clouds", "fast", 0.44, 4, "test"),
+    ("grid", "slow", 0.00, 0, "test"),
+    ("grid", "fast", 0.72, 6, "test"),
+    ("lowlight", "slow", 0.00, 0, "test"),
+    ("lowlight", "fast", 0.18, 8, "test"),
+    ("text", "slow", 0.00, 0, "test"),
+    ("text", "fast", 0.55, 11, "test"),
+    ("illumination", "slow", 0.00, 0, "test"),
+    ("smooth", "slow", 0.00, 0, "test"),
+    # ---- calibration (8) -----------------------------------------------
+    ("horizon", "slow", 0.21, 13, "calibration"),
+    ("road", "slow", 0.33, 15, "calibration"),
+    ("targets", "slow", 0.47, 17, "calibration"),
+    ("texture", "slow", 0.09, 19, "calibration"),
+    ("edges", "slow", 0.66, 21, "calibration"),
+    ("clouds", "slow", 0.28, 23, "calibration"),
+    ("text", "slow", 0.81, 25, "calibration"),
+    ("lowlight", "slow", 0.05, 27, "calibration"),
+    # ---- validation (6) ------------------------------------------------
+    ("horizon", "fast", 0.74, 29, "validation"),
+    ("road", "fast", 0.12, 31, "validation"),
+    ("targets", "fast", 0.58, 33, "validation"),
+    ("texture", "fast", 0.86, 35, "validation"),
+    ("grid", "slow", 0.41, 37, "validation"),
+    ("clouds", "fast", 0.63, 39, "validation"),
+)
+
+
+def research_suite(h: int, w: int, n_frames: int = 16,
+                   scenes: Optional[Sequence[Tuple[str, str, float, int, str]]] = None
+                   ) -> List[FrameSource]:
+    """The research material of E02: continuous clips, one scene each.
+
+    Every clip is a genuinely different scene - a different pattern, a
+    different motion regime or a different starting phase - so that scenes can
+    be treated as independent clusters in the statistics.  They remain
+    *synthetic*: that limitation is carried in ``provenance`` and repeated in
+    every report built from them.
+    """
+    speeds = {"static": 0.0, "slow": 0.02, "fast": 0.10}
+    out: List[FrameSource] = []
+    for pattern, motion, phase0, variant, split in (scenes or RESEARCH_SCENES):
+        step = speeds[motion]
+        frames = [_scene_variant(PATTERNS[pattern](h, w, phase0 + i * step), variant)
+                  for i in range(n_frames)]
+        out.append(FrameSource(
+            name=f"clip_{pattern}_{motion}_v{variant}",
+            frames=frames,
+            provenance=PROV_SYNTHETIC,
+            description=(f"procedural research clip '{pattern}', motion={motion}, "
+                         f"phase0={phase0}, viewpoint variant {variant}, "
+                         f"{w}x{h}, {n_frames} frames"),
+            meta={"pattern": pattern, "motion": motion, "phase0": phase0,
+                  "variant": variant, "scene_id": f"synthetic:{pattern}-v{variant}",
+                  "category": PATTERN_CATEGORY.get(pattern, "other"),
+                  "split": split, "suite": "research"},
+        ))
     return out
 
 
@@ -358,6 +580,8 @@ def build_sources(spec: Dict[str, object]) -> List[FrameSource]:
     kind = str(spec.get("kind", "synthetic"))
     h = int(spec.get("height", 240))
     w = int(spec.get("width", 320))
+    if kind == "research":
+        return research_suite(h, w, int(spec.get("n_frames", 16)))
     if kind == "synthetic":
         n = int(spec.get("n_frames", 6))
         names = spec.get("patterns")
@@ -384,6 +608,7 @@ def build_sources(spec: Dict[str, object]) -> List[FrameSource]:
 __all__ = [
     "FrameSource", "PROV_SYNTHETIC", "PROV_LOCAL_FILE", "PROV_HARDWARE", "PATTERNS",
     "pattern_blocks", "synthetic_still", "synthetic_sequence", "chosen_plaintext_source",
-    "default_suite", "from_image_file", "from_video_file", "from_directory",
+    "default_suite", "research_suite", "RESEARCH_SCENES",
+    "PATTERN_CATEGORY", "from_image_file", "from_video_file", "from_directory",
     "from_capture_device", "HardwareCaptureUnavailable", "build_sources",
 ]

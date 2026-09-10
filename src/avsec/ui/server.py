@@ -435,6 +435,97 @@ def action_load_config(payload: Dict[str, Any]) -> Dict[str, Any]:
     return {"config": load_config(path).to_dict(), "path": path}
 
 
+# ------------------------------------------------------- saved-run explorer
+# Every one of these reads what `avsec analyze` / `avsec plots` already wrote.
+# None of them runs an experiment, so the UI can never show a number the CLI
+# would not produce.
+def action_explorer_runs(payload: Dict[str, Any]) -> Any:
+    from avsec.ui import explorer
+
+    return {"runs": explorer.list_runs(payload.get("runs_dir") or _RUNS_DIR)}
+
+
+def _run_dir(payload: Dict[str, Any]) -> str:
+    d = payload.get("run") or payload.get("run_dir") or ""
+    if not d:
+        raise ValueError("не вказано каталог прогону")
+    if not os.path.isdir(d):
+        raise ValueError(f"каталог {d} не існує")
+    return d
+
+
+def action_explorer_overview(payload: Dict[str, Any]) -> Any:
+    from avsec.ui import explorer
+
+    return explorer.run_overview(_run_dir(payload))
+
+
+def action_explorer_filters(payload: Dict[str, Any]) -> Any:
+    from avsec.ui import explorer
+
+    return explorer.filters(_run_dir(payload))
+
+
+def action_explorer_summary(payload: Dict[str, Any]) -> Any:
+    from avsec.ui import explorer
+
+    return explorer.summary(_run_dir(payload), payload.get("methods"),
+                            payload.get("channels"),
+                            payload.get("metric", "psnr_full"))
+
+
+def action_explorer_paired(payload: Dict[str, Any]) -> Any:
+    from avsec.ui import explorer
+
+    return explorer.paired(_run_dir(payload), payload.get("a", "P"),
+                           payload.get("b", "B4"), payload.get("channel"),
+                           payload.get("metric", "psnr_full"))
+
+
+def action_explorer_scenes(payload: Dict[str, Any]) -> Any:
+    from avsec.ui import explorer
+
+    return explorer.per_scene(_run_dir(payload),
+                              payload.get("methods") or ["P", "B4"],
+                              payload.get("channel", "bursty"),
+                              payload.get("metric", "psnr_full"))
+
+
+def action_explorer_failures(payload: Dict[str, Any]) -> Any:
+    from avsec.ui import explorer
+
+    return explorer.failures(_run_dir(payload))
+
+
+def action_explorer_figures(payload: Dict[str, Any]) -> Any:
+    from avsec.ui import explorer
+
+    return explorer.figure_catalogue(_run_dir(payload))
+
+
+def action_explorer_figure(payload: Dict[str, Any]) -> Any:
+    from avsec.ui import explorer
+
+    return explorer.figure_image(_run_dir(payload), payload.get("figure", "G03"))
+
+
+def action_explorer_export(payload: Dict[str, Any]) -> Any:
+    from avsec.ui import explorer
+
+    return explorer.figure_export(_run_dir(payload), payload.get("figure", "G03"),
+                                  payload.get("format", "svg"))
+
+
+def action_explorer_agemap(payload: Dict[str, Any]) -> Any:
+    from avsec.ui import explorer
+
+    return explorer.age_map(_run_dir(payload), payload.get("clip", ""),
+                            payload.get("method", "P"),
+                            payload.get("channel", "bursty"),
+                            int(payload.get("frame_id", 0)))
+
+
+
 ASYNC_ACTIONS: Dict[str, Callable[..., Any]] = {
     "demo": action_demo,
     "scramble": action_scramble,
@@ -452,6 +543,18 @@ SYNC_ACTIONS: Dict[str, Callable[[Dict[str, Any]], Any]] = {
     "defaults": action_defaults,
     "runs": action_list_runs,
     "load_config": action_load_config,
+    # saved-run explorer
+    "explorer_runs": action_explorer_runs,
+    "explorer_overview": action_explorer_overview,
+    "explorer_filters": action_explorer_filters,
+    "explorer_summary": action_explorer_summary,
+    "explorer_paired": action_explorer_paired,
+    "explorer_scenes": action_explorer_scenes,
+    "explorer_failures": action_explorer_failures,
+    "explorer_figures": action_explorer_figures,
+    "explorer_figure": action_explorer_figure,
+    "explorer_export": action_explorer_export,
+    "explorer_agemap": action_explorer_agemap,
 }
 
 

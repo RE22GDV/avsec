@@ -1,0 +1,5 @@
+authentication,confidentiality,deadline_misses,gross_bitrate_bps,latency_additive_s,latency_mean_s,logical_buffer_kb,method,model_arrays_mb,overhead_aead_tag,overhead_header,overhead_header_parity,overhead_payload,overhead_payload_parity,payload_bitrate_bps,payload_efficiency,process_peak_mb,raster_blanking,raster_data_cells,raster_grid_remainder,raster_pilots,raster_sync,unit_plain_bytes,unit_symbols,unit_wire_bytes,units_per_raster,units_placed,unused_symbols
+none,none,0,1056400.0,0.333617,0.15861111111111112,68.25,B0d,2.488,16,56,96,640,480,512000.0,0.4847,47.632,0.0926,0.8151,0.0,0.0858,0.0065,640,5152,1288,4,4,520
+"AEAD, whole frame",AEAD,0,1056400.0,0.333617,0.15861111111111112,68.25,B3,2.488,16,56,96,640,480,512000.0,0.4847,47.632,0.0926,0.8151,0.0,0.0858,0.0065,640,5152,1288,4,4,520
+"AEAD, per unit",AEAD,0,1056400.0,0.333617,0.15861111111111112,68.25,B4,2.488,16,56,96,640,480,512000.0,0.4847,47.632,0.0926,0.8151,0.0,0.0858,0.0065,640,5152,1288,4,4,520
+"AEAD, per unit",AEAD,0,1056400.0,0.333617,0.15861111111111112,68.49,P,2.488,16,56,96,320,384,384000.0,0.3635,47.632,0.0926,0.8151,0.0,0.0858,0.0065,320,3488,872,6,6,200

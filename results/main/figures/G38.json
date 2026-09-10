@@ -1,0 +1,14 @@
+{
+  "source_table": "protocol_checks.json",
+  "figure": "G38",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Перевірки протоколу",
+  "title_en": "Protocol checks",
+  "experiment": "E08",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}
