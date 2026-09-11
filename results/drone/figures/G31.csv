@@ -1,0 +1,7 @@
+admissible,coverage,n_descriptions,n_scenes,placement,psnr_full,reason
+True,0.8848379629629629,1,6,bawp,24.68693327485489,
+True,0.8223379629629629,2,6,bawp,23.745152818586764,
+False,nan,4,,bawp,nan,не вміщується у спільний бюджет
+True,0.8813657407407408,1,6,block,24.59364399366827,
+True,0.8796296296296294,2,6,block,23.653096012814498,
+False,nan,4,,block,nan,не вміщується у спільний бюджет

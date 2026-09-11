@@ -896,6 +896,144 @@ def run_e10(cfg: ExperimentConfig, out_dir: str,
 
 
 
+
+# ----------------------------------------------------------------------- E13
+#: The path from the strong baseline to the proposal, one change per step.
+#:
+#: The 2x2 factorial of E06 answers "does MDC x placement help, all else equal".
+#: It does not answer "where does the measured advantage of P over B4 actually
+#: come from", because P differs from B4 in four things at once: unit size, FEC
+#: strength, description count and placement.  This walks that difference one
+#: step at a time, on the same clips and the same channel realisations, so each
+#: step's contribution is a measured number rather than an attribution.
+#:
+#: Order matters and is declared: it goes from the transport parameters that any
+#: scheme could adopt to the two mechanisms this work proposes, so the proposal
+#: is charged with whatever is left after the cheap changes have been made.
+E13_CHAIN = (
+    ("B4 (база)", dict()),
+    ("+ менша одиниця 640→320 Б", dict(max_unit_payload=320)),
+    ("+ сильніший FEC nsym 96→128", dict(max_unit_payload=320, fec_nsym=128)),
+    ("+ нижча якість 12→8", dict(max_unit_payload=320, fec_nsym=128, quality=8)),
+    ("+ два описи (MDC)", dict(max_unit_payload=320, fec_nsym=128, quality=8,
+                               n_descriptions=2)),
+    ("+ BAWP = P", dict(max_unit_payload=320, fec_nsym=128, quality=8,
+                        n_descriptions=2, interleaver=("bawp", 0, 8))),
+)
+
+
+def run_e13(cfg: ExperimentConfig, out_dir: str, workers: int = 8,
+            channel: str = "bursty", repetitions: int = 3, max_frames: int = 8,
+            n_clips: int = 0, progress: Progress = None) -> Dict[str, Any]:
+    """E13: decompose the B4 -> P difference into its individual steps.
+
+    Every step is averaged over the **same** scenes.  A step that changes the
+    unit size or the quality can push the hardest scenes over the capacity
+    limit; averaging each step over whatever it happened to fit would credit it
+    with an easier subset.  The per-step contributions therefore come from the
+    intersection of scenes that every admissible step produced, and the scenes
+    dropped that way are counted and named.
+    """
+    ensure_dir(out_dir)
+    base = cfg.profile("B4")
+    point = [ChannelPoint.named(channel)]
+    rows: List[Dict[str, Any]] = []
+    per_scene: List[Dict[str, float]] = []
+    cov_scene: List[Dict[str, float]] = []
+
+    for i, (label, changes) in enumerate(E13_CHAIN):
+        if progress:
+            progress(f"E13 {label}", i / len(E13_CHAIN), {})
+        prof = dataclasses.replace(base, **changes)
+        sub = dataclasses.replace(cfg, methods=("B4",),
+                                  profiles={**cfg.profiles, "B4": prof},
+                                  channel_preset=channel, channel_overrides={})
+        spec = MatrixSpec(methods=("B4",), channels=point, repetitions=repetitions,
+                          splits=("test",), max_frames=max_frames,
+                          max_clips=n_clips, name=f"E13-{i}")
+        row: Dict[str, Any] = {"step": i, "label": label, **_flat(changes)}
+        try:
+            frames = _run(sub, spec, os.path.join(out_dir, "_jobs", f"chain{i}"),
+                          workers)
+        except Exception as exc:
+            row.update({"admissible": False,
+                        "reason": f"{type(exc).__name__}: {exc}"})
+            rows.append(row)
+            per_scene.append({})
+            cov_scene.append({})
+            continue
+        if not frames:
+            row.update({"admissible": False,
+                        "reason": "не вміщується у спільний бюджет"})
+            rows.append(row)
+            per_scene.append({})
+            cov_scene.append({})
+            continue
+        q = {r["scene"]: r["psnr_full"]
+             for r in _scene_mean(frames, "psnr_full", ["scene"])}
+        c = {r["scene"]: r["coverage"]
+             for r in _scene_mean(frames, "coverage", ["scene"])}
+        per_scene.append(q)
+        cov_scene.append(c)
+        arr = np.asarray(list(q.values()), dtype=float)
+        row.update({
+            "admissible": True, "reason": "",
+            "psnr_all_scenes": float(arr.mean()) if arr.size else float("nan"),
+            "n_scenes_available": int(arr.size),
+        })
+        rows.append(row)
+
+    # ---- the common scene set: every admissible step must have it ---------
+    sets = [set(d) for d in per_scene if d]
+    common = sorted(set.intersection(*sets)) if sets else []
+    dropped = sorted(set.union(*sets) - set(common)) if sets else []
+
+    prev_q = prev_c = None
+    for row, q, c in zip(rows, per_scene, cov_scene):
+        if not row.get("admissible") or not common:
+            continue
+        vals = np.asarray([q[s] for s in common], dtype=float)
+        cov = np.asarray([c[s] for s in common], dtype=float)
+        row["n_scenes"] = len(common)
+        row["psnr_full"] = float(vals.mean())
+        row["psnr_sd"] = float(vals.std(ddof=1)) if vals.size > 1 else 0.0
+        row["coverage"] = float(cov.mean())
+        row["delta_psnr"] = 0.0 if prev_q is None else float(vals.mean() - prev_q)
+        row["delta_coverage"] = 0.0 if prev_c is None else float(cov.mean() - prev_c)
+        prev_q, prev_c = float(vals.mean()), float(cov.mean())
+
+    write_csv(os.path.join(out_dir, "chain.csv"), rows)
+    ok = [r for r in rows if r.get("admissible")]
+    transport = sum(r.get("delta_psnr", 0.0) for r in ok
+                    if not ("опис" in r["label"] or "BAWP" in r["label"]))
+    mechanism = sum(r.get("delta_psnr", 0.0) for r in ok
+                    if ("опис" in r["label"] or "BAWP" in r["label"]))
+    out = {"kind": "E13", "channel": channel,
+           "steps": [lbl for lbl, _ in E13_CHAIN], "n_rows": len(rows),
+           "n_scenes_common": len(common),
+           "scenes_dropped": dropped,
+           "n_scenes_dropped": len(dropped),
+           "transport_gain_db": round(transport, 3),
+           "mechanism_gain_db": round(mechanism, 3),
+           "note": ("кожен крок змінює рівно одну річ відносно попереднього; "
+                    "кліпи, повтори й реалізації каналу спільні для всіх кроків. "
+                    "Внески рахуються на СПІЛЬНОМУ наборі сцен - крок, що змінює "
+                    "розмір одиниці чи якість, може виштовхнути найважчі сцени за "
+                    "межу бюджету, і усереднення кожного кроку по своєму набору "
+                    "приписало б йому легшу вибірку. Порядок кроків оголошено "
+                    "наперед: спершу параметри транспорту, які може перейняти "
+                    "будь-яка схема, потім два запропоновані механізми")}
+    write_json(os.path.join(out_dir, "e13.json"), out)
+    return out
+
+
+def _flat(changes: Dict[str, Any]) -> Dict[str, Any]:
+    out: Dict[str, Any] = {}
+    for k, v in changes.items():
+        out[k] = "/".join(str(x) for x in v) if isinstance(v, tuple) else v
+    return out
+
+
 __all__ = ["run_e01", "run_e03", "run_e04", "run_e05", "run_e06",
-           "run_e07", "run_e09", "run_e10",
+           "run_e07", "run_e09", "run_e10", "run_e13", "E13_CHAIN",
            "E01_PLANNED", "E03_GRIDS", "E03_METHODS"]

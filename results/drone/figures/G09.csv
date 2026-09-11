@@ -1,0 +1,16 @@
+category,channel,mean_P_minus_B4,n_scenes
+high-detail,clean,-2.4064022232285027,3
+high-detail,mild,-2.4064022232285027,3
+high-detail,moderate,-0.4207637701068568,3
+high-detail,bursty,1.1575507296548437,3
+high-detail,harsh,0.0,3
+low-detail,clean,-1.9955948934414256,3
+low-detail,mild,-1.9955948934414256,3
+low-detail,moderate,0.10417721520098411,3
+low-detail,bursty,2.8467685112539165,3
+low-detail,harsh,0.0,3
+structure,clean,-2.365651360066967,4
+structure,mild,-2.365651360066967,4
+structure,moderate,0.7674685443864382,4
+structure,bursty,1.6428812312138685,4
+structure,harsh,0.0,4

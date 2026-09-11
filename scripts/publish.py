@@ -16,4 +16,8 @@ from avsec.publish import publish  # noqa: E402
 
 if __name__ == "__main__":
     run = sys.argv[1] if len(sys.argv) > 1 else "runs/main"
-    print(json.dumps(publish(run), indent=2, ensure_ascii=False))
+    # an optional second run to compare against (the real-imagery transfer check)
+    compare = sys.argv[2] if len(sys.argv) > 2 else (
+        "runs/drone" if os.path.isdir("runs/drone") and run != "runs/drone" else None)
+    print(json.dumps(publish(run, compare_dir=compare), indent=2,
+                     ensure_ascii=False))

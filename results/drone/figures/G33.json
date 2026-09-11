@@ -1,0 +1,14 @@
+{
+  "source_table": "ablations.csv",
+  "figure": "G33",
+  "lang": "uk",
+  "run_dir": "runs/drone",
+  "title_uk": "Вікно й затримка",
+  "title_en": "Window and latency",
+  "experiment": "E06",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

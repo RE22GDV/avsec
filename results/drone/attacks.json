@@ -1,0 +1,708 @@
+{
+  "kind": "attacks",
+  "results": [
+    {
+      "name": "chosen_plaintext_permutation_recovery",
+      "assumptions": "static permutation; attacker controls or knows one full input frame",
+      "success": true,
+      "metrics": {
+        "permutation_accuracy": 1.0,
+        "n_blocks": 192.0,
+        "n_frames_used": 1.0
+      },
+      "seconds": 0.0011646000002656365,
+      "notes": "Recovering a static permutation does not break an independently regenerated permutation."
+    },
+    {
+      "name": "known_plaintext_tile_matching",
+      "assumptions": "one (original, scrambled) pair under the same permutation",
+      "success": true,
+      "metrics": {
+        "n_blocks": 192.0,
+        "mean_match_cost": 0.0,
+        "permutation_accuracy": 1.0
+      },
+      "seconds": 0.03101509999942209,
+      "notes": "",
+      "content": "smooth"
+    },
+    {
+      "name": "boundary_compatibility_reassembly",
+      "assumptions": "ciphertext-only; public grid; natural image continuity across seams",
+      "success": false,
+      "metrics": {
+        "n_blocks": 192.0,
+        "direct_accuracy": 0.0,
+        "neighbour_accuracy": 0.949438202247191,
+        "reconstruction_psnr_db": 24.681112285187794
+      },
+      "seconds": 0.07945459999973536,
+      "notes": "Greedy best-buddy jigsaw solver; no learned model is used.",
+      "content": "smooth"
+    },
+    {
+      "name": "known_plaintext_tile_matching",
+      "assumptions": "one (original, scrambled) pair under the same permutation",
+      "success": true,
+      "metrics": {
+        "n_blocks": 192.0,
+        "mean_match_cost": 0.0,
+        "permutation_accuracy": 0.3333333333333333
+      },
+      "seconds": 0.032114200000251,
+      "notes": "",
+      "content": "edges"
+    },
+    {
+      "name": "boundary_compatibility_reassembly",
+      "assumptions": "ciphertext-only; public grid; natural image continuity across seams",
+      "success": false,
+      "metrics": {
+        "n_blocks": 192.0,
+        "direct_accuracy": 0.010416666666666666,
+        "neighbour_accuracy": 0.033707865168539325,
+        "reconstruction_psnr_db": 6.033210412854942
+      },
+      "seconds": 0.07979939999950147,
+      "notes": "Greedy best-buddy jigsaw solver; no learned model is used.",
+      "content": "edges"
+    },
+    {
+      "name": "known_plaintext_tile_matching",
+      "assumptions": "one (original, scrambled) pair under the same permutation",
+      "success": true,
+      "metrics": {
+        "n_blocks": 192.0,
+        "mean_match_cost": 0.0,
+        "permutation_accuracy": 0.5364583333333334
+      },
+      "seconds": 0.033049700000447046,
+      "notes": "",
+      "content": "text"
+    },
+    {
+      "name": "boundary_compatibility_reassembly",
+      "assumptions": "ciphertext-only; public grid; natural image continuity across seams",
+      "success": false,
+      "metrics": {
+        "n_blocks": 192.0,
+        "direct_accuracy": 0.0,
+        "neighbour_accuracy": 0.03089887640449438,
+        "reconstruction_psnr_db": 13.027386367024139
+      },
+      "seconds": 0.08546380000007048,
+      "notes": "Greedy best-buddy jigsaw solver; no learned model is used.",
+      "content": "text"
+    },
+    {
+      "name": "known_plaintext_tile_matching",
+      "assumptions": "one (original, scrambled) pair under the same permutation",
+      "success": true,
+      "metrics": {
+        "n_blocks": 192.0,
+        "mean_match_cost": 0.0,
+        "permutation_accuracy": 1.0
+      },
+      "seconds": 0.03249119999964023,
+      "notes": "",
+      "content": "texture"
+    },
+    {
+      "name": "boundary_compatibility_reassembly",
+      "assumptions": "ciphertext-only; public grid; natural image continuity across seams",
+      "success": false,
+      "metrics": {
+        "n_blocks": 192.0,
+        "direct_accuracy": 0.005208333333333333,
+        "neighbour_accuracy": 0.6741573033707865,
+        "reconstruction_psnr_db": 14.620146310552848
+      },
+      "seconds": 0.10586539999985689,
+      "notes": "Greedy best-buddy jigsaw solver; no learned model is used.",
+      "content": "texture"
+    },
+    {
+      "name": "multi_frame_variance_fingerprint",
+      "assumptions": "permutation reused across frames; attacker sees many scrambled frames",
+      "success": true,
+      "metrics": {
+        "permutation_accuracy": 0.5104166666666666,
+        "n_frames": 12.0,
+        "n_blocks": 192.0
+      },
+      "seconds": 0.0034318999996685307,
+      "notes": "Shows why a per-frame permutation is required; still not a confidentiality proof for the per-frame variant."
+    },
+    {
+      "name": "lfsr_seed_bruteforce",
+      "assumptions": "known (original, scrambled) pair; seed space = our reconstruction parameter",
+      "success": true,
+      "metrics": {
+        "seed_found": 44257.0,
+        "seeds_tried": 44257.0,
+        "key_space": 65535.0,
+        "seeds_per_second": 8178.895245755668
+      },
+      "seconds": 5.411121999999523,
+      "notes": "key space 2^16-1 = 65535; searched 44257"
+    }
+  ],
+  "similarity_table": [
+    {
+      "seed": 44257,
+      "content": "smooth",
+      "corr_original_vs_scrambled": -0.05804752577900199,
+      "similarity_scrambled_pct": 5.804752577900199,
+      "corr_original_vs_decrypted": 1.0,
+      "similarity_decrypted_pct": 100.0,
+      "exact_recovery": true
+    },
+    {
+      "seed": 44257,
+      "content": "edges",
+      "corr_original_vs_scrambled": -0.05078546390775316,
+      "similarity_scrambled_pct": 5.078546390775316,
+      "corr_original_vs_decrypted": 1.0,
+      "similarity_decrypted_pct": 100.0,
+      "exact_recovery": true
+    },
+    {
+      "seed": 44257,
+      "content": "texture",
+      "corr_original_vs_scrambled": 0.022810400122280878,
+      "similarity_scrambled_pct": 2.281040012228088,
+      "corr_original_vs_decrypted": 1.0,
+      "similarity_decrypted_pct": 100.0,
+      "exact_recovery": true
+    },
+    {
+      "seed": 1234,
+      "content": "smooth",
+      "corr_original_vs_scrambled": 0.06315269974896344,
+      "similarity_scrambled_pct": 6.315269974896344,
+      "corr_original_vs_decrypted": 1.0,
+      "similarity_decrypted_pct": 100.0,
+      "exact_recovery": true
+    },
+    {
+      "seed": 1234,
+      "content": "edges",
+      "corr_original_vs_scrambled": -0.047690079787567556,
+      "similarity_scrambled_pct": 4.769007978756756,
+      "corr_original_vs_decrypted": 1.0,
+      "similarity_decrypted_pct": 100.0,
+      "exact_recovery": true
+    },
+    {
+      "seed": 1234,
+      "content": "texture",
+      "corr_original_vs_scrambled": 0.02205452696251327,
+      "similarity_scrambled_pct": 2.205452696251327,
+      "corr_original_vs_decrypted": 1.0,
+      "similarity_decrypted_pct": 100.0,
+      "exact_recovery": true
+    },
+    {
+      "seed": 1111,
+      "content": "smooth",
+      "corr_original_vs_scrambled": 0.03575776979361813,
+      "similarity_scrambled_pct": 3.5757769793618133,
+      "corr_original_vs_decrypted": 1.0,
+      "similarity_decrypted_pct": 100.0,
+      "exact_recovery": true
+    },
+    {
+      "seed": 1111,
+      "content": "edges",
+      "corr_original_vs_scrambled": 0.06673228330542913,
+      "similarity_scrambled_pct": 6.673228330542913,
+      "corr_original_vs_decrypted": 1.0,
+      "similarity_decrypted_pct": 100.0,
+      "exact_recovery": true
+    },
+    {
+      "seed": 1111,
+      "content": "texture",
+      "corr_original_vs_scrambled": 0.008988330728290236,
+      "similarity_scrambled_pct": 0.8988330728290237,
+      "corr_original_vs_decrypted": 1.0,
+      "similarity_decrypted_pct": 100.0,
+      "exact_recovery": true
+    }
+  ],
+  "protocol_checks": [
+    {
+      "check": "valid unit (positive control)",
+      "expected": "accept",
+      "outcome": "ACCEPTED",
+      "passed": true,
+      "detail": "must accept, otherwise every rejection below is meaningless"
+    },
+    {
+      "check": "replay of an accepted unit",
+      "expected": "ReplayDetected",
+      "outcome": "REJECTED (ReplayDetected)",
+      "passed": true,
+      "detail": "unit sequence 0 already accepted"
+    },
+    {
+      "check": "modified ciphertext",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "same nonce and same AAD as the genuine unit tag verification failed"
+    },
+    {
+      "check": "modified tag",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "same nonce and same AAD as the genuine unit tag verification failed"
+    },
+    {
+      "check": "truncated ciphertext",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "same nonce and same AAD as the genuine unit tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'frame_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'stripe_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'desc_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'seg_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'codec_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'profile_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'payload_len'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'flags'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'session_epoch'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'stream_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'n_segs'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'n_descs'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated geometry",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "tag verification failed"
+    },
+    {
+      "check": "unit replayed into another session",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "tag verification failed"
+    },
+    {
+      "check": "unit replayed into another epoch of the same session",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "tag verification failed"
+    },
+    {
+      "check": "wrong master key",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "tag verification failed"
+    },
+    {
+      "check": "unit replayed into another stream",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "tag verification failed"
+    },
+    {
+      "check": "negative control: empty AAD instead of the header",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "if this were accepted, the header would not be authenticated at all tag verification failed"
+    },
+    {
+      "check": "counters are allocated once and never repeat",
+      "expected": "strictly increasing, no caller-chosen counter",
+      "outcome": "0 then 1; seal() takes no counter argument",
+      "passed": true
+    },
+    {
+      "check": "counter beyond the profile limit",
+      "expected": "NonceExhausted",
+      "outcome": "REJECTED (NonceExhausted)",
+      "passed": true,
+      "detail": "session counter exhausted; move to a new epoch or session id"
+    },
+    {
+      "check": "unknown protocol version",
+      "expected": "UnknownVersion",
+      "outcome": "REJECTED (UnknownVersion)",
+      "passed": true,
+      "detail": "unsupported protocol version 7"
+    },
+    {
+      "check": "unknown transport profile",
+      "expected": "UnknownProfile",
+      "outcome": "REJECTED (UnknownProfile)",
+      "passed": true,
+      "detail": "unsupported profile id 200"
+    },
+    {
+      "check": "zero payload length",
+      "expected": "FramingError",
+      "outcome": "REJECTED (FramingError)",
+      "passed": true,
+      "detail": "payload_len 0 outside (0, 16384]"
+    },
+    {
+      "check": "payload length above the profile bound",
+      "expected": "FramingError",
+      "outcome": "REJECTED (FramingError)",
+      "passed": true,
+      "detail": "payload_len 9000 outside (0, 1024]"
+    },
+    {
+      "check": "segment index outside the segment count",
+      "expected": "FramingError",
+      "outcome": "REJECTED (FramingError)",
+      "passed": true,
+      "detail": "segment indices inconsistent"
+    },
+    {
+      "check": "corrupted header CRC",
+      "expected": "FramingError",
+      "outcome": "REJECTED (FramingError)",
+      "passed": true,
+      "detail": "bad magic"
+    },
+    {
+      "check": "geometry outside the frame",
+      "expected": "FramingError",
+      "outcome": "REJECTED (FramingError)",
+      "passed": true,
+      "detail": "geometry exceeds the declared frame size"
+    },
+    {
+      "check": "geometry phase inconsistent with the step",
+      "expected": "FramingError",
+      "outcome": "REJECTED (FramingError)",
+      "passed": true,
+      "detail": "geometry phase inconsistent with step"
+    },
+    {
+      "check": "modification fully repaired by FEC",
+      "expected": "not a forgery: the identical protected message is restored",
+      "outcome": "restored",
+      "passed": true,
+      "detail": "a corrected error is not evidence of a broken tag"
+    },
+    {
+      "check": "modification beyond the FEC capability",
+      "expected": "rejected by FEC or by AEAD",
+      "outcome": "uncorrectable, discarded by FEC",
+      "passed": true
+    }
+  ],
+  "record": {
+    "config_id": "research_drone",
+    "config": {
+      "name": "research_drone",
+      "seed": 20240909,
+      "channel_seed": 20240909,
+      "crypto_seed": 20240909,
+      "frame": {
+        "width": 256,
+        "height": 192,
+        "n_frames": 16
+      },
+      "sources": {
+        "kind": "drone",
+        "n_frames": 16
+      },
+      "channel": {
+        "preset": "moderate",
+        "overrides": {}
+      },
+      "budget": {
+        "rasters_per_frame": 3,
+        "raster_rate_hz": 25.0,
+        "source_fps": 8.333,
+        "effective_display_fps": 8.333333333333334,
+        "max_accumulation_rows": 300,
+        "max_virtual_latency_s": 0.8,
+        "max_receiver_buffer_kb": 512,
+        "raster": "720x576",
+        "active_window": [
+          24,
+          8,
+          696,
+          568
+        ],
+        "amplitude_window": [
+          40,
+          216
+        ],
+        "note": "однакові геометрія растру, частота растрів і амплітудне вікно для всіх методів; порядок модуляції та розмір комірки символу входять до простору пошуку, тому жодна схема не отримує непомітно додаткового часу, смуги чи потужності сигналу"
+      },
+      "methods": [
+        "B0a",
+        "B0a-R",
+        "B0d",
+        "B1",
+        "B2",
+        "B3",
+        "B4",
+        "P"
+      ],
+      "profiles": {
+        "B0d": {
+          "stripe_height": 24,
+          "n_descriptions": 1,
+          "codec": "dct",
+          "quality": 12,
+          "max_unit_payload": 640,
+          "fec_nsym": 96,
+          "fec_header_nsym": 48,
+          "modulation": [
+            4,
+            8,
+            2
+          ],
+          "interleaver": [
+            "block",
+            278,
+            0
+          ],
+          "interleaver_window": 0
+        },
+        "B3": {
+          "stripe_height": 24,
+          "n_descriptions": 1,
+          "codec": "dct",
+          "quality": 12,
+          "max_unit_payload": 640,
+          "fec_nsym": 96,
+          "fec_header_nsym": 48,
+          "modulation": [
+            4,
+            8,
+            2
+          ],
+          "interleaver": [
+            "block",
+            278,
+            0
+          ],
+          "interleaver_window": 0
+        },
+        "B4": {
+          "stripe_height": 24,
+          "n_descriptions": 1,
+          "codec": "dct",
+          "quality": 12,
+          "max_unit_payload": 640,
+          "fec_nsym": 96,
+          "fec_header_nsym": 48,
+          "modulation": [
+            4,
+            8,
+            2
+          ],
+          "interleaver": [
+            "block",
+            278,
+            0
+          ],
+          "interleaver_window": 0
+        },
+        "P": {
+          "stripe_height": 24,
+          "n_descriptions": 2,
+          "codec": "dct",
+          "quality": 8,
+          "max_unit_payload": 320,
+          "fec_nsym": 128,
+          "fec_header_nsym": 48,
+          "modulation": [
+            4,
+            8,
+            2
+          ],
+          "interleaver": [
+            "bawp",
+            0,
+            8
+          ],
+          "interleaver_window": 0
+        }
+      },
+      "crypto": {
+        "algorithm": "chacha20poly1305",
+        "tag_bytes": 16,
+        "key_bytes": 32,
+        "nonce_bytes": 12,
+        "nonce_layout": "prefix(4B, HKDF per session+epoch+direction+stream) || counter(8B BE)",
+        "kdf": "HKDF-SHA256(salt=session_id, info=label|direction|stream|alg|epoch)",
+        "epoch_bits": 32,
+        "counter_allocation": "sealer-allocated, one-shot; no caller-supplied counter",
+        "replay_window": 4096,
+        "direction": "uplink",
+        "stream_id": 0
+      },
+      "lfsr": {
+        "grid_rows": 12,
+        "grid_cols": 16,
+        "n_blocks": 192,
+        "variant": "fisher_yates",
+        "size_policy": "pad",
+        "per_frame": false,
+        "frame_seed_mode": null,
+        "block_order": "row-major (raster) over the block grid",
+        "lfsr": {
+          "width": 16,
+          "taps": [
+            16,
+            15,
+            13,
+            4
+          ],
+          "polynomial": "x^16 + x^15 + x^13 + x^4 + 1",
+          "form": "fibonacci",
+          "seed": 44257,
+          "zero_state_policy": "force_one",
+          "state_space": 65535,
+          "note": "reconstruction: the 2021 paper does not specify these parameters"
+        }
+      },
+      "b2_grid": [
+        12,
+        16
+      ],
+      "b0ar_combine": "median",
+      "fill": "interpolate",
+      "key_mode": "lab",
+      "max_frames_per_source": 16,
+      "channel_realisations": 5,
+      "notes": "E12. Ti sami visim metodiv i ti sami profili kanalu, shcho i v E02, ale na 10 testovykh stsenakh, vyrizanykh z realnoi fotografii z drona. Konfiguratsii ne pereпidbyralysia. Tse perevirka perenesennia z protsedurnogo materialu na realnyi, a ne novyi pidbir.\n [loaded from research_drone.yaml]"
+    },
+    "environment": {
+      "python": "3.12.10",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "machine": "AMD64",
+      "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+      "cpu_count": 32,
+      "packages": {
+        "numpy": "2.1.2",
+        "scipy": "1.16.0",
+        "cv2": "4.13.0",
+        "cryptography": "50.0.1",
+        "reedsolo": "unknown",
+        "PIL": "11.0.0",
+        "matplotlib": "3.9.2",
+        "yaml": "6.0.2"
+      },
+      "avsec_version": "0.1.0",
+      "git_commit": "c7165dfa8dfc6993cb80041a094e53a6b04b523b"
+    },
+    "inputs": {},
+    "counters": {}
+  },
+  "lfsr": {
+    "grid_rows": 12,
+    "grid_cols": 16,
+    "n_blocks": 192,
+    "variant": "fisher_yates",
+    "size_policy": "pad",
+    "per_frame": false,
+    "frame_seed_mode": null,
+    "block_order": "row-major (raster) over the block grid",
+    "lfsr": {
+      "width": 16,
+      "taps": [
+        16,
+        15,
+        13,
+        4
+      ],
+      "polynomial": "x^16 + x^15 + x^13 + x^4 + 1",
+      "form": "fibonacci",
+      "seed": 44257,
+      "zero_state_policy": "force_one",
+      "state_space": 65535,
+      "note": "reconstruction: the 2021 paper does not specify these parameters"
+    }
+  },
+  "caveat": "відновлення однієї сталої перестановки нічого не говорить про незалежно перегенеровану перестановку; невдала атака не є доказом безпеки"
+}

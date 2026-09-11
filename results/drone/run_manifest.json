@@ -1,0 +1,297 @@
+{
+  "run_id": "a56957124aebce41",
+  "config_name": "research_drone",
+  "commit": "c7165dfa8dfc6993cb80041a094e53a6b04b523b",
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "cpu_count": 32,
+    "packages": {
+      "numpy": "2.1.2",
+      "scipy": "1.16.0",
+      "cv2": "4.13.0",
+      "cryptography": "50.0.1",
+      "reedsolo": "unknown",
+      "PIL": "11.0.0",
+      "matplotlib": "3.9.2",
+      "yaml": "6.0.2"
+    },
+    "avsec_version": "0.1.0",
+    "git_commit": "c7165dfa8dfc6993cb80041a094e53a6b04b523b"
+  },
+  "config": {
+    "name": "research_drone",
+    "seed": 20240909,
+    "channel_seed": 20240909,
+    "crypto_seed": 20240909,
+    "frame": {
+      "width": 256,
+      "height": 192,
+      "n_frames": 16
+    },
+    "sources": {
+      "kind": "drone",
+      "n_frames": 16
+    },
+    "channel": {
+      "preset": "moderate",
+      "overrides": {}
+    },
+    "budget": {
+      "rasters_per_frame": 3,
+      "raster_rate_hz": 25.0,
+      "source_fps": 8.333,
+      "effective_display_fps": 8.333333333333334,
+      "max_accumulation_rows": 300,
+      "max_virtual_latency_s": 0.8,
+      "max_receiver_buffer_kb": 512,
+      "raster": "720x576",
+      "active_window": [
+        24,
+        8,
+        696,
+        568
+      ],
+      "amplitude_window": [
+        40,
+        216
+      ],
+      "note": "однакові геометрія растру, частота растрів і амплітудне вікно для всіх методів; порядок модуляції та розмір комірки символу входять до простору пошуку, тому жодна схема не отримує непомітно додаткового часу, смуги чи потужності сигналу"
+    },
+    "methods": [
+      "B0a",
+      "B0a-R",
+      "B0d",
+      "B1",
+      "B2",
+      "B3",
+      "B4",
+      "P"
+    ],
+    "profiles": {
+      "B0d": {
+        "stripe_height": 24,
+        "n_descriptions": 1,
+        "codec": "dct",
+        "quality": 12,
+        "max_unit_payload": 640,
+        "fec_nsym": 96,
+        "fec_header_nsym": 48,
+        "modulation": [
+          4,
+          8,
+          2
+        ],
+        "interleaver": [
+          "block",
+          278,
+          0
+        ],
+        "interleaver_window": 0
+      },
+      "B3": {
+        "stripe_height": 24,
+        "n_descriptions": 1,
+        "codec": "dct",
+        "quality": 12,
+        "max_unit_payload": 640,
+        "fec_nsym": 96,
+        "fec_header_nsym": 48,
+        "modulation": [
+          4,
+          8,
+          2
+        ],
+        "interleaver": [
+          "block",
+          278,
+          0
+        ],
+        "interleaver_window": 0
+      },
+      "B4": {
+        "stripe_height": 24,
+        "n_descriptions": 1,
+        "codec": "dct",
+        "quality": 12,
+        "max_unit_payload": 640,
+        "fec_nsym": 96,
+        "fec_header_nsym": 48,
+        "modulation": [
+          4,
+          8,
+          2
+        ],
+        "interleaver": [
+          "block",
+          278,
+          0
+        ],
+        "interleaver_window": 0
+      },
+      "P": {
+        "stripe_height": 24,
+        "n_descriptions": 2,
+        "codec": "dct",
+        "quality": 8,
+        "max_unit_payload": 320,
+        "fec_nsym": 128,
+        "fec_header_nsym": 48,
+        "modulation": [
+          4,
+          8,
+          2
+        ],
+        "interleaver": [
+          "bawp",
+          0,
+          8
+        ],
+        "interleaver_window": 0
+      }
+    },
+    "crypto": {
+      "algorithm": "chacha20poly1305",
+      "tag_bytes": 16,
+      "key_bytes": 32,
+      "nonce_bytes": 12,
+      "nonce_layout": "prefix(4B, HKDF per session+epoch+direction+stream) || counter(8B BE)",
+      "kdf": "HKDF-SHA256(salt=session_id, info=label|direction|stream|alg|epoch)",
+      "epoch_bits": 32,
+      "counter_allocation": "sealer-allocated, one-shot; no caller-supplied counter",
+      "replay_window": 4096,
+      "direction": "uplink",
+      "stream_id": 0
+    },
+    "lfsr": {
+      "grid_rows": 12,
+      "grid_cols": 16,
+      "n_blocks": 192,
+      "variant": "fisher_yates",
+      "size_policy": "pad",
+      "per_frame": false,
+      "frame_seed_mode": null,
+      "block_order": "row-major (raster) over the block grid",
+      "lfsr": {
+        "width": 16,
+        "taps": [
+          16,
+          15,
+          13,
+          4
+        ],
+        "polynomial": "x^16 + x^15 + x^13 + x^4 + 1",
+        "form": "fibonacci",
+        "seed": 44257,
+        "zero_state_policy": "force_one",
+        "state_space": 65535,
+        "note": "reconstruction: the 2021 paper does not specify these parameters"
+      }
+    },
+    "b2_grid": [
+      12,
+      16
+    ],
+    "b0ar_combine": "median",
+    "fill": "interpolate",
+    "key_mode": "lab",
+    "max_frames_per_source": 16,
+    "channel_realisations": 5,
+    "notes": "E12. Ti sami visim metodiv i ti sami profili kanalu, shcho i v E02, ale na 10 testovykh stsenakh, vyrizanykh z realnoi fotografii z drona. Konfiguratsii ne pereпidbyralysia. Tse perevirka perenesennia z protsedurnogo materialu na realnyi, a ne novyi pidbir.\n [loaded from research_drone.yaml]"
+  },
+  "seeds": {
+    "seed": 20240909,
+    "channel_seed": 20240909,
+    "crypto_seed": 20240909,
+    "key_mode": "lab"
+  },
+  "plan": {
+    "name": "E12-drone",
+    "methods": [
+      "B0a",
+      "B0a-R",
+      "B0d",
+      "B1",
+      "B2",
+      "B3",
+      "B4",
+      "P"
+    ],
+    "channels": [
+      {
+        "base": "clean",
+        "overrides": {},
+        "axis": "",
+        "value": NaN,
+        "label": "clean"
+      },
+      {
+        "base": "mild",
+        "overrides": {},
+        "axis": "",
+        "value": NaN,
+        "label": "mild"
+      },
+      {
+        "base": "moderate",
+        "overrides": {},
+        "axis": "",
+        "value": NaN,
+        "label": "moderate"
+      },
+      {
+        "base": "bursty",
+        "overrides": {},
+        "axis": "",
+        "value": NaN,
+        "label": "bursty"
+      },
+      {
+        "base": "harsh",
+        "overrides": {},
+        "axis": "",
+        "value": NaN,
+        "label": "harsh"
+      }
+    ],
+    "repetitions": 5,
+    "splits": [
+      "test"
+    ],
+    "max_frames": 16,
+    "max_clips": 0,
+    "schedule": [],
+    "workers": 12
+  },
+  "n_jobs_planned": 2000,
+  "dataset": {
+    "ok": true,
+    "problems": [],
+    "warnings": [],
+    "n_clips": 17,
+    "n_scenes": 17,
+    "scenes_per_split": {
+      "calibration": 4,
+      "validation": 3,
+      "test": 10
+    },
+    "clips_per_split": {
+      "calibration": 4,
+      "validation": 3,
+      "test": 10
+    },
+    "duplicates": [],
+    "categories": [
+      "high-detail",
+      "low-detail",
+      "structure"
+    ],
+    "provenances": [
+      "local_file"
+    ]
+  },
+  "workers": 16,
+  "started": "2026-09-12T01:08:47"
+}

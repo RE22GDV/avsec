@@ -1,4 +1,14 @@
 data_table,experiment,figure,files,params,reason,status,title_en,title_uk
+runs/main/figures\K01.csv,E02,K01,runs/main/figures\K01.png;runs/main/figures\K01.svg;runs/main/figures\K01.pdf,runs/main/figures\K01.json,,ready,What each method really provides,Що кожен метод справді дає
+runs/main/figures\K02.csv,E03,K02,runs/main/figures\K02.png;runs/main/figures\K02.svg;runs/main/figures\K02.pdf,runs/main/figures\K02.json,,ready,The crossover,Точка перелому
+runs/main/figures\K03.csv,E04,K03,runs/main/figures\K03.png;runs/main/figures\K03.svg;runs/main/figures\K03.pdf,runs/main/figures\K03.json,,ready,Operating map,Карта режимів
+runs/main/figures\K04.csv,E05,K04,runs/main/figures\K04.png;runs/main/figures\K04.svg;runs/main/figures\K04.pdf,runs/main/figures\K04.json,,ready,Placement trade-off,Розміщення: компроміс без переможця
+runs/main/figures\K05.csv,E13,K05,runs/main/figures\K05.png;runs/main/figures\K05.svg;runs/main/figures\K05.pdf,runs/main/figures\K05.json,,ready,Where the advantage comes from,Звідки береться перевага
+runs/main/figures\K06.csv,E01,K06,runs/main/figures\K06.png;runs/main/figures\K06.svg;runs/main/figures\K06.pdf,runs/main/figures\K06.json,,ready,The price of compression,Ціна стиснення
+runs/main/figures\K07.csv,E02,K07,runs/main/figures\K07.png;runs/main/figures\K07.svg;runs/main/figures\K07.pdf,runs/main/figures\K07.json,,ready,End-to-end example,Наскрізний приклад
+runs/main/figures\K08.csv,E02,K08,runs/main/figures\K08.png;runs/main/figures\K08.svg;runs/main/figures\K08.pdf,runs/main/figures\K08.json,,ready,What the viewer is shown,Що саме показано глядачу
+runs/main/figures\K09.csv,E09,K09,runs/main/figures\K09.png;runs/main/figures\K09.svg;runs/main/figures\K09.pdf,runs/main/figures\K09.json,,ready,"Budget, latency, memory","Бюджет, затримка, пам'ять"
+runs/main/figures\K10.csv,E08,K10,runs/main/figures\K10.png;runs/main/figures\K10.svg;runs/main/figures\K10.pdf,runs/main/figures\K10.json,,ready,The 2021 scheme is broken,Схема 2021 року зламана
 runs/main/figures\G01.csv,E02,G01,runs/main/figures\G01.png;runs/main/figures\G01.svg;runs/main/figures\G01.pdf,runs/main/figures\G01.json,,ready,End-to-end examples,Наскрізні приклади
 runs/main/figures\G02.csv,E02,G02,runs/main/figures\G02.png;runs/main/figures\G02.svg;runs/main/figures\G02.pdf,runs/main/figures\G02.json,,ready,Availability maps,Карти доступності
 runs/main/figures\G03.csv,E02,G03,runs/main/figures\G03.png;runs/main/figures\G03.svg;runs/main/figures\G03.pdf,runs/main/figures\G03.json,,ready,Quality across five profiles,Якість у п'яти профілях

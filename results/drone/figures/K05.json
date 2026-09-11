@@ -1,0 +1,16 @@
+{
+  "transport_gain_db": 2.800134775648605,
+  "mechanism_gain_db": -0.787645557104355,
+  "source_table": "chain.csv",
+  "figure": "K05",
+  "lang": "uk",
+  "run_dir": "runs/drone",
+  "title_uk": "Звідки береться перевага",
+  "title_en": "Where the advantage comes from",
+  "experiment": "E13",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

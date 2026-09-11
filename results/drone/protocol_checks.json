@@ -1,0 +1,250 @@
+{
+  "checks": [
+    {
+      "check": "valid unit (positive control)",
+      "expected": "accept",
+      "outcome": "ACCEPTED",
+      "passed": true,
+      "detail": "must accept, otherwise every rejection below is meaningless"
+    },
+    {
+      "check": "replay of an accepted unit",
+      "expected": "ReplayDetected",
+      "outcome": "REJECTED (ReplayDetected)",
+      "passed": true,
+      "detail": "unit sequence 0 already accepted"
+    },
+    {
+      "check": "modified ciphertext",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "same nonce and same AAD as the genuine unit tag verification failed"
+    },
+    {
+      "check": "modified tag",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "same nonce and same AAD as the genuine unit tag verification failed"
+    },
+    {
+      "check": "truncated ciphertext",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "same nonce and same AAD as the genuine unit tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'frame_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'stripe_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'desc_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'seg_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'codec_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'profile_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'payload_len'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'flags'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'session_epoch'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'stream_id'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'n_segs'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated field 'n_descs'",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "only this field differs; nonce and ciphertext are untouched tag verification failed"
+    },
+    {
+      "check": "modified authenticated geometry",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "tag verification failed"
+    },
+    {
+      "check": "unit replayed into another session",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "tag verification failed"
+    },
+    {
+      "check": "unit replayed into another epoch of the same session",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "tag verification failed"
+    },
+    {
+      "check": "wrong master key",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "tag verification failed"
+    },
+    {
+      "check": "unit replayed into another stream",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "tag verification failed"
+    },
+    {
+      "check": "negative control: empty AAD instead of the header",
+      "expected": "AuthenticationFailed",
+      "outcome": "REJECTED (AuthenticationFailed)",
+      "passed": true,
+      "detail": "if this were accepted, the header would not be authenticated at all tag verification failed"
+    },
+    {
+      "check": "counters are allocated once and never repeat",
+      "expected": "strictly increasing, no caller-chosen counter",
+      "outcome": "0 then 1; seal() takes no counter argument",
+      "passed": true
+    },
+    {
+      "check": "counter beyond the profile limit",
+      "expected": "NonceExhausted",
+      "outcome": "REJECTED (NonceExhausted)",
+      "passed": true,
+      "detail": "session counter exhausted; move to a new epoch or session id"
+    },
+    {
+      "check": "unknown protocol version",
+      "expected": "UnknownVersion",
+      "outcome": "REJECTED (UnknownVersion)",
+      "passed": true,
+      "detail": "unsupported protocol version 7"
+    },
+    {
+      "check": "unknown transport profile",
+      "expected": "UnknownProfile",
+      "outcome": "REJECTED (UnknownProfile)",
+      "passed": true,
+      "detail": "unsupported profile id 200"
+    },
+    {
+      "check": "zero payload length",
+      "expected": "FramingError",
+      "outcome": "REJECTED (FramingError)",
+      "passed": true,
+      "detail": "payload_len 0 outside (0, 16384]"
+    },
+    {
+      "check": "payload length above the profile bound",
+      "expected": "FramingError",
+      "outcome": "REJECTED (FramingError)",
+      "passed": true,
+      "detail": "payload_len 9000 outside (0, 1024]"
+    },
+    {
+      "check": "segment index outside the segment count",
+      "expected": "FramingError",
+      "outcome": "REJECTED (FramingError)",
+      "passed": true,
+      "detail": "segment indices inconsistent"
+    },
+    {
+      "check": "corrupted header CRC",
+      "expected": "FramingError",
+      "outcome": "REJECTED (FramingError)",
+      "passed": true,
+      "detail": "bad magic"
+    },
+    {
+      "check": "geometry outside the frame",
+      "expected": "FramingError",
+      "outcome": "REJECTED (FramingError)",
+      "passed": true,
+      "detail": "geometry exceeds the declared frame size"
+    },
+    {
+      "check": "geometry phase inconsistent with the step",
+      "expected": "FramingError",
+      "outcome": "REJECTED (FramingError)",
+      "passed": true,
+      "detail": "geometry phase inconsistent with step"
+    },
+    {
+      "check": "modification fully repaired by FEC",
+      "expected": "not a forgery: the identical protected message is restored",
+      "outcome": "restored",
+      "passed": true,
+      "detail": "a corrected error is not evidence of a broken tag"
+    },
+    {
+      "check": "modification beyond the FEC capability",
+      "expected": "rejected by FEC or by AEAD",
+      "outcome": "uncorrectable, discarded by FEC",
+      "passed": true
+    }
+  ],
+  "n_checks": 35,
+  "n_passed": 35,
+  "all_passed": true
+}

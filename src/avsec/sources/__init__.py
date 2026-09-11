@@ -582,6 +582,13 @@ def build_sources(spec: Dict[str, object]) -> List[FrameSource]:
     w = int(spec.get("width", 320))
     if kind == "research":
         return research_suite(h, w, int(spec.get("n_frames", 16)))
+    if kind == "drone":
+        from avsec.sources.drone import DRONE_SCENES, drone_suite
+
+        want = spec.get("scene")
+        picked = ([s for s in DRONE_SCENES if s[0] == str(want)] or None) if want else None
+        return drone_suite(h, w, int(spec.get("n_frames", 16)),
+                           path=spec.get("path"), scenes=picked)
     if kind == "synthetic":
         n = int(spec.get("n_frames", 6))
         names = spec.get("patterns")

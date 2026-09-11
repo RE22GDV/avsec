@@ -81,6 +81,16 @@ PROGRAM: Tuple[Experiment, ...] = (
         "без переналаштування?",
         ("cvbs.json", "G42")),
     Experiment(
+        "E12", "Реальні кадри з дрона", "Real UAV imagery",
+        "Чи переносяться висновки з процедурного матеріалу на справжні кадри "
+        "з дрона, без переналаштування конфігурацій?",
+        ("frames.csv", "paired_effects.csv", "K01", "K02", "K07", "K08")),
+    Experiment(
+        "E13", "Розклад переваги по кроках", "Decomposition of the advantage",
+        "Яку частину різниці B4 -> P дають параметри транспорту, доступні будь-"
+        "якій схемі, а яку - два запропоновані механізми?",
+        ("chain.csv", "K05")),
+    Experiment(
         "E11", "Апаратна перевірка", "Hardware validation",
         "Які реальні місткість, затримка, споживання і вартість фізичного тракту?",
         ("H01", "H02", "H03", "H04"),
@@ -214,9 +224,47 @@ CATALOGUE: Tuple[Figure, ...] = (
            "E07", ("budgets.csv",)),
 )
 
-FIGURES: Dict[str, Figure] = {f.gid: f for f in CATALOGUE}
+#: The ten figures that carry the argument.  The G catalogue is complete by
+#: construction - one number per research question - but completeness is not the
+#: same as saying something, and several of those figures are bookkeeping.  These
+#: are the ones a reader should look at first; they are built from exactly the
+#: same tables.
+KEY: Tuple[Figure, ...] = (
+    Figure("K01", "Що кожен метод справді дає", "What each method really provides",
+           "захист × метод, поруч якість і покриття", "E02",
+           ("summary.csv",), panels=2),
+    Figure("K02", "Точка перелому", "The crossover",
+           "довжина пакета → якість і покриття, точка перетину", "E03",
+           ("sweeps.csv",), panels=2),
+    Figure("K03", "Карта режимів", "Operating map",
+           "шум × пакет → хто виграє; «≈» там, де різниця не встановлена", "E04",
+           ("interaction.csv",)),
+    Figure("K04", "Розміщення: компроміс без переможця", "Placement trade-off",
+           "пошкодження RS-слова × втрата обох описів", "E05",
+           ("codewords.csv", "joint_loss.csv")),
+    Figure("K05", "Звідки береться перевага", "Where the advantage comes from",
+           "кроки B4 → P → внесок кожного, дБ", "E13",
+           ("chain.csv",), panels=2),
+    Figure("K06", "Ціна стиснення", "The price of compression",
+           "фактичний бітрейт → якість, межа місткості каналу", "E01",
+           ("e01_rate_quality.csv",)),
+    Figure("K07", "Наскрізний приклад", "End-to-end example",
+           "кадр → растр → прийнято → реконструкція, B4 і P", "E02",
+           ("frames.csv",), panels=8),
+    Figure("K08", "Що саме показано глядачу", "What the viewer is shown",
+           "перевірене / старе / домальоване", "E02", ("frames.csv",), panels=3),
+    Figure("K09", "Бюджет, затримка, пам'ять", "Budget, latency, memory",
+           "місткість → корисні дані; розклад подій; три величини пам'яті", "E09",
+           ("budgets.json",), panels=3),
+    Figure("K10", "Схема 2021 року зламана", "The 2021 scheme is broken",
+           "оригінал / передане / відновлене атакою + успіх атак", "E08",
+           ("attacks.json",), panels=3),
+)
+
+FIGURES: Dict[str, Figure] = {f.gid: f for f in CATALOGUE + KEY}
 
 assert len(CATALOGUE) == 43, "the catalogue is defined as 43 figures"
+assert len(KEY) == 10, "there are ten key figures"
 
 
 # ---------------------------------------------------------------- readiness
@@ -265,21 +313,37 @@ def _default_reason(gid: str, present: Dict[str, bool], data: str) -> str:
     return "невідома причина"
 
 
-def catalogue_status(directory: str, reasons: Optional[Dict[str, str]] = None
-                     ) -> List[Dict[str, Any]]:
-    """The whole G01-G43 table, ready or pending, in catalogue order."""
+def catalogue_status(directory: str, reasons: Optional[Dict[str, str]] = None,
+                     include_key: bool = True) -> List[Dict[str, Any]]:
+    """The whole table, ready or pending, in catalogue order.
+
+    The ten key figures come first: a reader who stops after the first screen
+    should have seen the ones that carry the argument.
+    """
     reasons = reasons or {}
-    return [figure_status(directory, f.gid, reasons.get(f.gid, "")) for f in CATALOGUE]
+    figs = (list(KEY) if include_key else []) + list(CATALOGUE)
+    return [figure_status(directory, f.gid, reasons.get(f.gid, "")) for f in figs]
 
 
-def programme_status(figure_rows: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Derive each experiment's status from the figures that depend on it."""
+def programme_status(figure_rows: Sequence[Dict[str, Any]],
+                     evidence: Optional[Dict[str, str]] = None
+                     ) -> List[Dict[str, Any]]:
+    """Derive each experiment's status from the figures that depend on it.
+
+    ``evidence`` overrides that for experiments whose result is not a figure of
+    its own.  E12, for instance, is a second full run on different material: its
+    figures are the same K-numbers rebuilt from that run's tables, so counting
+    figures in one directory would report it as never performed.
+    """
+    evidence = evidence or {}
     out: List[Dict[str, Any]] = []
     for exp in PROGRAM:
         mine = [r for r in figure_rows if r.get("experiment") == exp.eid]
         ready = sum(1 for r in mine if r["status"] == "ready")
         if exp.status == "not_done":
             status = "not_done"
+        elif exp.eid in evidence:
+            status = evidence[exp.eid]
         elif not mine:
             status = exp.status
         elif ready == len(mine):
@@ -298,6 +362,7 @@ def programme_status(figure_rows: Sequence[Dict[str, Any]]) -> List[Dict[str, An
     return out
 
 
-__all__ = ["Experiment", "PROGRAM", "EXPERIMENTS", "Figure", "CATALOGUE", "FIGURES",
+__all__ = ["Experiment", "PROGRAM", "EXPERIMENTS", "Figure", "CATALOGUE",
+           "KEY", "FIGURES",
            "EXPORT_FORMATS", "figure_paths", "figure_status", "catalogue_status",
            "programme_status"]

@@ -1,0 +1,4 @@
+channel,clip,frame_id,method,percentile,psnr_full
+harsh,uav_forest_canopy,13,P,10,11.568952788302205
+mild,uav_village,6,P,50,24.145430427405522
+mild,uav_sky_horizon,3,P,90,27.414987978731453

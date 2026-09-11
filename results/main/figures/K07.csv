@@ -1,0 +1,3 @@
+channel,clip,coverage,frame_id,method,psnr_full
+bursty,clip_edges_fast_v9,1.0,7,B4,30.552394362633883
+bursty,clip_edges_fast_v9,1.0,7,P,26.148872864147336

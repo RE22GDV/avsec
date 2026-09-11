@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+title: "avsec — secure video over an existing analog composite video path"
+message: "If you use this testbed or its results, please cite it."
+type: software
+authors:
+  - alias: RE22GDV
+repository-code: "https://github.com/RE22GDV/avsec"
+license: MIT
+version: "1.0.0"
+date-released: "2026-09-12"
+keywords:
+  - UAV video
+  - analog composite video
+  - CVBS
+  - authenticated encryption
+  - AEAD
+  - Reed-Solomon
+  - interleaving
+  - multiple description coding
+abstract: >-
+  A research testbed that reproduces the LFSR block-permutation scheme for UAV
+  analog video links proposed at ISITIA 2021, demonstrates experimentally that
+  it provides no confidentiality, and builds a replacement on standard
+  cryptography: digital source coding with per-segment AEAD and Reed-Solomon,
+  carried as luminance levels through the same analog composite path. Includes a
+  full experimental programme on both procedural material and real drone
+  imagery, with every published number generated from a single recorded run.
+references:
+  - type: conference-paper
+    title: "Low Cost Analog Video Transmission Security of Unmanned Aerial Vehicle (UAV) based on Linear Feedback Shift Register (LFSR)"
+    authors:
+      - family-names: Mardiyanto
+        given-names: R.
+      - family-names: Suryoatmojo
+        given-names: H.
+      - family-names: Setiawan
+        given-names: F.
+      - family-names: Irfansyah
+        given-names: A. N.
+    collection-title: "2021 International Seminar on Intelligent Technology and Its Applications (ISITIA)"
+    start: 414
+    end: 419
+    year: 2021
+    doi: "10.1109/ISITIA52817.2021.9502241"

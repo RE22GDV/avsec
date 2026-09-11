@@ -1,0 +1,8 @@
+# avsec — everything in requirements.txt plus the test tooling
+#
+#   pip install -r requirements-dev.txt
+
+-r requirements.txt
+
+pytest>=7.4
+pytest-timeout>=2.1

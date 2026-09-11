@@ -1,0 +1,54 @@
+data_table,experiment,figure,files,params,reason,status,title_en,title_uk
+runs/drone/figures\K01.csv,E02,K01,runs/drone/figures\K01.png;runs/drone/figures\K01.svg;runs/drone/figures\K01.pdf,runs/drone/figures\K01.json,,ready,What each method really provides,Що кожен метод справді дає
+runs/drone/figures\K02.csv,E03,K02,runs/drone/figures\K02.png;runs/drone/figures\K02.svg;runs/drone/figures\K02.pdf,runs/drone/figures\K02.json,,ready,The crossover,Точка перелому
+runs/drone/figures\K03.csv,E04,K03,runs/drone/figures\K03.png;runs/drone/figures\K03.svg;runs/drone/figures\K03.pdf,runs/drone/figures\K03.json,,ready,Operating map,Карта режимів
+runs/drone/figures\K04.csv,E05,K04,runs/drone/figures\K04.png;runs/drone/figures\K04.svg;runs/drone/figures\K04.pdf,runs/drone/figures\K04.json,,ready,Placement trade-off,Розміщення: компроміс без переможця
+runs/drone/figures\K05.csv,E13,K05,runs/drone/figures\K05.png;runs/drone/figures\K05.svg;runs/drone/figures\K05.pdf,runs/drone/figures\K05.json,,ready,Where the advantage comes from,Звідки береться перевага
+runs/drone/figures\K06.csv,E01,K06,runs/drone/figures\K06.png;runs/drone/figures\K06.svg;runs/drone/figures\K06.pdf,runs/drone/figures\K06.json,,ready,The price of compression,Ціна стиснення
+runs/drone/figures\K07.csv,E02,K07,runs/drone/figures\K07.png;runs/drone/figures\K07.svg;runs/drone/figures\K07.pdf,runs/drone/figures\K07.json,,ready,End-to-end example,Наскрізний приклад
+runs/drone/figures\K08.csv,E02,K08,runs/drone/figures\K08.png;runs/drone/figures\K08.svg;runs/drone/figures\K08.pdf,runs/drone/figures\K08.json,,ready,What the viewer is shown,Що саме показано глядачу
+runs/drone/figures\K09.csv,E09,K09,runs/drone/figures\K09.png;runs/drone/figures\K09.svg;runs/drone/figures\K09.pdf,runs/drone/figures\K09.json,,ready,"Budget, latency, memory","Бюджет, затримка, пам'ять"
+runs/drone/figures\K10.csv,E08,K10,runs/drone/figures\K10.png;runs/drone/figures\K10.svg;runs/drone/figures\K10.pdf,runs/drone/figures\K10.json,,ready,The 2021 scheme is broken,Схема 2021 року зламана
+runs/drone/figures\G01.csv,E02,G01,runs/drone/figures\G01.png;runs/drone/figures\G01.svg;runs/drone/figures\G01.pdf,runs/drone/figures\G01.json,,ready,End-to-end examples,Наскрізні приклади
+runs/drone/figures\G02.csv,E02,G02,runs/drone/figures\G02.png;runs/drone/figures\G02.svg;runs/drone/figures\G02.pdf,runs/drone/figures\G02.json,,ready,Availability maps,Карти доступності
+runs/drone/figures\G03.csv,E02,G03,runs/drone/figures\G03.png;runs/drone/figures\G03.svg;runs/drone/figures\G03.pdf,runs/drone/figures\G03.json,,ready,Quality across five profiles,Якість у п'яти профілях
+runs/drone/figures\G04.csv,E02,G04,runs/drone/figures\G04.png;runs/drone/figures\G04.svg;runs/drone/figures\G04.pdf,runs/drone/figures\G04.json,,ready,Structural quality,Структурна якість
+runs/drone/figures\G05.csv,E02,G05,runs/drone/figures\G05.png;runs/drone/figures\G05.svg;runs/drone/figures\G05.pdf,runs/drone/figures\G05.json,,ready,Current authenticated coverage,Поточне автентифіковане покриття
+runs/drone/figures\G06.csv,E02,G06,runs/drone/figures\G06.png;runs/drone/figures\G06.svg;runs/drone/figures\G06.pdf,runs/drone/figures\G06.json,,ready,Operability,Працездатність
+runs/drone/figures\G07.csv,E02,G07,runs/drone/figures\G07.png;runs/drone/figures\G07.svg;runs/drone/figures\G07.pdf,runs/drone/figures\G07.json,,ready,Paired advantage of P over B4,Парна перевага P над B4
+runs/drone/figures\G08.csv,E02,G08,runs/drone/figures\G08.png;runs/drone/figures\G08.svg;runs/drone/figures\G08.pdf,runs/drone/figures\G08.json,,ready,Per-scene results,Результати окремих сцен
+runs/drone/figures\G09.csv,E02,G09,runs/drone/figures\G09.png;runs/drone/figures\G09.svg;runs/drone/figures\G09.pdf,runs/drone/figures\G09.json,,ready,Content dependence,Залежність від вмісту
+runs/drone/figures\G10.csv,E02,G10,runs/drone/figures\G10.png;runs/drone/figures\G10.svg;runs/drone/figures\G10.pdf,runs/drone/figures\G10.json,,ready,Distribution of the gain,Розподіл виграшу
+runs/drone/figures\G11.csv,E01,G11,runs/drone/figures\G11.png;runs/drone/figures\G11.svg;runs/drone/figures\G11.pdf,runs/drone/figures\G11.json,,ready,Compression on a clean channel,Стиснення на чистому каналі
+runs/drone/figures\G12.csv,E01,G12,runs/drone/figures\G12.png;runs/drone/figures\G12.svg;runs/drone/figures\G12.pdf,runs/drone/figures\G12.json,,ready,Overhead breakdown,Накладні витрати
+runs/drone/figures\G13.csv,E03,G13,runs/drone/figures\G13.png;runs/drone/figures\G13.svg;runs/drone/figures\G13.pdf,runs/drone/figures\G13.json,,ready,Useful data delivered in time,"Корисні дані, отримані вчасно"
+runs/drone/figures\G14.csv,E09,G14,runs/drone/figures\G14.png;runs/drone/figures\G14.svg;runs/drone/figures\G14.pdf,runs/drone/figures\G14.json,,ready,Rate Pareto front,Межа Парето за швидкістю
+runs/drone/figures\G15.csv,E09,G15,runs/drone/figures\G15.png;runs/drone/figures\G15.svg;runs/drone/figures\G15.pdf,runs/drone/figures\G15.json,,ready,Latency Pareto front,Межа Парето за затримкою
+runs/drone/figures\G16.csv,E09,G16,runs/drone/figures\G16.png;runs/drone/figures\G16.svg;runs/drone/figures\G16.pdf,runs/drone/figures\G16.json,,ready,Buffer Pareto front,Межа Парето за буфером
+runs/drone/figures\G17.csv,E03,G17,runs/drone/figures\G17.png;runs/drone/figures\G17.svg;runs/drone/figures\G17.pdf,runs/drone/figures\G17.json,,ready,Noise sensitivity,Чутливість до шуму
+runs/drone/figures\G18.csv,E03,G18,runs/drone/figures\G18.png;runs/drone/figures\G18.svg;runs/drone/figures\G18.pdf,runs/drone/figures\G18.json,,ready,Burst-length sensitivity,Чутливість до довжини burst
+runs/drone/figures\G19.csv,E03,G19,runs/drone/figures\G19.png;runs/drone/figures\G19.svg;runs/drone/figures\G19.pdf,runs/drone/figures\G19.json,,ready,Burst-rate sensitivity,Чутливість до частоти burst
+runs/drone/figures\G20.csv,E03,G20,runs/drone/figures\G20.png;runs/drone/figures\G20.svg;runs/drone/figures\G20.pdf,runs/drone/figures\G20.json,,ready,Jitter sensitivity,Чутливість до джитеру
+runs/drone/figures\G21.csv,E03,G21,runs/drone/figures\G21.png;runs/drone/figures\G21.svg;runs/drone/figures\G21.pdf,runs/drone/figures\G21.json,,ready,Low-pass sensitivity,Чутливість до фільтрації
+runs/drone/figures\G22.csv,E04,G22,runs/drone/figures\G22.png;runs/drone/figures\G22.svg;runs/drone/figures\G22.pdf,runs/drone/figures\G22.json,,ready,Gain and offset,Підсилення та зміщення
+runs/drone/figures\G23.csv,E04,G23,runs/drone/figures\G23.png;runs/drone/figures\G23.svg;runs/drone/figures\G23.pdf,runs/drone/figures\G23.json,,ready,Noise and burst interaction,Спільний вплив шуму й burst
+runs/drone/figures\G24.csv,E07,G24,runs/drone/figures\G24.png;runs/drone/figures\G24.svg;runs/drone/figures\G24.pdf,runs/drone/figures\G24.json,,ready,Recovery time,Час відновлення
+runs/drone/figures\G25.csv,E07,G25,runs/drone/figures\G25.png;runs/drone/figures\G25.svg;runs/drone/figures\G25.pdf,runs/drone/figures\G25.json,,ready,Quality dynamics,Динаміка якості
+runs/drone/figures\G26.csv,E07,G26,runs/drone/figures\G26.png;runs/drone/figures\G26.svg;runs/drone/figures\G26.pdf,runs/drone/figures\G26.json,,ready,Freshness of the display,Актуальність показу
+runs/drone/figures\G27.csv,E05,G27,runs/drone/figures\G27.png;runs/drone/figures\G27.svg;runs/drone/figures\G27.pdf,runs/drone/figures\G27.json,,ready,Interleaver geometry,Геометрія перемежувачів
+runs/drone/figures\G28.csv,E05,G28,runs/drone/figures\G28.png;runs/drone/figures\G28.svg;runs/drone/figures\G28.pdf,runs/drone/figures\G28.json,,ready,Codeword damage,Пошкодження кодових слів
+runs/drone/figures\G29.csv,E05,G29,runs/drone/figures\G29.png;runs/drone/figures\G29.svg;runs/drone/figures\G29.pdf,runs/drone/figures\G29.json,,ready,Analytic bound check,Перевірка аналітичної межі
+runs/drone/figures\G30.csv,E05,G30,runs/drone/figures\G30.png;runs/drone/figures\G30.svg;runs/drone/figures\G30.pdf,runs/drone/figures\G30.json,,ready,Joint description loss,Спільні втрати описів
+runs/drone/figures\G31.csv,E06,G31,runs/drone/figures\G31.png;runs/drone/figures\G31.svg;runs/drone/figures\G31.pdf,runs/drone/figures\G31.json,,ready,MDC x placement ablation,Абляція MDC x розміщення
+runs/drone/figures\G32.csv,E06,G32,runs/drone/figures\G32.png;runs/drone/figures\G32.svg;runs/drone/figures\G32.pdf,runs/drone/figures\G32.json,,ready,Unit size and FEC,Розмір одиниці та FEC
+runs/drone/figures\G33.csv,E06,G33,runs/drone/figures\G33.png;runs/drone/figures\G33.svg;runs/drone/figures\G33.pdf,runs/drone/figures\G33.json,,ready,Window and latency,Вікно й затримка
+runs/drone/figures\G34.csv,E06,G34,runs/drone/figures\G34.png;runs/drone/figures\G34.svg;runs/drone/figures\G34.pdf,runs/drone/figures\G34.json,,ready,Gap-fill policy,Політика відновлення пропусків
+runs/drone/figures\G35.csv,E08,G35,runs/drone/figures\G35.png;runs/drone/figures\G35.svg;runs/drone/figures\G35.pdf,runs/drone/figures\G35.json,,ready,Boundary-consistency attack,Атака за сумісністю меж
+runs/drone/figures\G36.csv,E08,G36,runs/drone/figures\G36.png;runs/drone/figures\G36.svg;runs/drone/figures\G36.pdf,runs/drone/figures\G36.json,,ready,Known or chosen frames,Відомі або обрані кадри
+runs/drone/figures\G37.csv,E08,G37,runs/drone/figures\G37.png;runs/drone/figures\G37.svg;runs/drone/figures\G37.pdf,runs/drone/figures\G37.json,,ready,Lab LFSR brute force,Перебір лабораторного LFSR
+runs/drone/figures\G38.csv,E08,G38,runs/drone/figures\G38.png;runs/drone/figures\G38.svg;runs/drone/figures\G38.pdf,runs/drone/figures\G38.json,,ready,Protocol checks,Перевірки протоколу
+runs/drone/figures\G39.csv,E09,G39,runs/drone/figures\G39.png;runs/drone/figures\G39.svg;runs/drone/figures\G39.pdf,runs/drone/figures\G39.json,,ready,Pipeline stage timing,Час етапів конвеєра
+runs/drone/figures\G40.csv,E09,G40,runs/drone/figures\G40.png;runs/drone/figures\G40.svg;runs/drone/figures\G40.pdf,runs/drone/figures\G40.json,,ready,Scaling,Масштабування
+runs/drone/figures\G41.csv,E09,G41,runs/drone/figures\G41.png;runs/drone/figures\G41.svg;runs/drone/figures\G41.pdf,runs/drone/figures\G41.json,,ready,Memory,Пам'ять
+runs/drone/figures\G42.csv,E10,G42,runs/drone/figures\G42.png;runs/drone/figures\G42.svg;runs/drone/figures\G42.pdf,runs/drone/figures\G42.json,,ready,Transfer level A -> B,Перенесення рівень A -> B
+runs/drone/figures\G43.csv,E07,G43,runs/drone/figures\G43.png;runs/drone/figures\G43.svg;runs/drone/figures\G43.pdf,runs/drone/figures\G43.json,,ready,Event schedule,Подієвий розклад

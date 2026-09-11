@@ -1,0 +1,19 @@
+{
+  "axis": "line_jitter_sigma",
+  "metrics": [
+    "psnr_full",
+    "coverage"
+  ],
+  "source_table": "sweeps.csv",
+  "figure": "G20",
+  "lang": "uk",
+  "run_dir": "runs/drone",
+  "title_uk": "Чутливість до джитеру",
+  "title_en": "Jitter sensitivity",
+  "experiment": "E03",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

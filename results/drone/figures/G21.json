@@ -1,0 +1,19 @@
+{
+  "axis": "lowpass_sigma",
+  "metrics": [
+    "symbol_errors_pre_fec",
+    "psnr_full"
+  ],
+  "source_table": "sweeps.csv",
+  "figure": "G21",
+  "lang": "uk",
+  "run_dir": "runs/drone",
+  "title_uk": "Чутливість до фільтрації",
+  "title_en": "Low-pass sensitivity",
+  "experiment": "E03",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

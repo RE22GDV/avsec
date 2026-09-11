@@ -1,0 +1,14 @@
+{
+  "source_table": "joint_loss.csv",
+  "figure": "G30",
+  "lang": "uk",
+  "run_dir": "runs/drone",
+  "title_uk": "Спільні втрати описів",
+  "title_en": "Joint description loss",
+  "experiment": "E05",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

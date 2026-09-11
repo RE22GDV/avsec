@@ -1,0 +1,16 @@
+{
+  "selection": "percentiles 10/50/90",
+  "source_table": "frames.csv",
+  "figure": "G01",
+  "lang": "uk",
+  "run_dir": "runs/drone",
+  "title_uk": "Наскрізні приклади",
+  "title_en": "End-to-end examples",
+  "experiment": "E02",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ],
+  "dpi": 140
+}

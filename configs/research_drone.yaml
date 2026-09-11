@@ -1,0 +1,124 @@
+# E12: te same porivniannia, shcho i E02, ale na REALNYKH kadrakh z drona.
+#
+# Dzherelo: fotografiia Curonian Spit NP (Epha Dune), avtor A.Savin,
+# kamera DJI FC6310 (Phantom 4 Pro), 4213x2633, Free Art License 1.3.
+# Kliпy - panoramuvannia vikna kadruvannia po tsii fotografii, tobto realnyi
+# vmist i realnyi rukh, a ne protsedurnyi patern.
+#
+# Plan zafiksovano do zapusku; konfiguratsii metodiv NE pereпidbyraiutsia pid
+# tsi dani - vony ti sami, shcho i v E02.
+name: research_drone
+seed: 20240909
+channel_seed: 20240909
+crypto_seed: 20240909
+key_mode: lab
+frame:
+  width: 256
+  height: 192
+  n_frames: 16
+sources:
+  kind: drone             # REAL UAV imagery: 17 stsen z fotografii DJI FC6310
+  n_frames: 16
+channel:
+  preset: moderate        # bazovyi profil; matrytsia zadaie svii nabir
+budget:
+  rasters_per_frame: 3          # spilne obmezhennia zainiatosti kanalu dlia vsikh metodiv
+  raster_rate_hz: 25.0
+  source_fps: 8.333             # 25 / 3
+  max_accumulation_rows: 300
+  max_virtual_latency_s: 0.8
+  max_receiver_buffer_kb: 512
+  raster_width: 720
+  raster_height: 576
+  active_x0: 24
+  active_x1: 696
+  active_y0: 8
+  active_y1: 568
+  level_low: 40
+  level_high: 216
+methods: [B0a, B0d, B1, B2, B3, B4, P]
+profiles:
+  B0d:
+    stripe_height: 24
+    n_descriptions: 1
+    codec: dct
+    quality: 12
+    max_unit_payload: 640
+    fec_nsym: 96
+    fec_header_nsym: 48
+    modulation: [4, 8, 2]
+    interleaver: [block, 278, 0]
+  B3:
+    stripe_height: 24
+    n_descriptions: 1
+    codec: dct
+    quality: 12
+    max_unit_payload: 640
+    fec_nsym: 96
+    fec_header_nsym: 48
+    modulation: [4, 8, 2]
+    interleaver: [block, 278, 0]
+  B4:
+    stripe_height: 24
+    n_descriptions: 1
+    codec: dct
+    quality: 12
+    max_unit_payload: 640
+    fec_nsym: 96
+    fec_header_nsym: 48
+    modulation: [4, 8, 2]
+    interleaver: [block, 278, 0]
+  P:
+    stripe_height: 24
+    n_descriptions: 2
+    codec: dct
+    quality: 8
+    max_unit_payload: 320
+    fec_nsym: 128
+    fec_header_nsym: 48
+    modulation: [4, 8, 2]
+    interleaver: [bawp, 0, 8]
+lfsr:
+  grid_rows: 12
+  grid_cols: 16
+  width: 16
+  seed: 44257
+  form: fibonacci
+  variant: fisher_yates
+  size_policy: pad
+  per_frame: false
+crypto:
+  algorithm: chacha20poly1305
+  replay_window: 4096
+  direction: uplink
+  stream_id: 0
+b2_grid: [12, 16]
+fill: interpolate
+max_frames_per_source: 4
+channel_realisations: 5
+save_images: false
+methods: [B0a, B0a-R, B0d, B1, B2, B3, B4, P]
+fill: interpolate
+max_frames_per_source: 16
+channel_realisations: 5
+save_images: false
+
+# --- plan matrytsi (chytaie `avsec matrix`) ---------------------------------
+matrix:
+  name: E12-drone
+  splits: [test]
+  repetitions: 5
+  max_frames: 16
+  workers: 12
+  channels:
+    - {base: clean}
+    - {base: mild}
+    - {base: moderate}
+    - {base: bursty}
+    - {base: harsh}
+
+notes: >
+  E12. Ti sami visim metodiv i ti sami profili kanalu, shcho i v E02, ale na
+  10 testovykh stsenakh, vyrizanykh z realnoi fotografii z drona. Konfiguratsii
+  ne pereпidbyralysia. Tse perevirka perenesennia z protsedurnogo materialu na
+  realnyi, a ne novyi pidbir.

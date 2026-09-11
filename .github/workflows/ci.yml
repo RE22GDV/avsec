@@ -1,0 +1,44 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.10", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          pip install -e .
+
+      - name: Tests
+        run: pytest tests -q
+
+      # These two are the checks that must never regress silently: a dataset
+      # with duplicates across splits, or an AEAD field that stopped being
+      # authenticated, would both still pass the unit tests.
+      - name: Dataset validation
+        run: avsec dataset validate --config configs/research_main.yaml --output runs/_ci
+
+      - name: Protocol checks
+        run: avsec protocol-check --config configs/research_main.yaml --output runs/_ci
+
+      - name: Smoke run
+        run: avsec demo --config configs/smoke.yaml --output runs/_ci_demo

@@ -1,0 +1,6 @@
+accumulation_rows,admissible,psnr_full,reason,window_accumulation_ms,window_rows
+16.0,False,nan,не вміщується у спільний бюджет,2.222,16
+32.0,False,nan,не вміщується у спільний бюджет,4.444,32
+64.0,False,nan,не вміщується у спільний бюджет,8.889,64
+128.0,False,nan,не вміщується у спільний бюджет,17.778,128
+278.0,True,23.745152818586764,,38.611,0

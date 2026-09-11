@@ -1,5 +1,6 @@
 {
   "run_id": "07b257405f757223",
+  "name": "figure_index.csv",
   "source": "runs/main",
   "destination": "results\\main",
   "tables": [
@@ -7,8 +8,8 @@
     "dataset_manifest.csv (0.01 MB)",
     "dataset_manifest.json (0.03 MB)",
     "channel_traces.jsonl (0.72 MB)",
-    "frames.csv (проріджено 20859/62575)",
-    "units.csv (проріджено 27374/54747)",
+    "frames.csv (проріджено 12515/62575)",
+    "units.csv (проріджено 13687/54747)",
     "codewords.csv (0.03 MB)",
     "joint_loss.csv (0.02 MB)",
     "placement_geometry.csv (0.00 MB)",
@@ -22,7 +23,6 @@
     "summary.csv (0.02 MB)",
     "operability.csv (0.00 MB)",
     "analysis.json (0.01 MB)",
-    "observations.csv (проріджено 20892/62675)",
     "jobs.csv (0.96 MB)",
     "matrix.json (0.07 MB)",
     "config.yaml (0.00 MB)",
@@ -47,6 +47,6 @@
     "protocol_checks.json (0.01 MB)",
     "programme_run.json (0.00 MB)"
   ],
-  "figure_files": 216,
-  "total_mb": 36.64
+  "figure_files": 266,
+  "total_mb": 27.84
 }

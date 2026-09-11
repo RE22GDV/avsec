@@ -1,0 +1,16 @@
+{
+  "burst_lines": 16,
+  "rs_nsym": 128.0,
+  "source_table": "codewords.csv+joint_loss.csv",
+  "figure": "K04",
+  "lang": "uk",
+  "run_dir": "runs/drone",
+  "title_uk": "Розміщення: компроміс без переможця",
+  "title_en": "Placement trade-off",
+  "experiment": "E05",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "clip": "uav_village",
+  "channel": "bursty",
+  "source_table": "frames.csv",
+  "figure": "K08",
+  "lang": "uk",
+  "run_dir": "runs/drone",
+  "title_uk": "Що саме показано глядачу",
+  "title_en": "What the viewer is shown",
+  "experiment": "E02",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ],
+  "dpi": 140
+}

@@ -1,0 +1,15 @@
+{
+  "crossover_burst_lines": 28.46353663321493,
+  "source_table": "sweeps.csv",
+  "figure": "K02",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Точка перелому",
+  "title_en": "The crossover",
+  "experiment": "E03",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

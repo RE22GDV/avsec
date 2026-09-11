@@ -182,14 +182,23 @@ def channel_key(name: str) -> Tuple[int, str]:
     return (CHANNEL_ORDER.index(base) if base in CHANNEL_ORDER else 99, name)
 
 
+#: Figures that are montages of raster frames rather than vector plots.  The
+#: source images are 256x192; rendering them at 300 dpi only upsamples pixels
+#: and multiplies the file size, and the SVG then carries the same upsampled
+#: bitmap base64-encoded.  Line art keeps the full resolution.
+RASTER_FIGURES = frozenset({"G01", "G02", "G27", "K07", "K08"})
+RASTER_DPI = 140
+
+
 def export(ctx: FigureContext, gid: str, fig, rows: Sequence[Dict[str, Any]],
            params: Dict[str, Any]) -> Dict[str, Any]:
     """Write PNG+SVG+PDF, the data table and the build parameters."""
     ensure_dir(ctx.out_dir)
     files = []
+    dpi = RASTER_DPI if gid in RASTER_FIGURES else DPI
     for fmt in ctx.formats:
         p = os.path.join(ctx.out_dir, f"{gid}.{fmt}")
-        fig.savefig(p, format=fmt, bbox_inches="tight")
+        fig.savefig(p, format=fmt, bbox_inches="tight", dpi=dpi)
         files.append(p)
     _plt().close(fig)
     write_csv(os.path.join(ctx.out_dir, f"{gid}.csv"), list(rows))
@@ -199,7 +208,7 @@ def export(ctx: FigureContext, gid: str, fig, rows: Sequence[Dict[str, Any]],
                  "title_uk": fdef.title_uk if fdef else "",
                  "title_en": fdef.title_en if fdef else "",
                  "experiment": fdef.source if fdef else "",
-                 "formats": list(ctx.formats)})
+                 "formats": list(ctx.formats), "dpi": dpi})
     write_json(os.path.join(ctx.out_dir, f"{gid}.json"), meta)
     return {"figure": gid, "status": "ready", "files": files, "n_rows": len(rows)}
 
@@ -1801,9 +1810,13 @@ def g42(ctx: FigureContext) -> Dict[str, Any]:
 def build(ctx: FigureContext, ids: Optional[Sequence[str]] = None
           ) -> List[Dict[str, Any]]:
     """Build what can be built; record the rest as pending with a reason."""
+    import avsec.figures_key  # noqa: F401  (registers K01-K10)
+
+    from avsec.program import KEY
+
     ensure_dir(ctx.out_dir)
     reasons: Dict[str, str] = {}
-    wanted = list(ids or [f.gid for f in CATALOGUE])
+    wanted = list(ids or ([f.gid for f in KEY] + [f.gid for f in CATALOGUE]))
     for gid in wanted:
         builder = BUILDERS.get(gid)
         if builder is None:

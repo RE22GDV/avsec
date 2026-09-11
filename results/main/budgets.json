@@ -786,8 +786,8 @@
         }
       ],
       "memory": {
-        "process_peak_bytes": 47632384,
-        "process_peak_mb": 47.632,
+        "process_peak_bytes": 138391552,
+        "process_peak_mb": 138.392,
         "process_method": "GetProcessMemoryInfo/PeakWorkingSetSize",
         "python_peak_bytes": 0,
         "python_peak_mb": 0.0,
@@ -1515,8 +1515,8 @@
         }
       ],
       "memory": {
-        "process_peak_bytes": 47632384,
-        "process_peak_mb": 47.632,
+        "process_peak_bytes": 138391552,
+        "process_peak_mb": 138.392,
         "process_method": "GetProcessMemoryInfo/PeakWorkingSetSize",
         "python_peak_bytes": 0,
         "python_peak_mb": 0.0,
@@ -2244,8 +2244,8 @@
         }
       ],
       "memory": {
-        "process_peak_bytes": 47632384,
-        "process_peak_mb": 47.632,
+        "process_peak_bytes": 138391552,
+        "process_peak_mb": 138.392,
         "process_method": "GetProcessMemoryInfo/PeakWorkingSetSize",
         "python_peak_bytes": 0,
         "python_peak_mb": 0.0,
@@ -3069,8 +3069,8 @@
         }
       ],
       "memory": {
-        "process_peak_bytes": 47632384,
-        "process_peak_mb": 47.632,
+        "process_peak_bytes": 138391552,
+        "process_peak_mb": 138.392,
         "process_method": "GetProcessMemoryInfo/PeakWorkingSetSize",
         "python_peak_bytes": 0,
         "python_peak_mb": 0.0,

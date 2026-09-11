@@ -23,6 +23,41 @@ from avsec.config import load_config  # noqa: E402
 from avsec.utils import write_json  # noqa: E402
 
 
+def _write_budgets(cfg, out: str) -> None:
+    """Capacity, latency and memory tables for this configuration."""
+    from avsec.experiments import run_budget
+    from avsec.utils import write_csv
+
+    o = run_budget(cfg)
+    write_json(os.path.join(out, "budgets.json"), o)
+    rows = []
+    for m, d in o["methods"].items():
+        row = {"method": m, "unit_plain_bytes": d["unit_plain_bytes"],
+               "unit_wire_bytes": d["unit_wire_bytes"],
+               "unit_symbols": d["unit_symbols"],
+               "units_per_raster": d["units_per_raster"],
+               "units_placed": d["units_per_raster_after_placement"],
+               "unused_symbols": d["unused_symbols"],
+               "gross_bitrate_bps": d["gross_bitrate_bps"],
+               "payload_bitrate_bps": d["payload_bitrate_bps"],
+               "payload_efficiency": d["payload_efficiency"],
+               "latency_mean_s": d["latency"]["latency_s"]["mean"],
+               "latency_additive_s":
+                   d["latency"]["additive_upper_bound"]["virtual_total_s"],
+               "deadline_misses": d["latency"]["deadline_misses"],
+               "logical_buffer_kb": d["memory"]["logical_total_kb"],
+               "process_peak_mb": d["memory"]["process_peak_mb"],
+               "model_arrays_mb": d["memory"]["model_total_mb"],
+               "confidentiality": d["security"].get("confidentiality"),
+               "authentication": d["security"].get("authentication")}
+        row.update({f"overhead_{k}": v
+                    for k, v in d["overhead_breakdown_per_unit"].items()})
+        row.update({f"raster_{k}": v for k, v in
+                    d["waterfall"]["raster_overhead"]["fractions"].items()})
+        rows.append(row)
+    write_csv(os.path.join(out, "budgets.csv"), rows)
+
+
 def main(argv: list) -> int:
     plan = argv[1] if len(argv) > 1 else "configs/research_main.yaml"
     out = argv[2] if len(argv) > 2 else "runs/main"
@@ -45,6 +80,8 @@ def main(argv: list) -> int:
                                         repetitions=3, n_clips=4)
     def _e09(): return research.run_e09(cfg, out, workers=1, warmup=1, repeats=5)
     def _e10(): return research.run_e10(cfg, out)
+    def _e13(): return research.run_e13(cfg, out, workers, repetitions=3,
+                                        max_frames=8)
 
     def _e08():
         att = run_attacks(cfg, out)
@@ -59,7 +96,7 @@ def main(argv: list) -> int:
 
     steps = [("E01", _e01), ("E03", _e03), ("E04", _e04), ("E05", _e05),
              ("E06", _e06), ("E07", _e07), ("E08", _e08), ("E09", _e09),
-             ("E10", _e10)]
+             ("E10", _e10), ("E13", _e13)]
     status = {}
     for name, fn in steps:
         if only and name not in only:
@@ -77,6 +114,12 @@ def main(argv: list) -> int:
                             "error": f"{type(exc).__name__}: {exc}",
                             "traceback": traceback.format_exc()[-2000:]}
             print(f"=== {name} FAILED: {exc}", flush=True)
+    # the budget tables belong to the run as much as any experiment does
+    try:
+        _write_budgets(cfg, out)
+        status["budgets"] = {"status": "done"}
+    except Exception as exc:
+        status["budgets"] = {"status": "failed", "error": str(exc)}
     write_json(os.path.join(out, "programme_run.json"), status)
     print(json.dumps({k: v["status"] for k, v in status.items()}, indent=1), flush=True)
     return 0

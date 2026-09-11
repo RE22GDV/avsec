@@ -1,0 +1,4 @@
+channel,clip,coverage,estimated_fraction,percentile,stale_fraction
+harsh,uav_forest_canopy,0.0,1.0,10,0.0
+mild,uav_village,1.0,0.0,50,0.0
+mild,uav_sky_horizon,1.0,0.0,90,0.0

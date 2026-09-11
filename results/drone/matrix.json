@@ -1,0 +1,105 @@
+{
+  "kind": "matrix",
+  "spec": {
+    "name": "E12-drone",
+    "methods": [
+      "B0a",
+      "B0a-R",
+      "B0d",
+      "B1",
+      "B2",
+      "B3",
+      "B4",
+      "P"
+    ],
+    "channels": [
+      {
+        "base": "clean",
+        "overrides": {},
+        "axis": "",
+        "value": NaN,
+        "label": "clean"
+      },
+      {
+        "base": "mild",
+        "overrides": {},
+        "axis": "",
+        "value": NaN,
+        "label": "mild"
+      },
+      {
+        "base": "moderate",
+        "overrides": {},
+        "axis": "",
+        "value": NaN,
+        "label": "moderate"
+      },
+      {
+        "base": "bursty",
+        "overrides": {},
+        "axis": "",
+        "value": NaN,
+        "label": "bursty"
+      },
+      {
+        "base": "harsh",
+        "overrides": {},
+        "axis": "",
+        "value": NaN,
+        "label": "harsh"
+      }
+    ],
+    "repetitions": 5,
+    "splits": [
+      "test"
+    ],
+    "max_frames": 16,
+    "max_clips": 0,
+    "schedule": [],
+    "workers": 12
+  },
+  "config_id": "a56957124aebce41",
+  "n_jobs_this_call": 2000,
+  "n_jobs_total": 2000,
+  "n_frames": 32000,
+  "wall_s_this_call": 549.42,
+  "failures": [],
+  "completeness": {
+    "n_planned": 2000,
+    "n_done": 2000,
+    "n_missing": 0,
+    "n_failed": 0,
+    "complete": true,
+    "missing": [],
+    "failed": [],
+    "truncated": false
+  },
+  "channel_axes": [],
+  "wall_s_measured": 550.7,
+  "estimate_before_run": {
+    "n_jobs": 2000,
+    "n_frames_total": 32000,
+    "estimated_wall_s": 610.2,
+    "estimated_wall_human": "0h10m10s",
+    "estimated_output_bytes": 13440000,
+    "estimated_output_mb": 13.44,
+    "jobs_per_method": {
+      "B0a": 250,
+      "B0a-R": 250,
+      "B0d": 250,
+      "B1": 250,
+      "B2": 250,
+      "B3": 250,
+      "B4": 250,
+      "P": 250
+    },
+    "jobs_per_channel": {
+      "clean": 400,
+      "mild": 400,
+      "moderate": 400,
+      "bursty": 400,
+      "harsh": 400
+    },
+    "cost_model": "measured one frame per method (B0a=143ms, B0a-R=40ms, B0d=167ms, B1=19ms, B2=17ms, B3=114ms, B4=177ms, P=299ms); parallel speedup 6.4x assumed for 16 process workers (measured efficiency 0.40, not the worker count)"
+  }
+}

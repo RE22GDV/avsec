@@ -1,0 +1,15 @@
+{
+  "method": "P",
+  "source_table": "budgets.json",
+  "figure": "K09",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Бюджет, затримка, пам'ять",
+  "title_en": "Budget, latency, memory",
+  "experiment": "E09",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

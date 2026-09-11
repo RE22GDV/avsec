@@ -230,7 +230,17 @@ function setBar(f){ $("bar").style.width = Math.round(f*100)+"%"; }
 function tabsInit(){
   $("tabs").innerHTML = TABS.map(([id,label]) =>
     `<button data-t="${id}" onclick="selectTab('${id}')">${label}</button>`).join("");
-  selectTab("demo");
+  /* Deep links: ?tab=<id>[&auto=1][&run=<dir>] selects a tab, optionally runs it
+     and optionally opens a saved run. Makes a view shareable — and lets the
+     documentation screenshots be taken from the real interface. */
+  const q = new URLSearchParams(location.search);
+  const want = q.get("tab");
+  const tab = TABS.some(t => t[0] === want) ? want : "demo";
+  selectTab(tab);
+  if(q.get("run")) EX.pendingRun = q.get("run");
+  if(q.get("auto") === "1" && TABRUN[tab] && tab !== "explorer"){
+    setTimeout(() => TABRUN[tab](), 60);
+  }
 }
 function selectTab(id){
   CURRENT = id;
@@ -262,7 +272,7 @@ TABS.forEach(([id,,fn]) => TABRUN[id]=fn);
    The saved-run browser. It only READS what `avsec analyze` and `avsec plots`
    wrote: no endpoint here starts an experiment, so the interface cannot show a
    number the command line would not produce. */
-const EX = { run:null, filters:null, metric:"psnr_full", methods:[], channels:[] };
+const EX = { run:null, filters:null, metric:"psnr_full", methods:[], channels:[], pendingRun:null };
 
 async function sync(action, payload){
   const r = await fetch("/api/sync/"+action, {method:"POST",
@@ -281,6 +291,11 @@ async function runExplorer(){
         немає збережених прогонів. Запустіть <code>avsec matrix --plan configs/research_main.yaml
         --output runs/main</code>, потім <code>avsec analyze --input runs/main</code>.</div></div>`;
       setStatus("порожньо"); return;
+    }
+    if(EX.pendingRun){
+      const i = runs.findIndex(r => r.path === EX.pendingRun || r.name === EX.pendingRun);
+      if(i > 0) runs.unshift(runs.splice(i, 1)[0]);   /* preselect it */
+      EX.pendingRun = null;
     }
     const opts = runs.map(r=>`<option value="${esc(r.path)}">${esc(r.name)} · ${r.n_frames} кадрів · ${r.figures_ready}/${r.figures_total} рисунків</option>`).join("");
     $("out").innerHTML = `<div class="panel">
@@ -510,6 +525,15 @@ async function exAgeMap(){
   setStatus("готово","ok");
 }
 
+/* "uav:<scene>" selects a real drone clip; anything else is a procedural
+   pattern. Kept in one place so every tab builds the same source spec. */
+function sourceSpec(n){
+  const v = $("pattern").value || "edges";
+  if(v.startsWith("uav:"))
+    return {kind:"drone", scene:v.slice(4), n_frames:(n||2)};
+  return {kind:"synthetic", patterns:[v], n_frames:(n||2)};
+}
+
 function cfg(){
   const [b4w,b4h] = ($("b4_cell").value||"8x2").split("x").map(Number);
   const [pw,ph]   = ($("p_cell").value||"8x2").split("x").map(Number);
@@ -532,7 +556,7 @@ function cfg(){
     seed: parseInt($("seed").value),
     key_mode: "lab",
     frame: {width: parseInt($("fw").value), height: parseInt($("fh").value), n_frames: 2},
-    sources: {kind:"synthetic", patterns:[$("pattern").value], n_frames:2},
+    sources: sourceSpec(),
     channel: {preset: $("chPreset").value, overrides: ov},
     budget: Object.assign(base.budget||{}, {
       rasters_per_frame: parseInt($("rpf").value),
@@ -557,8 +581,23 @@ async function post(url, body){
   return j;
 }
 
+/* Set by ?sync=1. A headless browser fast-forwards setTimeout, so the polling
+   loop below would screenshot the page mid-run; one blocking request does not
+   have that problem. Humans keep the progress bar. */
+const SYNC_MODE = new URLSearchParams(location.search).get("sync") === "1";
+
 async function job(action, payload, render){
   setStatus("запуск…"); setBar(0.02); $("out").innerHTML="";
+  if(SYNC_MODE){
+    try {
+      const res = await post("/api/sync/"+action, payload);
+      setBar(1); setStatus("готово", "ok"); render(res); return;
+    } catch(e){
+      setBar(0); setStatus(String(e), "err");
+      $("out").innerHTML = `<div class="panel err">${esc(e.message||e)}</div>`;
+      return;
+    }
+  }
   let j;
   try { j = await post("/api/run/"+action, payload); }
   catch(e){ setStatus(String(e), "err"); return; }
@@ -773,7 +812,11 @@ async function init(){
   DEF = await post("/api/sync/defaults", {});
   $("ver").textContent = "v" + DEF.version;
   $("env").textContent = "python " + DEF.environment.python + " · numpy " + DEF.environment.packages.numpy;
-  $("pattern").innerHTML = DEF.patterns.map(p=>`<option${p==="edges"?" selected":""}>${p}</option>`).join("");
+  const wantPattern = new URLSearchParams(location.search).get("pattern");
+  const defPattern = (wantPattern && DEF.patterns.includes(wantPattern))
+                     ? wantPattern : "edges";
+  $("pattern").innerHTML = DEF.patterns.map(
+    p=>`<option${p===defPattern?" selected":""}>${esc(p)}</option>`).join("");
   $("chPreset").innerHTML = Object.keys(DEF.channel_presets).map(
     p=>`<option${p==="moderate"?" selected":""}>${p}</option>`).join("");
   $("cfgFile").innerHTML = (DEF.configs_dir||[]).map(

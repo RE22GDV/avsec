@@ -1,0 +1,5 @@
+aead_tag,header,header_parity,method,payload,payload_efficiency,payload_parity,raster_blanking,raster_data_cells,raster_grid_remainder,raster_pilots,raster_sync,unit_wire_bytes,units_per_raster,unused_symbols
+16,56,96,B0d,640,0.4847,480,0.0926,0.8151,0.0,0.0858,0.0065,1288,4,520
+16,56,96,B3,640,0.4847,480,0.0926,0.8151,0.0,0.0858,0.0065,1288,4,520
+16,56,96,B4,640,0.4847,480,0.0926,0.8151,0.0,0.0858,0.0065,1288,4,520
+16,56,96,P,320,0.3635,384,0.0926,0.8151,0.0,0.0858,0.0065,872,6,200

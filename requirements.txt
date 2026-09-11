@@ -1,0 +1,18 @@
+# avsec — runtime dependencies
+#
+#   pip install -r requirements.txt
+#
+# Python 3.10 or newer is required.
+#
+# Nothing here is a cryptographic implementation written by this project:
+# AEAD comes from `cryptography` (which wraps OpenSSL) and Reed–Solomon from
+# `reedsolo`.  That is deliberate — see docs/threat_model.md.
+
+numpy>=1.24            # arrays, the whole signal path
+scipy>=1.10            # filtering, SSIM windows, resampling
+cryptography>=41       # ChaCha20-Poly1305 / AES-256-GCM, HKDF-SHA256
+reedsolo>=1.7          # Reed–Solomon over GF(256)
+opencv-python>=4.8     # image I/O, resampling, drawing
+Pillow>=10.0           # image formats opencv does not cover
+PyYAML>=6.0            # configuration files
+matplotlib>=3.7        # figures (PNG 300 dpi / SVG / PDF)

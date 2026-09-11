@@ -436,6 +436,87 @@ def e09_section(view: RunView) -> str:
     ])
 
 
+
+def transfer_section(view: RunView, other_dir: Optional[str]) -> str:
+    """Same configurations, different material: does the conclusion survive?
+
+    This is a transfer check, not a second tuning round - the configurations
+    are not re-selected on the new material.  Both the agreement and the change
+    in magnitude are reported, because a smaller effect on real data is a
+    result and not something to smooth over.
+    """
+    if not other_dir or not os.path.isdir(other_dir):
+        return ("_Порівняння з реальними кадрами недоступне: немає другого "
+                "прогону._")
+    other = RunView(other_dir)
+    a_an, b_an = view.json("analysis.json"), other.json("analysis.json")
+    if not a_an or not b_an:
+        return "_Один із прогонів не проаналізовано._"
+    a_rows = {r["channel"]: r for r in a_an.get("primary", [])}
+    b_rows = {r["channel"]: r for r in b_an.get("primary", [])}
+    a_cov = {(r["channel"], r["method"]): _f(r, "mean")
+             for r in view.csv("summary.csv") if r.get("metric") == "coverage"}
+    b_cov = {(r["channel"], r["method"]): _f(r, "mean")
+             for r in other.csv("summary.csv") if r.get("metric") == "coverage"}
+
+    body = []
+    agree = disagree = 0
+    for ch in sorted(set(a_rows) & set(b_rows) - {"ALL"}, key=_ch_key):
+        ra, rb = a_rows[ch], b_rows[ch]
+        ma, mb = _f(ra, "mean"), _f(rb, "mean")
+        sa = bool(ra.get("significant_at_95"))
+        sb = bool(rb.get("significant_at_95"))
+        # Two runs agree when they reach the same CONCLUSION.  Comparing the
+        # sign of an effect that neither run established is meaningless: a
+        # -0.01 dB and a +0.21 dB point estimate, both with an interval
+        # containing zero, say exactly the same thing.
+        if not sa and not sb:
+            same, verdict = True, "збігається (в обох не встановлено)"
+        elif sa != sb:
+            same, verdict = False, "**розходиться** (значуще лише в одному)"
+        elif np.sign(ma) == np.sign(mb):
+            same, verdict = True, "збігається"
+        else:
+            same, verdict = False, "**розходиться** (протилежний знак)"
+        agree += int(same)
+        disagree += int(not same)
+        ca = a_cov.get((ch, "P"))
+        cb = b_cov.get((ch, "P"))
+        body.append([
+            ch,
+            f"{ma:+.2f} [{_f(ra, 'lo'):+.2f}; {_f(ra, 'hi'):+.2f}]"
+            + ("" if sa else " (не встановлено)"),
+            f"{mb:+.2f} [{_f(rb, 'lo'):+.2f}; {_f(rb, 'hi'):+.2f}]"
+            + ("" if sb else " (не встановлено)"),
+            f"{ca:.3f} / {cb:.3f}" if ca is not None and cb is not None else "—",
+            verdict,
+        ])
+    lines = [
+        f"Конфігурації **не переналаштовувались** під другий набір — вони ті "
+        f"самі. Синтетичний прогін: {a_an.get('n_scenes')} сцен, "
+        f"{a_an.get('n_observations')} кадрів. Реальні кадри з дрона: "
+        f"{b_an.get('n_scenes')} сцен, {b_an.get('n_observations')} кадрів.",
+        "",
+        _table(["канал", "синтетичні, P−B4, дБ", "реальні, P−B4, дБ",
+                "покриття P синт/реал", "висновок"], body),
+        "",
+        f"Висновок збігається у **{agree} з {agree + disagree}** каналів"
+        + (f"; розходиться у {disagree}." if disagree else "."),
+    ]
+    fa = view.csv("failures.csv")
+    fb = other.csv("failures.csv")
+    lines += [
+        "",
+        f"**Відмови за бюджетом:** синтетичний набір — {len(fa)}, реальні "
+        f"кадри — {len(fb)}."
+        + (" Процедурні патерни з високою частотою (регулярна сітка, рендерений "
+           "текст) виявились важчими за будь-який реальний кадр: синтетичний "
+           "набір був консервативнішим тестом, а не легшим."
+           if len(fa) > len(fb) else ""),
+    ]
+    return "\n".join(lines)
+
+
 def figures_section(view: RunView, figures_dir: str) -> str:
     rows = view.csv(os.path.join(os.path.relpath(figures_dir, view.run_dir),
                                  "figure_index.csv")) if figures_dir else []
@@ -457,25 +538,35 @@ def figures_section(view: RunView, figures_dir: str) -> str:
               "параметрами побудови.")
 
 
-def programme_section(figures_dir: str) -> str:
+def _evidence(compare_dir: Optional[str]) -> Dict[str, str]:
+    """Experiments whose evidence is a whole second run, not a figure."""
+    out: Dict[str, str] = {}
+    if compare_dir and os.path.exists(os.path.join(compare_dir, "analysis.json")):
+        out["E12"] = "done"
+    return out
+
+
+def programme_section(figures_dir: str,
+                      evidence: Optional[Dict[str, str]] = None) -> str:
     rows: List[Dict[str, Any]] = []
     idx = os.path.join(figures_dir, "figure_index.csv")
     if os.path.exists(idx):
         with open(idx, encoding="utf-8", newline="") as fh:
             rows = list(csv.DictReader(fh))
-    st = programme_status(rows)
+    st = programme_status(rows, evidence)
     body = []
     for e in st:
         label = {"done": "виконано", "partial": "частково",
                  "not_done": "не виконано", "planned": "заплановано"}[e["status"]]
         body.append([e["id"], e["title_uk"], label,
                      f"{e['figures_ready']}/{e['figures_total']}",
-                     e.get("reason", "")[:120]])
+                     e.get("reason", "")[:180]])
     return _table(["ID", "дослідження", "статус", "рисунків", "причина"], body)
 
 
 # --------------------------------------------------------------------- output
-def build_results_doc(view: RunView, figures_dir: str) -> str:
+def build_results_doc(view: RunView, figures_dir: str,
+                      compare_dir: Optional[str] = None) -> str:
     parts = [
         "# Результати",
         "",
@@ -522,13 +613,17 @@ def build_results_doc(view: RunView, figures_dir: str) -> str:
         "",
         e09_section(view),
         "",
+        "## 9a. Перенесення на реальні кадри з дрона (E12)",
+        "",
+        transfer_section(view, compare_dir),
+        "",
         "## 10. Каталог рисунків",
         "",
         figures_section(view, figures_dir),
         "",
         "## 11. Програма досліджень",
         "",
-        programme_section(figures_dir),
+        programme_section(figures_dir, _evidence(compare_dir)),
         "",
         "## 12. Межі цих результатів",
         "",
@@ -572,11 +667,20 @@ def build_readme_block(view: RunView, figures_dir: str) -> str:
 
     # The headline is composed from what the intervals actually say, so it
     # cannot claim a general win when the effect is confined to one channel.
+    chain = view.json("e13.json")
+    decomposition = ""
+    if chain:
+        decomposition = (
+            f" Покроковий розклад цієї різниці (E13) показує, що її дають "
+            f"**параметри транспорту** ({chain.get('transport_gain_db', 0):+.2f} дБ), "
+            f"тоді як самі запропоновані механізми — кілька описів і BAWP — "
+            f"**віднімають** {abs(chain.get('mechanism_gain_db', 0)):.2f} дБ.")
     if better and worse:
         headline = (f"**Перевага запропонованої схеми залежить від каналу.** "
                     f"`P` значуще краща за `B4` на {', '.join(better)} і значуще "
                     f"гірша на {', '.join(worse)}. Загального виграшу немає, і "
-                    f"це головний результат прогону, а не застереження до нього.")
+                    f"це головний результат прогону, а не застереження до нього."
+                    + decomposition)
     elif better:
         headline = (f"**`P` значуще перевершує `B4`** на каналах "
                     f"{', '.join(better)}; програшів не зафіксовано.")
@@ -632,36 +736,40 @@ def build_readme_block(view: RunView, figures_dir: str) -> str:
             f"{_f(p_row, 'latency_mean_s') * 1e3:.0f} мс, логічний буфер "
             f"{_f(p_row, 'logical_buffer_kb'):.1f} кБ.")
     lines += [
-        f"- **Рисунки:** {n_ready} з {len(idx_rows) or len(CATALOGUE)} каталогу "
-        f"G01–G43 побудовано; решта позначені `pending` з причиною у "
-        f"[docs/figures.md](docs/figures.md).",
+        f"- **Рисунки:** {n_ready} з {len(idx_rows) or len(CATALOGUE)} "
+        f"(K01–K10 і G01–G43)"
+        + (" — усі побудовано." if n_ready == len(idx_rows) and idx_rows
+           else "; решта позначені `pending` з причиною у "
+                "[docs/figures.md](docs/figures.md)."),
         "- **Апаратних вимірювань немає** (E11 не виконано): усе нижче — модель.",
         "",
-        f"Повні таблиці: [docs/results.md](docs/results.md).  "
-        f"Сирі дані: `{_relpath(view.run_dir)}/`.",
+        f"Повні таблиці: [docs/results.md](docs/results.md) · "
+        f"аналіз і висновки: [docs/conclusions.md](docs/conclusions.md) · "
+        f"курована добірка з усіма рисунками: [results/](results/).",
         README_END,
     ]
     return "\n".join(lines)
 
 
 def publish(run_dir: str, docs_dir: str = "docs", readme: str = "README.md",
-            figures_dir: Optional[str] = None) -> Dict[str, Any]:
+            figures_dir: Optional[str] = None,
+            compare_dir: Optional[str] = None) -> Dict[str, Any]:
     """Regenerate every document that quotes a number, from this run only."""
     view = RunView(run_dir)
     figures_dir = figures_dir or os.path.join(run_dir, "figures")
     ensure_dir(docs_dir)
 
-    results = build_results_doc(view, figures_dir)
+    results = build_results_doc(view, figures_dir, compare_dir)
     with open(os.path.join(docs_dir, "results.md"), "w", encoding="utf-8") as fh:
         fh.write(results)
 
     with open(os.path.join(docs_dir, "figures.md"), "w", encoding="utf-8") as fh:
-        fh.write("# Каталог рисунків G01–G43\n\n" + view.stamp() + "\n\n"
+        fh.write("# Каталог рисунків: K01–K10 і G01–G43\n\n" + view.stamp() + "\n\n"
                  + figures_section(view, figures_dir) + "\n")
 
     with open(os.path.join(docs_dir, "programme.md"), "w", encoding="utf-8") as fh:
-        fh.write("# Програма досліджень E01–E11\n\n" + view.stamp() + "\n\n"
-                 + programme_section(figures_dir) + "\n\n"
+        fh.write("# Програма досліджень E01–E13\n\n" + view.stamp() + "\n\n"
+                 + programme_section(figures_dir, _evidence(compare_dir)) + "\n\n"
                  + "## E11 — апаратна перевірка\n\n"
                  + EXPERIMENTS["E11"].reason + "\n\n"
                  + "Доки цих вимірювань немає, рисунки H01–H04 не існують, а "
@@ -684,6 +792,7 @@ def publish(run_dir: str, docs_dir: str = "docs", readme: str = "README.md",
         updated_readme = True
 
     return {"run_id": view.run_id, "commit": view.commit,
+            "compared_with": compare_dir,
             "results": os.path.join(docs_dir, "results.md"),
             "figures": os.path.join(docs_dir, "figures.md"),
             "programme": os.path.join(docs_dir, "programme.md"),

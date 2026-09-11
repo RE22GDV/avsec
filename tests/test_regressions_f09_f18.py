@@ -446,14 +446,20 @@ def test_f18_a_loss_is_reported_not_hidden(tmp_path):
 
 
 def test_f18_pending_figures_carry_a_reason(tmp_path):
-    from avsec.program import catalogue_status
+    from avsec.program import CATALOGUE, KEY, catalogue_status
 
     rows = catalogue_status(str(tmp_path))
-    assert len(rows) == 43
+    assert len(rows) == len(KEY) + len(CATALOGUE) == 53
+    # the ten key figures come first: a reader who stops after one screen
+    # should have seen the ones that carry the argument
+    assert [r["figure"] for r in rows[:len(KEY)]] == [f.gid for f in KEY]
     assert all(r["status"] == "pending" for r in rows)
     assert all(r["reason"] for r in rows)
     e11 = [r for r in rows if r["experiment"] == "E11"]
     assert not e11, "E11 has no software figures; its outputs are H01-H04"
+
+    catalogue_only = catalogue_status(str(tmp_path), include_key=False)
+    assert len(catalogue_only) == 43
 
 
 def test_f18_hardware_experiment_is_declared_not_done():

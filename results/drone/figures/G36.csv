@@ -1,0 +1,7 @@
+assumptions,attack,content,group,n_frames_used,permutation_accuracy,seconds,success
+"one (original, scrambled) pair under the same permutation",known_plaintext_tile_matching,smooth,1 відома пара,1,1.0,0.03101509999942209,True
+"one (original, scrambled) pair under the same permutation",known_plaintext_tile_matching,edges,1 відома пара,1,0.3333333333333333,0.032114200000251,True
+"one (original, scrambled) pair under the same permutation",known_plaintext_tile_matching,text,1 відома пара,1,0.5364583333333334,0.033049700000447046,True
+"one (original, scrambled) pair under the same permutation",known_plaintext_tile_matching,texture,1 відома пара,1,1.0,0.03249119999964023,True
+static permutation; attacker controls or knows one full input frame,chosen_plaintext_permutation_recovery,,1 обраний кадр,1.0,1.0,0.0011646000002656365,True
+permutation reused across frames; attacker sees many scrambled frames,multi_frame_variance_fingerprint,,багатокадрова,1,0.5104166666666666,0.0034318999996685307,True

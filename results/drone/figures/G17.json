@@ -1,0 +1,19 @@
+{
+  "axis": "noise_sigma",
+  "metrics": [
+    "psnr_full",
+    "coverage"
+  ],
+  "source_table": "sweeps.csv",
+  "figure": "G17",
+  "lang": "uk",
+  "run_dir": "runs/drone",
+  "title_uk": "Чутливість до шуму",
+  "title_en": "Noise sensitivity",
+  "experiment": "E03",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

@@ -30,7 +30,7 @@ TABLES = (
     "joint_loss.csv", "placement_geometry.csv", "timings.csv", "scaling.csv",
     "budgets.csv", "budgets.json", "failures.csv", "failures_summary.csv",
     "paired_effects.csv", "summary.csv", "operability.csv", "analysis.json",
-    "observations.csv", "jobs.csv", "matrix.json", "config.yaml",
+    "jobs.csv", "matrix.json", "config.yaml",
     "e01_rate_quality.csv", "e01.json", "sweeps.csv", "e03.json",
     "interaction.csv", "e04.json", "e05.json", "ablations.csv", "e06.json",
     "dynamics.csv", "recovery.csv", "e07.json", "e09.json",
@@ -40,8 +40,10 @@ TABLES = (
 
 #: frames.csv is 22 MB; the per-scene aggregate is what the tables actually
 #: read, so the full per-frame table is summarised instead of copied whole.
-LARGE = {"frames.csv": 4_000_000, "observations.csv": 4_000_000,
-         "units.csv": 4_000_000}
+#: Row budget for the per-frame tables.  Enough to re-derive every aggregate to
+#: within its own interval (see results/README.md for the comparison), small
+#: enough that the evidence folder stays clonable.
+LARGE = {"frames.csv": 12_000, "units.csv": 12_000, "sweeps_frames.csv": 12_000}
 
 
 def _copy(src_dir: str, dst_dir: str, name: str) -> str:
@@ -52,7 +54,7 @@ def _copy(src_dir: str, dst_dir: str, name: str) -> str:
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     size = os.path.getsize(src)
     limit = LARGE.get(name)
-    if limit and size > limit:
+    if limit:
         return _summarise(src, dst, limit)
     shutil.copy2(src, dst)
     return f"{name} ({size / 1e6:.2f} MB)"
@@ -64,8 +66,10 @@ def _summarise(src: str, dst: str, limit: int) -> str:
 
     with open(src, encoding="utf-8", newline="") as fh:
         rows = list(csv.DictReader(fh))
-    step = max(1, len(rows) * 400 // max(limit // 1000, 1) // 400)
-    step = max(1, len(rows) // 20000)
+    if not rows:
+        shutil.copy2(src, dst)
+        return f"{os.path.basename(dst)} (порожня)"
+    step = max(1, len(rows) // max(int(limit), 1))
     kept = rows[::step]
     with open(dst, "w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=list(rows[0]))
@@ -84,12 +88,15 @@ def _summarise(src: str, dst: str, limit: int) -> str:
 def main(argv: list) -> int:
     run = argv[1] if len(argv) > 1 else "runs/main"
     out_root = argv[2] if len(argv) > 2 else "results"
+    # the destination is named after the run, so several runs can be curated
+    # side by side (the synthetic one and the real-imagery one)
+    name = argv[3] if len(argv) > 3 else os.path.basename(run.rstrip("/\\"))
     manifest_path = os.path.join(run, "run_manifest.json")
     run_id = "unknown"
     if os.path.exists(manifest_path):
         with open(manifest_path, encoding="utf-8") as fh:
             run_id = json.load(fh).get("run_id", "unknown")
-    dst = os.path.join(out_root, "main")
+    dst = os.path.join(out_root, name)
     if os.path.isdir(dst):
         shutil.rmtree(dst)
     os.makedirs(dst, exist_ok=True)
@@ -109,7 +116,7 @@ def main(argv: list) -> int:
 
     total = sum(os.path.getsize(os.path.join(r, f))
                 for r, _, fs in os.walk(dst) for f in fs)
-    summary = {"run_id": run_id, "source": run, "destination": dst,
+    summary = {"run_id": run_id, "name": name, "source": run, "destination": dst,
                "tables": copied, "figure_files": n_fig,
                "total_mb": round(total / 1e6, 2)}
     with open(os.path.join(dst, "CURATION.json"), "w", encoding="utf-8") as fh:

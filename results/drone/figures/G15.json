@@ -1,0 +1,15 @@
+{
+  "x": "latency_s",
+  "source_table": "budgets.json",
+  "figure": "G15",
+  "lang": "uk",
+  "run_dir": "runs/drone",
+  "title_uk": "Межа Парето за затримкою",
+  "title_en": "Latency Pareto front",
+  "experiment": "E09",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "source_table": "attacks.json",
+  "figure": "K10",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Схема 2021 року зламана",
+  "title_en": "The 2021 scheme is broken",
+  "experiment": "E08",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

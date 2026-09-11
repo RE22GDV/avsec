@@ -97,6 +97,23 @@ def _config(payload: Dict[str, Any]):
 
 
 # ------------------------------------------------------------------- actions
+def _drone_patterns() -> List[str]:
+    """Real UAV scenes, offered next to the procedural patterns.
+
+    They are prefixed so nobody can confuse a real frame with a generated one:
+    the provenance field says the same thing, but the dropdown is what a user
+    actually reads.
+    """
+    try:
+        from avsec.sources.drone import DRONE_PHOTO, DRONE_SCENES
+    except Exception:
+        return []
+    if not os.path.exists(DRONE_PHOTO):
+        return []
+    return [f"uav:{name}" for name, _c, _s, _e, _m, split in DRONE_SCENES
+            if split == "test"]
+
+
 def action_defaults(payload: Dict[str, Any]) -> Dict[str, Any]:
     from avsec.channel import PRESETS
     from avsec.config import DEFAULT_PROFILES, ExperimentConfig
@@ -111,7 +128,7 @@ def action_defaults(payload: Dict[str, Any]) -> Dict[str, Any]:
         "environment": environment_record(),
         "channel_presets": {k: v.describe() for k, v in PRESETS.items()},
         "cvbs_presets": sorted(CVBS_PRESETS),
-        "patterns": sorted(PATTERNS),
+        "patterns": sorted(PATTERNS) + _drone_patterns(),
         "methods": ["B0a", "B0d", "B1", "B2", "B3", "B4", "P"],
         "interleaver_schemes": list(SCHEMES),
         "codecs": ["raw", "dct", "jpeg"],
@@ -539,6 +556,15 @@ ASYNC_ACTIONS: Dict[str, Callable[..., Any]] = {
     "budget": action_budget,
 }
 
+#: The long actions are also reachable synchronously.  The page uses this path
+#: when it is driven by a script (``?sync=1``): a polling loop is fine for a
+#: human watching a progress bar, but a headless browser fast-forwards timers
+#: and screenshots the page mid-run.  One blocking request is deterministic.
+def _sync(fn: Callable[..., Any]) -> Callable[[Dict[str, Any]], Any]:
+    # a no-op progress sink, not None: the actions call it directly
+    return lambda payload: fn(payload, lambda *a, **k: None)
+
+
 SYNC_ACTIONS: Dict[str, Callable[[Dict[str, Any]], Any]] = {
     "defaults": action_defaults,
     "runs": action_list_runs,
@@ -555,6 +581,12 @@ SYNC_ACTIONS: Dict[str, Callable[[Dict[str, Any]], Any]] = {
     "explorer_figure": action_explorer_figure,
     "explorer_export": action_explorer_export,
     "explorer_agemap": action_explorer_agemap,
+    # blocking variants of the long actions, for scripted use
+    "demo": _sync(action_demo),
+    "budget": _sync(action_budget),
+    "scramble": _sync(action_scramble),
+    "attacks": _sync(action_attacks),
+    "cvbs": _sync(action_cvbs),
 }
 
 

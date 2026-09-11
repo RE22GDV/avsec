@@ -1,0 +1,14 @@
+{
+  "source_table": "scaling.csv",
+  "figure": "G40",
+  "lang": "uk",
+  "run_dir": "runs/drone",
+  "title_uk": "Масштабування",
+  "title_en": "Scaling",
+  "experiment": "E09",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}

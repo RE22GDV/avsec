@@ -1,0 +1,14 @@
+{
+  "source_table": "frames.csv",
+  "figure": "G10",
+  "lang": "uk",
+  "run_dir": "runs/drone",
+  "title_uk": "Розподіл виграшу",
+  "title_en": "Distribution of the gain",
+  "experiment": "E02",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ]
+}
