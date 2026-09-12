@@ -37,6 +37,20 @@ def test_every_link_and_anchor_resolves():
     assert res.returncode == 0, res.stdout + res.stderr
 
 
+def test_math_survives_githubs_renderer():
+    r"""Display math must be a fenced ```math block, not $$...$$.
+
+    GitHub runs its emphasis parser before the math renderer, so a multi-line
+    ``$$`` block loses every pairable ``_``: ``\underbrace{x}_{a}`` comes out
+    as ``\underbrace{x}{a}`` and the formula collapses on the rendered page
+    while looking perfectly fine in the source.
+    """
+    res = subprocess.run([sys.executable,
+                          os.path.join(ROOT, "scripts", "check_math.py")],
+                         capture_output=True, text=True, cwd=ROOT)
+    assert res.returncode == 0, res.stdout + res.stderr
+
+
 def test_every_document_says_what_it_is():
     """A reader landing from a search result must see what the file is for."""
     exempt = {"docs/historical_results.md"}      # carries its own warning banner

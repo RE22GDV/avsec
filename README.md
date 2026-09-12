@@ -396,16 +396,20 @@ flowchart LR
 
 Середньоквадратична похибка і PSNR по **всьому показаному кадру**:
 
-$$\mathrm{MSE} = \frac{1}{HW}\sum_{y=0}^{H-1}\sum_{x=0}^{W-1}\bigl(I(y,x)-\hat I(y,x)\bigr)^2,
+```math
+\mathrm{MSE} = \frac{1}{HW}\sum_{y=0}^{H-1}\sum_{x=0}^{W-1}\bigl(I(y,x)-\hat I(y,x)\bigr)^2,
 \qquad
-\mathrm{PSNR} = 10\log_{10}\frac{255^2}{\mathrm{MSE}}$$
+\mathrm{PSNR} = 10\log_{10}\frac{255^2}{\mathrm{MSE}}
+```
 
 За $\mathrm{MSE}=0$ PSNR нескінченний. Такі кадри **рахуються окремо**
 (`bit_exact`), а не підмінюються скінченною сталою на кшталт 99 дБ.
 
 **Поточне автентифіковане покриття** — головна метрика захищеного тракту:
 
-$$\mathrm{cov} = \frac{\bigl|\{(y,x): \text{піксель з одиниці, що пройшла перевірку AEAD у цьому кадрі}\}\bigr|}{HW}$$
+```math
+\mathrm{cov} = \frac{\bigl|\{(y,x): \text{піксель з одиниці, що пройшла перевірку AEAD у цьому кадрі}\}\bigr|}{HW}
+```
 
 Старі пікселі (з попереднього кадру) і домальовані інтерполяцією **не входять**.
 Для `B0a`, `B1`, `B2` $\mathrm{cov}=1$ означає лише «зображення відображено».
@@ -417,20 +421,26 @@ $$\mathrm{cov} = \frac{\bigl|\{(y,x): \text{піксель з одиниці, щ
 
 Вікно висотою $W$ символьних рядків ділиться на смуги:
 
-$$G = \max\Bigl(1,\ \min\bigl(D,\ \lfloor W/B \rfloor\bigr)\Bigr),
-\qquad h = \lfloor W/G \rfloor$$
+```math
+G = \max\Bigl(1,\ \min\bigl(D,\ \lfloor W/B \rfloor\bigr)\Bigr),
+\qquad h = \lfloor W/G \rfloor
+```
 
 де $D$ — число описів, $B$ — очікувана висота пакета пошкодження. Усередині
-смуги з рядками $[r_0, r_0+h)$ і $C$ стовпцями $l$-й символ потрапляє у комірку:
+смуги з рядками `[r₀, r₀+h)` і $C$ стовпцями $l$-й символ потрапляє у комірку:
 
-$$\mathrm{row} = r_0 + (l \bmod h),
+```math
+\mathrm{row} = r_0 + (l \bmod h),
 \qquad
-\mathrm{col} = \bigl(\lfloor l/h \rfloor + \sigma\,(l \bmod h)\bigr) \bmod C$$
+\mathrm{col} = \bigl(\lfloor l/h \rfloor + \sigma\,(l \bmod h)\bigr) \bmod C
+```
 
 Це бієкція на комірки смуги для $l < hC$. Пакет висотою $b \le h$ символьних
 рядків руйнує щонайбільше
 
-$$b \cdot \lceil n/h \rceil$$
+```math
+b \cdot \lceil n/h \rceil
+```
 
 символів будь-якого кодового слова довжини $n$ — **за умови, що слово лежить
 усередині однієї смуги**. Фактичний максимум рахується вичерпним перебором усіх
@@ -443,13 +453,15 @@ $$b \cdot \lceil n/h \rceil$$
 
 Чотири різні «одиниці» плутати не можна:
 
-$$\underbrace{L\ \text{рядків растру}}_{\text{канал}}
+```math
+\underbrace{L\ \text{рядків растру}}_{\text{канал}}
 \ \longrightarrow\
 \underbrace{\Bigl\lfloor \frac{L}{h_{\text{симв}}} \Bigr\rfloor + 1\ \text{символьних рядків}}_{\text{модем}}
 \ \longrightarrow\
 \underbrace{\text{символи модуляції}}_{2\ \text{біти кожен}}
 \ \longrightarrow\
-\underbrace{\text{байти RS}}_{\text{GF}(256)}$$
+\underbrace{\text{байти RS}}_{\text{GF}(256)}
+```
 
 Додаткова одиниця в другому переході — бо пакет, що не починається на межі
 комірки, зачіпає на один символьний рядок більше.
@@ -462,17 +474,21 @@ $$\underbrace{L\ \text{рядків растру}}_{\text{канал}}
 Код RS$(k+\mathrm{nsym},\,k)$ над GF(256) виправляє $t$ помилок і $e$ стирань,
 поки
 
-$$2t + e \le \mathrm{nsym}$$
+```math
+2t + e \le \mathrm{nsym}
+```
 
 Стирання (позиція відома з прапорця демодулятора) коштує вдвічі дешевше за
 помилку — тому модем позначає непевні комірки, а не вгадує їх.
 
 Розмір одиниці «на дроті» і корисна швидкість:
 
-$$\text{wire} = \underbrace{\mathrm{RS}_{\text{hdr}}(56)}_{\text{заголовок}}
+```math
+\text{wire} = \underbrace{\mathrm{RS}_{\text{hdr}}(56)}_{\text{заголовок}}
 + \underbrace{\mathrm{RS}_{\text{pay}}(\text{payload}+16)}_{\text{дані}+\text{тег}},
 \qquad
-R_{\text{корисна}} = \frac{u \cdot \text{payload} \cdot 8}{T_{\text{растру}}}$$
+R_{\text{корисна}} = \frac{u \cdot \text{payload} \cdot 8}{T_{\text{растру}}}
+```
 
 де $u$ — скільки одиниць реально вміщується в растр **після розміщення**
 (не за сирою місткістю).
@@ -482,7 +498,9 @@ R_{\text{корисна}} = \frac{u \cdot \text{payload} \cdot 8}{T_{\text{ра�
 <details>
 <summary><b>Затримка — різниця, а не сума</b></summary>
 
-$$\mathrm{latency}(f) = t_{\text{display}}(f) - t_{\text{capture}}(f)$$
+```math
+\mathrm{latency}(f) = t_{\text{display}}(f) - t_{\text{capture}}(f)
+```
 
 Саме **різниця позначок часу** на віртуальному годиннику. Сума тривалостей
 етапів дала б завищену оцінку, бо етапи перекриваються: поки серіалізується
@@ -496,16 +514,20 @@ $$\mathrm{latency}(f) = t_{\text{display}}(f) - t_{\text{capture}}(f)$$
 
 Одиниця незалежності — **сцена**, не кадр. Агрегування у фіксованому порядку:
 
-$$\bar x_{\text{сцена}} = \operatorname*{mean}_{\text{кліпи}}
+```math
+\bar x_{\text{сцена}} = \operatorname*{mean}_{\text{кліпи}}
 \Bigl(\operatorname*{mean}_{\text{повтори}}
-\bigl(\operatorname*{mean}_{\text{кадри}} x\bigr)\Bigr)$$
+\bigl(\operatorname*{mean}_{\text{кадри}} x\bigr)\Bigr)
+```
 
 Парне порівняння двох методів — **кластерний bootstrap за сценами**
 ($10^4$ ресемплів):
 
-$$\hat\Delta = \frac{1}{S}\sum_{s=1}^{S}\bigl(\bar x^{A}_s - \bar x^{B}_s\bigr),
+```math
+\hat\Delta = \frac{1}{S}\sum_{s=1}^{S}\bigl(\bar x^{A}_s - \bar x^{B}_s\bigr),
 \qquad
-\mathrm{CI}_{95\%} = \bigl[\Delta^{(2{,}5\%)},\ \Delta^{(97{,}5\%)}\bigr]$$
+\mathrm{CI}_{95\%} = \bigl[\Delta^{(2{,}5\%)},\ \Delta^{(97{,}5\%)}\bigr]
+```
 
 Сцени, де немає результату одного з методів, **виключаються й перелічуються**,
 а не обрізаються за індексом. Для сімейства порівнянь застосовується поправка

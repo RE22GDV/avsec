@@ -48,6 +48,11 @@ jobs:
       - name: Documentation links
         run: python scripts/check_links.py
 
+      # Formulas look fine in the source and collapse on the rendered page:
+      # GitHub eats the subscripts of a multi-line $$...$$ block.
+      - name: Documentation math
+        run: python scripts/check_math.py
+
       # The evidence directory exists so that a published number can be
       # rechecked without re-running anything.  If that stops working, the
       # directory is just files.
