@@ -11,6 +11,8 @@
 #    ./run.sh demo         one frame through every method
 #    ./run.sh check        dataset + protocol checks
 #    ./run.sh research     the full research programme (long)
+#    ./run.sh verify       recheck every published number, runs nothing
+#    ./run.sh sources      download the natural UAV photographs
 #    ./run.sh shell        a shell with the environment active
 #    ./run.sh <anything>   passed straight to `avsec`, e.g. ./run.sh budget
 # =============================================================================
@@ -93,9 +95,18 @@ case "$CMD" in
     echo "[avsec] it resumes if interrupted — just run it again."
     "$PY" scripts/run_matrix.py configs/research_main.yaml runs/main 16
     "$PY" scripts/run_program.py configs/research_main.yaml runs/main 16
-    "$PY" -m avsec.cli analyze --input runs/main
+    "$PY" -m avsec.cli analyze --input runs/main --plan configs/analysis_plan.yaml
     "$PY" -m avsec.cli plots --input runs/main
+    "$PY" -m avsec.cli verify --input runs/main
     "$PY" scripts/publish.py runs/main
+    ;;
+  verify)
+    echo "[avsec] rechecking every published number from the published tables."
+    "$PY" -m avsec.cli verify --input results/main
+    ;;
+  sources)
+    "$PY" scripts/fetch_drone_photo.py
+    "$PY" scripts/fetch_natural_sources.py
     ;;
   shell)
     echo "[avsec] environment active. Type \`avsec --help\` or \`exit\`."

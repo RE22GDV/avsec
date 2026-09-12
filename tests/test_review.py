@@ -746,8 +746,11 @@ def test_r12_no_document_claims_a_new_cipher_or_hardware_validation():
               "перевірено на реальному відеолінку",
               "перевірено на реальному відеотракті")
     offenders = []
+    # docs/claims.md is the document that *defines* the ban list, so the
+    # phrases legitimately appear there; everything else must be clean.
+    exempt = {os.path.normpath("docs/claims.md")}
     for path in glob.glob("docs/*.md") + ["README.md", "results/README.md"]:
-        if not os.path.exists(path):
+        if not os.path.exists(path) or os.path.normpath(path) in exempt:
             continue
         text = _io.open(path, encoding="utf-8").read().lower()
         for phrase in banned:

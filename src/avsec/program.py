@@ -280,10 +280,27 @@ KEY: Tuple[Figure, ...] = (
            ("operating_map.csv",), panels=2),
 )
 
+#: The figures of the paper itself.  Everything else - the rest of the K series
+#: and the whole G catalogue - is supplementary material (R12).
+#:
+#: Eight, chosen because each answers a question the others do not:
+#:   K01  what each method actually provides (security and quality together)
+#:   K04  what the placement rule buys and what it costs
+#:   K05  where the measured advantage comes from
+#:   K11  how much of that decomposition is an artefact of the step order
+#:   K12  the effect with an interval over independent recordings
+#:   K13  the operating region, as a map rather than a threshold
+#:   K09  the budget: capacity, latency and memory in one place
+#:   K10  the scheme being replaced is broken
+MAIN_FIGURES: Tuple[str, ...] = ("K01", "K04", "K05", "K11", "K12", "K13",
+                                 "K09", "K10")
+
 FIGURES: Dict[str, Figure] = {f.gid: f for f in CATALOGUE + KEY}
 
 assert len(CATALOGUE) == 43, "the catalogue is defined as 43 figures"
 assert len(KEY) == 13, "there are thirteen key figures"
+assert 6 <= len(MAIN_FIGURES) <= 8, "a paper carries 6-8 figures"
+assert all(g in FIGURES for g in MAIN_FIGURES)
 
 
 # ---------------------------------------------------------------- readiness

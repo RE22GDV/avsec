@@ -11,6 +11,8 @@ REM    run.bat test         the test suite
 REM    run.bat demo         one frame through every method
 REM    run.bat check        dataset + protocol checks
 REM    run.bat research     the full research programme (long)
+REM    run.bat verify       recheck every published number, runs nothing
+REM    run.bat sources      download the natural UAV photographs
 REM    run.bat shell        a shell with the environment active
 REM    run.bat <anything>   passed straight to `avsec`, e.g. run.bat budget
 REM
@@ -100,9 +102,22 @@ if /i "%CMD%"=="research" (
     echo [avsec] it resumes if interrupted - just run it again.
     "%PY%" scripts\run_matrix.py configs\research_main.yaml runs\main 16
     "%PY%" scripts\run_program.py configs\research_main.yaml runs\main 16
-    "%PY%" -m avsec.cli analyze --input runs/main
+    "%PY%" -m avsec.cli analyze --input runs/main --plan configs/analysis_plan.yaml
     "%PY%" -m avsec.cli plots --input runs/main
+    "%PY%" -m avsec.cli verify --input runs/main
     "%PY%" scripts\publish.py runs\main
+    goto :eof
+)
+
+if /i "%CMD%"=="verify" (
+    echo [avsec] rechecking every published number from the published tables.
+    "%PY%" -m avsec.cli verify --input results/main
+    goto :eof
+)
+
+if /i "%CMD%"=="sources" (
+    "%PY%" scripts\fetch_drone_photo.py
+    "%PY%" scripts\fetch_natural_sources.py
     goto :eof
 )
 

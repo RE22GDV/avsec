@@ -82,6 +82,29 @@ def _scene_mean(rows: Sequence[Dict[str, Any]], metric: str,
     return out
 
 
+def _successful(frames) -> List[Dict[str, Any]]:
+    """Rows that actually delivered a picture.
+
+    Since R05 a clip that exceeds capacity still writes a row for every
+    scheduled instant, so a non-empty result set can contain no successes at
+    all.  Callers that want to aggregate quality must go through here; callers
+    that want availability must not.
+    """
+    return [f for f in frames if str(f.get("status", "ok")) == "ok"]
+
+
+def _failure_reason(frames) -> str:
+    """Why a cell produced no usable instant, in its own words."""
+    from collections import Counter
+
+    counts = Counter(str(f.get("status", "ok")) for f in frames)
+    detail = next((str(f.get("detail", "")) for f in frames
+                   if f.get("detail")), "")
+    kinds = ", ".join(f"{k}x{v}" for k, v in sorted(counts.items()))
+    return (f"жоден запланований момент не дав картинки ({kinds})"
+            + (f": {detail}" if detail else ""))
+
+
 def _scene_values(rows, metric: str) -> Dict[str, float]:
     """``scene -> mean of the metric`` over that scene's frames and repetitions."""
     return {r["scene"]: float(r[metric])
@@ -182,23 +205,29 @@ def run_e01(cfg: ExperimentConfig, out_dir: str, workers: int = 8,
                          "quality": q, "admissible": False,
                          "reason": f"{type(exc).__name__}: {exc}"})
             continue
-        if not frames:
+        ok = _successful(frames)
+        if not ok:
             rows.append({"codec": codec, "n_descriptions": nd, "stripe_height": sh,
                          "quality": q, "admissible": False,
-                         "reason": "не вміщується у спільний бюджет каналу"})
+                         "reason": (_failure_reason(frames) if frames else
+                                    "не вміщується у спільний бюджет каналу"),
+                         "availability": 0.0,
+                         "n_scheduled_instants": len(frames)})
             continue
-        bits = [float(f.get("payload_bytes", 0)) * 8 for f in frames]
-        psnr = [float(f.get("psnr_full", "nan")) for f in frames]
-        ssim = [float(f.get("ssim_full", "nan")) for f in frames]
+        bits = [float(f.get("payload_bytes", 0)) * 8 for f in ok]
+        psnr = [float(f.get("psnr_full", "nan")) for f in ok]
+        ssim = [float(f.get("ssim_full", "nan")) for f in ok]
         rows.append({
             "codec": codec, "n_descriptions": nd, "stripe_height": sh, "quality": q,
             "admissible": True, "reason": "",
             "bits_per_frame": float(np.mean(bits)),
             "psnr_full": float(np.nanmean(psnr)),
             "ssim_full": float(np.nanmean(ssim)),
-            "units_per_frame": float(np.mean([f.get("units_sent", 0) for f in frames])),
-            "wire_bytes_per_frame": float(np.mean([f.get("wire_bytes", 0) for f in frames])),
-            "n_frames": len(frames),
+            "units_per_frame": float(np.mean([f.get("units_sent", 0) for f in ok])),
+            "wire_bytes_per_frame": float(np.mean([f.get("wire_bytes", 0) for f in ok])),
+            "n_frames": len(ok),
+            "n_scheduled_instants": len(frames),
+            "availability": len(ok) / max(1, len(frames)),
         })
     write_csv(os.path.join(out_dir, "e01_rate_quality.csv"), rows)
     out = {"kind": "E01", "planned_grid": E01_PLANNED, "executed_grid": executed,
@@ -627,9 +656,11 @@ def run_e06(cfg: ExperimentConfig, out_dir: str, workers: int = 8,
             rows.append({"study": name, "admissible": False,
                          "reason": f"{type(exc).__name__}: {exc}", **extra})
             return
-        if not frames:
+        if not _successful(frames):
             rows.append({"study": name, "admissible": False,
-                         "reason": "не вміщується у спільний бюджет", **extra})
+                         "reason": (_failure_reason(frames) if frames else
+                                    "не вміщується у спільний бюджет"),
+                         "availability": 0.0, **extra})
             return
         agg = _scene_mean(frames, "psnr_full", [])
         cov = _scene_mean(frames, "coverage", [])
@@ -1109,6 +1140,14 @@ E13_CHAIN_REVERSE = (
 )
 
 
+def _flat(changes: Dict[str, Any]) -> Dict[str, Any]:
+    """Profile overrides flattened into CSV-friendly scalars."""
+    out: Dict[str, Any] = {}
+    for k, v in changes.items():
+        out[k] = "/".join(str(x) for x in v) if isinstance(v, tuple) else v
+    return out
+
+
 def _chain_variant(cfg: ExperimentConfig, out_dir: str, tag: str,
                    chain, workers: int, channel: str, repetitions: int,
                    max_frames: int, n_clips: int,
@@ -1140,9 +1179,11 @@ def _chain_variant(cfg: ExperimentConfig, out_dir: str, tag: str,
             rows.append(row)
             per_scene.append({})
             continue
-        if not frames:
+        if not _successful(frames):
             row.update({"admissible": False,
-                        "reason": "не вміщується у спільний бюджет"})
+                        "reason": (_failure_reason(frames) if frames else
+                                   "не вміщується у спільний бюджет"),
+                        "availability": 0.0})
             rows.append(row)
             per_scene.append({})
             continue
@@ -1162,10 +1203,17 @@ def _chain_variant(cfg: ExperimentConfig, out_dir: str, tag: str,
 
 
 def _finish_chain(rows, per_scene, metrics=("psnr_full", "coverage",
-                                            "availability", "psnr_displayed")):
-    """Restrict every step to the common scene set and attach paired intervals."""
+                                            "availability", "psnr_displayed"),
+                  restrict=None):
+    """Restrict every step to the common scene set and attach paired intervals.
+
+    ``restrict`` forces a scene set from outside - used when two orderings of
+    the same chain must be averaged over identical scenes to be comparable.
+    """
     sets = [set(c.get("psnr_full", {})) for c in per_scene if c.get("psnr_full")]
     common = sorted(set.intersection(*sets)) if sets else []
+    if restrict is not None:
+        common = sorted(set(common) & set(restrict)) if common else sorted(restrict)
     dropped = sorted(set.union(*sets) - set(common)) if sets else []
 
     scene_rows: List[Dict[str, Any]] = []
@@ -1206,6 +1254,34 @@ def _finish_chain(rows, per_scene, metrics=("psnr_full", "coverage",
     return common, dropped, scene_rows
 
 
+def _order_statement(m_fwd: float, m_rev: float, blocked_fwd, blocked_rev) -> str:
+    """What the two orderings together are entitled to say (R09)."""
+    if blocked_rev and not blocked_fwd:
+        return (
+            "зворотний порядок не вдається пройти: механізми "
+            f"({', '.join(blocked_rev)}) НЕ ВМІЩУЮТЬСЯ у бюджет, доки не "
+            "зменшено розмір одиниці. Тобто два запропоновані механізми не є "
+            "самостійним доповненням до базової схеми - вони застосовні лише "
+            "після тих самих змін транспорту, які й дають увесь виміряний "
+            f"виграш. За прямого порядку їхній внесок {m_fwd:+.2f} дБ; "
+            "зворотний розклад не існує, і це сильніше твердження, ніж "
+            "різниця в числах")
+    if blocked_fwd and blocked_rev:
+        return ("жоден з двох порядків не проходиться повністю: механізми "
+                "недопустимі за бюджетом у обох. Покрокового розкладу цієї "
+                "різниці не існує")
+    if (m_fwd < 0) == (m_rev < 0):
+        return ("покроковий внесок залежить від порядку застосування змін. "
+                f"За прямого порядку механізми дають {m_fwd:+.2f} дБ, за "
+                f"зворотного {m_rev:+.2f} дБ; розбіжність "
+                f"{abs(m_fwd - m_rev):.2f} дБ - це ціна вибору порядку, а не "
+                "властивість механізмів. Спільним для обох є знак, тож висновок "
+                "про механізми не є артефактом порядку")
+    return ("покроковий внесок залежить від порядку, і в цьому випадку навіть "
+            f"ЗНАК внеску механізмів різний ({m_fwd:+.2f} проти {m_rev:+.2f} "
+            "дБ) - висновок про їхню користь не може спиратися на один розклад")
+
+
 def run_e13(cfg: ExperimentConfig, out_dir: str, workers: int = 8,
             channel: str = "bursty", repetitions: int = 3, max_frames: int = 8,
             n_clips: int = 0, progress: Progress = None) -> Dict[str, Any]:
@@ -1237,25 +1313,46 @@ def run_e13(cfg: ExperimentConfig, out_dir: str, workers: int = 8,
     reverse = _chain_variant(cfg, out_dir, "rev", E13_CHAIN_REVERSE, workers,
                              channel, repetitions, max_frames, n_clips, progress)
 
+    # Both orders are restricted to the SAME scene set, otherwise their totals
+    # are not comparable and neither is the conclusion drawn from comparing
+    # them (R09).
+    sets = [set(c.get("psnr_full", {}))
+            for c in forward["per_scene"] + reverse["per_scene"]
+            if c.get("psnr_full")]
+    shared = sorted(set.intersection(*sets)) if sets else []
     common, dropped, scene_rows = _finish_chain(forward["rows"],
-                                                forward["per_scene"])
+                                                forward["per_scene"],
+                                                restrict=shared)
     r_common, r_dropped, r_scene_rows = _finish_chain(reverse["rows"],
-                                                      reverse["per_scene"])
+                                                      reverse["per_scene"],
+                                                      restrict=shared)
 
     rows = forward["rows"] + reverse["rows"]
     write_csv(os.path.join(out_dir, "chain.csv"), rows)
     write_csv(os.path.join(out_dir, "chain_scenes.csv"), scene_rows + r_scene_rows)
 
-    def _split(step_rows) -> Tuple[float, float]:
-        ok = [r for r in step_rows if r.get("admissible") and "delta_psnr" in r]
-        mech = sum(r["delta_psnr"] for r in ok
-                   if ("опис" in r["label"] or "BAWP" in r["label"]))
-        trans = sum(r["delta_psnr"] for r in ok
-                    if not ("опис" in r["label"] or "BAWP" in r["label"]))
-        return trans, mech
+    def _is_mech(label: str) -> bool:
+        return "опис" in label or "BAWP" in label
 
-    t_fwd, m_fwd = _split(forward["rows"])
-    t_rev, m_rev = _split(reverse["rows"])
+    def _split(step_rows):
+        """Transport gain, mechanism gain, and how many steps never ran."""
+        mech = trans = 0.0
+        blocked = []
+        for r in step_rows:
+            if not r.get("admissible"):
+                if _is_mech(r.get("label", "")):
+                    blocked.append(r.get("label", ""))
+                continue
+            if "delta_psnr" not in r:
+                continue
+            if _is_mech(r["label"]):
+                mech += r["delta_psnr"]
+            else:
+                trans += r["delta_psnr"]
+        return trans, mech, blocked
+
+    t_fwd, m_fwd, blocked_fwd = _split(forward["rows"])
+    t_rev, m_rev, blocked_rev = _split(reverse["rows"])
 
     # The end points are identical by construction, so the two orders differ
     # only in how the same total is attributed.
@@ -1268,22 +1365,16 @@ def run_e13(cfg: ExperimentConfig, out_dir: str, workers: int = 8,
            "n_scenes_dropped": len(dropped),
            "transport_gain_db": round(t_fwd, 3),
            "mechanism_gain_db": round(m_fwd, 3),
+           "mechanism_steps_blocked_forward": blocked_fwd,
            "reverse_order": {
                "n_scenes_common": len(r_common),
                "transport_gain_db": round(t_rev, 3),
                "mechanism_gain_db": round(m_rev, 3),
+               "mechanism_steps_blocked": blocked_rev,
            },
            "order_sensitivity_db": round(abs(m_fwd - m_rev), 3),
-           "order_statement": (
-               "покроковий внесок залежить від порядку застосування змін. "
-               f"За прямого порядку механізми дають {m_fwd:+.2f} дБ, за "
-               f"зворотного {m_rev:+.2f} дБ; розбіжність "
-               f"{abs(m_fwd - m_rev):.2f} дБ - це і є ціна вибору порядку, "
-               "а не властивість самих механізмів. Спільним для обох є знак"
-               if (m_fwd < 0) == (m_rev < 0) else
-               "покроковий внесок залежить від порядку, і в цьому випадку "
-               "навіть ЗНАК внеску механізмів різний - висновок про їхню "
-               "користь не може спиратися на один розклад"),
+           "order_statement": _order_statement(m_fwd, m_rev, blocked_fwd,
+                                               blocked_rev),
            "note": ("кожен крок змінює рівно одну річ відносно попереднього; "
                     "кліпи, повтори й реалізації каналу спільні для всіх кроків, "
                     "а середні рахуються по спільному набору сцен. Різниці "

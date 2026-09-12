@@ -527,12 +527,30 @@ def figures_section(view: RunView, figures_dir: str) -> str:
                 rows = list(csv.DictReader(fh))
     if not rows:
         return "_Каталог рисунків не побудовано._"
+    from avsec.program import MAIN_FIGURES
+
     ready = [r for r in rows if r["status"] == "ready"]
-    body = [[r["figure"], r["title_uk"], r["experiment"],
-             "готово" if r["status"] == "ready" else "pending",
-             r.get("reason", "")[:110]] for r in rows]
+
+    def _body(sel):
+        return [[r["figure"], r["title_uk"], r["experiment"],
+                 "готово" if r["status"] == "ready" else "pending",
+                 r.get("reason", "")[:110]] for r in sel]
+
+    main = [r for r in rows if r["figure"] in MAIN_FIGURES]
+    rest = [r for r in rows if r["figure"] not in MAIN_FIGURES]
+    head = ["ID", "назва", "експеримент", "статус", "причина"]
     return (f"Готово **{len(ready)} з {len(rows)}** рисунків каталогу.\n\n"
-            + _table(["ID", "назва", "експеримент", "статус", "причина"], body)
+            "## Основні рисунки\n\n"
+            "Вісім рисунків, які несуть аргумент. Кожен відповідає на питання, "
+            "на яке не відповідає жоден інший; усе решта - додаткові "
+            "матеріали.\n\n"
+            + _table(head, _body(main))
+            + "\n\n## Додаткові матеріали\n\n"
+              "Повний каталог: по одному рисунку на дослідницьке питання. "
+              "Тут є і бухгалтерія — стовпчикові діаграми з чотирьох значень і "
+              "пласкі криві, які потребують абзацу пояснень, чому вони пласкі. "
+              "Вони потрібні для перевірки, а не для читання.\n\n"
+            + _table(head, _body(rest))
             + "\n\nPNG, SVG і PDF одного рисунка - це один результат, а не три. "
               "Поряд з кожним рисунком лежить його CSV з даними та JSON з "
               "параметрами побудови.")
@@ -737,7 +755,7 @@ def build_readme_block(view: RunView, figures_dir: str) -> str:
             f"{_f(p_row, 'logical_buffer_kb'):.1f} кБ.")
     lines += [
         f"- **Рисунки:** {n_ready} з {len(idx_rows) or len(CATALOGUE)} "
-        f"(K01–K10 і G01–G43)"
+        f"(вісім основних, решта — додаткові матеріали)"
         + (" — усі побудовано." if n_ready == len(idx_rows) and idx_rows
            else "; решта позначені `pending` з причиною у "
                 "[docs/figures.md](docs/figures.md)."),
@@ -764,7 +782,7 @@ def publish(run_dir: str, docs_dir: str = "docs", readme: str = "README.md",
         fh.write(results)
 
     with open(os.path.join(docs_dir, "figures.md"), "w", encoding="utf-8") as fh:
-        fh.write("# Каталог рисунків: K01–K10 і G01–G43\n\n" + view.stamp() + "\n\n"
+        fh.write("# Рисунки: вісім основних і повний каталог\n\n" + view.stamp() + "\n\n"
                  + figures_section(view, figures_dir) + "\n")
 
     with open(os.path.join(docs_dir, "programme.md"), "w", encoding="utf-8") as fh:

@@ -57,6 +57,20 @@ def _f(row: Dict[str, Any], key: str, default: float = float("nan")) -> float:
         return default
 
 
+def _delta(a: float, b: float) -> float:
+    """Difference between two published numbers, where "no value" matches.
+
+    A comparison over an empty set has no mean, and two empty comparisons are
+    the same result.  Plain subtraction says ``nan``, which is not a
+    disagreement - it is the absence of a number on both sides.
+    """
+    if not np.isfinite(a) and not np.isfinite(b):
+        return 0.0
+    if not np.isfinite(a) or not np.isfinite(b):
+        return float("inf")
+    return abs(a - b)
+
+
 def verify(run_dir: str, plan: Optional[AnalysisPlan] = None,
            output: Optional[str] = None) -> Dict[str, Any]:
     """Recompute the claims of ``run_dir`` and report every disagreement."""
@@ -81,9 +95,12 @@ def verify(run_dir: str, plan: Optional[AnalysisPlan] = None,
                                plan.equivalence_margin)
             pub_sig = str(pub.get("significant_at_95", "")).lower() == "true"
             agree_sig = bool(fresh["significant_at_95"]) == pub_sig
-            d_mean = abs(fresh["mean"] - _f(pub, "mean"))
-            d_lo = abs(fresh["lo"] - _f(pub, "lo"))
-            d_hi = abs(fresh["hi"] - _f(pub, "hi"))
+            # "No usable instant in either method" is a legitimate published
+            # result, and two of them agree.  NaN != NaN, so it has to be said.
+            d_mean = _delta(fresh["mean"], _f(pub, "mean"))
+            d_lo = _delta(fresh["lo"], _f(pub, "lo"))
+            d_hi = _delta(fresh["hi"], _f(pub, "hi"))
+            empty = fresh["n_units"] == 0 and int(_f(pub, "n_units", 0)) == 0
             ok = (agree_sig and d_mean <= TOLERANCE
                   and d_lo <= TOLERANCE and d_hi <= TOLERANCE)
             checks.append({
@@ -97,9 +114,12 @@ def verify(run_dir: str, plan: Optional[AnalysisPlan] = None,
                 "n_units": fresh["n_units"],
                 "p_raw": round(float(fresh.get("p_raw", float("nan"))), 5),
                 "ok": ok,
-                "detail": "" if ok else
-                          f"Δmean={d_mean:.4f} Δlo={d_lo:.4f} Δhi={d_hi:.4f}"
-                          + ("" if agree_sig else "; significance disagrees"),
+                "no_data": empty,
+                "detail": ("жоден метод не дав придатного моменту показу"
+                           if empty and ok else
+                           "" if ok else
+                           f"Δmean={d_mean:.4f} Δlo={d_lo:.4f} Δhi={d_hi:.4f}"
+                           + ("" if agree_sig else "; significance disagrees")),
             })
 
     # ---- 2. the per-method summary --------------------------------------
@@ -118,7 +138,7 @@ def verify(run_dir: str, plan: Optional[AnalysisPlan] = None,
                                "ok": False,
                                "detail": "у сирих рядках цього методу немає"})
                 continue
-            d = abs(f["mean"] - _f(row, "mean"))
+            d = _delta(f["mean"], _f(row, "mean"))
             checks.append({
                 "kind": "summary", "channel": ch, "method": m,
                 "published_mean": _f(row, "mean"),
@@ -232,15 +252,29 @@ def _provenance(run_dir: str) -> Dict[str, Any]:
 
 
 def _figures(run_dir: str) -> List[Dict[str, Any]]:
+    """Does every figure this run *could* produce exist, with its data table?
+
+    A run directory need not contain every experiment: the natural-imagery run
+    is a transfer check and runs the matrix and E13, not the whole programme.
+    A figure whose input tables are simply not in this directory is reported as
+    not applicable rather than as a failure - but it is still listed, so the
+    difference between "not run here" and "broken" stays visible.
+    """
     from avsec.program import KEY, figure_status
 
     directory = os.path.join(run_dir, "figures")
     out: List[Dict[str, Any]] = []
     for fig in KEY:
         st = figure_status(directory, fig.gid)
+        ready = st["status"] == "ready"
+        has_input = any(os.path.exists(os.path.join(run_dir, t))
+                        for t in (fig.tables or ()))
         out.append({"kind": "figure", "figure": fig.gid,
-                    "ok": st["status"] == "ready",
-                    "detail": st["reason"],
+                    "ok": ready or not has_input,
+                    "not_applicable": not ready and not has_input,
+                    "detail": ("" if ready else
+                               (f"{fig.source} не запускався у цій теці"
+                                if not has_input else st["reason"])),
                     "data_table": st["data_table"]})
     return out
 
@@ -265,6 +299,9 @@ def render(result: Dict[str, Any], width: int = 96) -> str:
                     f"середнє {c.get('recomputed_mean', float('nan')):7.3f}")
         elif c["kind"] == "figure":
             body = f"рисунок {c['figure']}"
+            if c.get("not_applicable"):
+                mark = "n/a "
+                body += f"  ({c['detail']})"
         else:
             body = f"{c.get('item', '')}"
         detail = f"  <- {c['detail']}" if c.get("detail") and not c["ok"] else ""

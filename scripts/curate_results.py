@@ -36,6 +36,15 @@ TABLES = (
     "dynamics.csv", "recovery.csv", "e07.json", "e09.json",
     "cvbs.json", "cvbs_transfer.csv", "attacks.json", "attacks.csv",
     "similarity.csv", "protocol_checks.json", "programme_run.json",
+    # R03/R04: the damage model and the decoder that checks it
+    "rs_cross_check.csv",
+    # R09: per-scene ablation data and the paired contrasts computed from it
+    "chain.csv", "chain_scenes.csv", "e13.json",
+    "ablation_scenes.csv", "ablation_contrasts.csv",
+    # R10: the operating map, measured nodes and their per-scene rows
+    "operating_map.csv", "operating_map_scenes.csv", "e15.json",
+    # R11: the recomputation of every published claim
+    "verification.json", "analysis_plan.yaml",
 )
 
 #: frames.csv is 22 MB; the per-scene aggregate is what the tables actually
@@ -43,7 +52,10 @@ TABLES = (
 #: Row budget for the per-frame tables.  Enough to re-derive every aggregate to
 #: within its own interval (see results/README.md for the comparison), small
 #: enough that the evidence folder stays clonable.
-LARGE = {"frames.csv": 12_000, "units.csv": 12_000, "sweeps_frames.csv": 12_000}
+LARGE = {"frames.csv": 12_000, "units.csv": 12_000,
+         "sweeps_frames.csv": 12_000,
+         "operating_map_scenes.csv": 12_000,
+         "chain_scenes.csv": 12_000, "ablation_scenes.csv": 12_000}
 
 
 def _copy(src_dir: str, dst_dir: str, name: str) -> str:
