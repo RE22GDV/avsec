@@ -1,6 +1,6 @@
 {
-  "transport_gain_db": 4.0017893932546045,
-  "mechanism_gain_db": -1.0605921391291666,
+  "transport_gain_db": 4.1828,
+  "mechanism_gain_db": -0.998,
   "source_table": "chain.csv",
   "figure": "K05",
   "lang": "uk",
@@ -12,5 +12,6 @@
     "png",
     "svg",
     "pdf"
-  ]
+  ],
+  "dpi": 300
 }

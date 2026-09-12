@@ -1,7 +1,7 @@
 {
-  "run_id": "07b257405f757223",
+  "run_id": "fe45d509310b99d4",
   "config_name": "research_main",
-  "commit": "26dcb4a75436e5ac0db9c369cbef8ff20128a44a",
+  "commit": "25534623fc247da4a07c7238f46cae4b068b68b3",
   "environment": {
     "python": "3.12.10",
     "platform": "Windows-11-10.0.26200-SP0",
@@ -9,17 +9,50 @@
     "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
     "cpu_count": 32,
     "packages": {
-      "numpy": "2.1.2",
-      "scipy": "1.16.0",
-      "cv2": "4.13.0",
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "cv2": "5.0.0",
       "cryptography": "50.0.1",
       "reedsolo": "unknown",
-      "PIL": "11.0.0",
-      "matplotlib": "3.9.2",
-      "yaml": "6.0.2"
+      "PIL": "12.3.0",
+      "matplotlib": "3.11.2",
+      "yaml": "6.0.3"
     },
     "avsec_version": "0.1.0",
-    "git_commit": "26dcb4a75436e5ac0db9c369cbef8ff20128a44a"
+    "git_commit": "25534623fc247da4a07c7238f46cae4b068b68b3",
+    "git_worktree": "clean",
+    "git_dirty": false,
+    "git_dirty_files": [],
+    "git_branch": "main",
+    "git_describe": "v1.0.0-2-g2553462",
+    "git_dirty_note": "",
+    "pip_freeze": [
+      "-e git+https://github.com/RE22GDV/avsec.git@25534623fc247da4a07c7238f46cae4b068b68b3#egg=avsec",
+      "PyYAML==6.0.3",
+      "Pygments==2.21.0",
+      "cffi==2.1.1",
+      "colorama==0.4.6",
+      "contourpy==1.4.0",
+      "cryptography==50.0.1",
+      "cycler==0.12.1",
+      "fonttools==4.65.0",
+      "iniconfig==2.3.0",
+      "kiwisolver==1.5.1",
+      "matplotlib==3.11.2",
+      "numpy==2.5.3",
+      "opencv-python==5.0.0.93",
+      "packaging==26.3",
+      "pillow==12.3.0",
+      "pluggy==1.6.0",
+      "pycparser==3.0",
+      "pyparsing==3.3.2",
+      "pytest-timeout==2.4.0",
+      "pytest==9.1.1",
+      "python-dateutil==2.9.0.post0",
+      "reedsolo==1.7.0",
+      "scipy==1.18.1",
+      "six==1.17.0"
+    ]
   },
   "config": {
     "name": "research_main",
@@ -68,6 +101,7 @@
       "B2",
       "B3",
       "B4",
+      "B4t",
       "P"
     ],
     "profiles": {
@@ -88,7 +122,8 @@
           "block",
           278,
           0
-        ]
+        ],
+        "interleaver_window": 0
       },
       "B3": {
         "stripe_height": 24,
@@ -107,7 +142,8 @@
           "block",
           278,
           0
-        ]
+        ],
+        "interleaver_window": 0
       },
       "B4": {
         "stripe_height": 24,
@@ -126,7 +162,28 @@
           "block",
           278,
           0
-        ]
+        ],
+        "interleaver_window": 0
+      },
+      "B4t": {
+        "stripe_height": 24,
+        "n_descriptions": 1,
+        "codec": "dct",
+        "quality": 8,
+        "max_unit_payload": 320,
+        "fec_nsym": 128,
+        "fec_header_nsym": 48,
+        "modulation": [
+          4,
+          8,
+          2
+        ],
+        "interleaver": [
+          "block",
+          278,
+          0
+        ],
+        "interleaver_window": 0
       },
       "P": {
         "stripe_height": 24,
@@ -145,7 +202,8 @@
           "bawp",
           0,
           8
-        ]
+        ],
+        "interleaver_window": 0
       }
     },
     "crypto": {
@@ -213,6 +271,7 @@
       "B2",
       "B3",
       "B4",
+      "B4t",
       "P"
     ],
     "channels": [
@@ -258,9 +317,10 @@
     ],
     "max_frames": 16,
     "max_clips": 0,
+    "schedule": [],
     "workers": 12
   },
-  "n_jobs_planned": 4000,
+  "n_jobs_planned": 4500,
   "dataset": {
     "ok": true,
     "problems": [],
@@ -269,6 +329,12 @@
     ],
     "n_clips": 34,
     "n_scenes": 34,
+    "n_sources": 34,
+    "sources_per_split": {
+      "calibration": 8,
+      "validation": 6,
+      "test": 20
+    },
     "scenes_per_split": {
       "calibration": 8,
       "validation": 6,
@@ -280,6 +346,8 @@
       "test": 20
     },
     "duplicates": [],
+    "crop_overlaps": [],
+    "n_crop_pairs_overlapping": 0,
     "categories": [
       "high-detail",
       "low-detail",
@@ -288,8 +356,9 @@
     ],
     "provenances": [
       "synthetic"
-    ]
+    ],
+    "independence_note": "одиниця незалежності для узагальнення на НОВІ записи - source_id (34 шт.), а не сцена (34 шт.)"
   },
-  "workers": 1,
-  "started": "2026-09-10T03:14:24"
+  "workers": 16,
+  "started": "2026-09-12T20:05:21"
 }

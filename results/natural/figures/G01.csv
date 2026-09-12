@@ -1,0 +1,4 @@
+channel,clip,frame_id,method,percentile,psnr_full
+harsh,nat_122435702,0,P,10,12.97707237447025
+bursty,nat_074983792,15,P,50,22.76722052904816
+bursty,nat_116466520,13,P,90,27.666822656052766

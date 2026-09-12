@@ -1,25 +1,25 @@
 admissible,fec_nsym,max_unit_payload,psnr_full,reason,rs_k
-True,32,160,20.111243690127285,,223
-True,32,240,17.24404077374695,,223
-True,32,320,17.423765493645895,,223
-True,32,480,17.01703608689231,,223
-False,32,640,nan,не вміщується у спільний бюджет,223
-False,32,960,nan,не вміщується у спільний бюджет,223
-True,64,160,23.648424315832514,,191
-True,64,240,22.271372195754093,,191
-True,64,320,22.0790981636641,,191
-True,64,480,21.533009009792988,,191
-False,64,640,nan,не вміщується у спільний бюджет,191
-False,64,960,nan,не вміщується у спільний бюджет,191
-True,96,160,25.941875045754283,,159
-True,96,240,25.92966109299952,,159
-True,96,320,25.906859012075028,,159
-False,96,480,nan,не вміщується у спільний бюджет,159
-False,96,640,nan,не вміщується у спільний бюджет,159
-False,96,960,nan,не вміщується у спільний бюджет,159
-True,128,160,27.433213135959818,,127
-True,128,240,27.47794768208773,,127
-True,128,320,27.54663199482371,,127
-False,128,480,nan,не вміщується у спільний бюджет,127
-False,128,640,nan,не вміщується у спільний бюджет,127
-False,128,960,nan,не вміщується у спільний бюджет,127
+True,32,160,20.123877814791957,,223
+True,32,240,17.206800000828384,,223
+True,32,320,17.359974305612553,,223
+True,32,480,16.92182974297317,,223
+False,32,640,nan,"жоден запланований момент не дав картинки (capacityx108): frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",223
+False,32,960,nan,"жоден запланований момент не дав картинки (capacityx108): frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",223
+True,64,160,23.63757866494672,,191
+True,64,240,22.147475696897672,,191
+True,64,320,22.13597329037411,,191
+True,64,480,21.355388034741917,,191
+False,64,640,nan,"жоден запланований момент не дав картинки (capacityx108): frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",191
+False,64,960,nan,"жоден запланований момент не дав картинки (capacityx108): frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",191
+True,96,160,25.948823562306472,,159
+True,96,240,25.959982683076728,,159
+True,96,320,25.909710507707235,,159
+False,96,480,nan,"жоден запланований момент не дав картинки (capacityx108): frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",159
+False,96,640,nan,"жоден запланований момент не дав картинки (capacityx108): frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",159
+False,96,960,nan,"жоден запланований момент не дав картинки (capacityx108): frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",159
+True,128,160,27.400602928624707,,127
+True,128,240,27.56101203741228,,127
+True,128,320,27.500532275576052,,127
+False,128,480,nan,"жоден запланований момент не дав картинки (capacityx108): frame 0 needs 4 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",127
+False,128,640,nan,"жоден запланований момент не дав картинки (capacityx108): frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",127
+False,128,960,nan,"жоден запланований момент не дав картинки (capacityx108): frame 0 needs 8 rasters, the profile allows 3; lower the quality/resolution or raise the capacity",127

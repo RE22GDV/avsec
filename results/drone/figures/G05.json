@@ -15,7 +15,8 @@
     "B2",
     "B3",
     "B4",
-    "P"
+    "P",
+    "B4t"
   ],
   "source_table": "summary.csv",
   "figure": "G05",
@@ -28,5 +29,6 @@
     "png",
     "svg",
     "pdf"
-  ]
+  ],
+  "dpi": 300
 }

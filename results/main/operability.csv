@@ -1,41 +1,46 @@
-authenticated,channel,criterion,method,n_scenes,operable_fraction,sd_over_scenes
-False,bursty,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B0a,20,0.1025,0.08955298343497699
-False,bursty,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B0a-R,20,0.5362500000000001,0.24861127446170594
-False,bursty,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B0d,19,0.4348684210526315,0.0796671621507017
-False,bursty,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B1,20,0.095625,0.08943122541342798
-False,bursty,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B2,20,0.09375000000000001,0.08768776845627961
-True,bursty,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B3,20,0.62625,0.12036813050847497
-True,bursty,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B4,19,0.4296052631578947,0.08027843541688176
-True,bursty,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),P,19,0.35573308270676696,0.08659963342376208
-False,clean,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B0a,20,1.0,0.0
-False,clean,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B0a-R,20,1.0,0.0
-False,clean,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B0d,19,1.0,0.0
-False,clean,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B1,20,1.0,0.0
-False,clean,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B2,20,1.0,0.0
-True,clean,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B3,20,1.0,0.0
-True,clean,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B4,19,1.0,0.0
-True,clean,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),P,19,0.9572368421052632,0.18640028376983142
-False,harsh,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B0a,20,0.0175,0.02272547839806794
-False,harsh,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B0a-R,20,0.3325,0.31571764533986274
-False,harsh,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B0d,19,0.0,0.0
-False,harsh,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B1,20,0.00625,0.01647366319151173
-False,harsh,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B2,20,0.00625,0.01596665934146263
-True,harsh,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B3,20,0.0,0.0
-True,harsh,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B4,19,0.0,0.0
-True,harsh,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),P,19,0.0,0.0
-False,mild,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B0a,20,0.999375,0.0027950849718747276
-False,mild,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B0a-R,20,1.0,0.0
-False,mild,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B0d,19,1.0,0.0
-False,mild,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B1,20,0.999375,0.0027950849718747276
-False,mild,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B2,20,0.999375,0.0027950849718747276
-True,mild,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B3,20,1.0,0.0
-True,mild,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B4,19,1.0,0.0
-True,mild,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),P,19,0.9572368421052632,0.18640028376983142
-False,moderate,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B0a,20,0.7150000000000001,0.31684090312763735
-False,moderate,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B0a-R,20,0.8825000000000001,0.30841807749597916
-False,moderate,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B0d,19,0.7526315789473683,0.07331189878133
-False,moderate,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B1,20,0.639375,0.3623814461310071
-False,moderate,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B2,20,0.6337499999999999,0.363668714918573
-True,moderate,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B3,20,0.79,0.09420721840708386
-True,moderate,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),B4,19,0.6980263157894738,0.06183860572405184
-True,moderate,coverage>=0.9 and psnr_full>=20.0 (engineering requirement of this study),P,19,0.7795112781954888,0.1621249470269835
+authenticated,availability,channel,criterion,method,n_scenes,n_scheduled_instants,n_units,not_operable_because,operable_fraction,sd_over_scenes,sd_over_units,unit_of_independence
+False,1.0,bursty,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B0a,20,1600,20,"{""below_criterion"": 1436}",0.1025,0.08955298343497699,0.08955298343497699,scene
+False,1.0,bursty,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B0a-R,20,1600,20,"{""below_criterion"": 751}",0.530625,0.25541745370646607,0.25541745370646607,scene
+False,0.880625,bursty,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B0d,20,1600,20,"{""below_criterion"": 759, ""no_sync"": 65, ""deadline_miss"": 46, ""capacity"": 80}",0.40625,0.12156463517946242,0.12156463517946242,scene
+False,1.0,bursty,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B1,20,1600,20,"{""below_criterion"": 1448}",0.095,0.08999268976159296,0.08999268976159296,scene
+False,1.0,bursty,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B2,20,1600,20,"{""below_criterion"": 1453}",0.091875,0.08906264427504475,0.08906264427504475,scene
+True,0.6268749999999998,bursty,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B3,20,1600,20,"{""no_sync"": 168, ""deadline_miss"": 429}",0.6268749999999998,0.12053028392111777,0.12053028392111777,scene
+True,0.8787500000000001,bursty,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B4,20,1600,20,"{""below_criterion"": 760, ""no_sync"": 66, ""deadline_miss"": 48, ""capacity"": 80}",0.40375000000000005,0.1189385622031281,0.1189385622031281,scene
+True,0.93875,bursty,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B4t,20,1600,20,"{""below_criterion"": 490, ""no_sync"": 18, ""capacity"": 80}",0.6325,0.16996516670993747,0.16996516670993747,scene
+True,0.898125,bursty,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),P,20,1600,20,"{""below_criterion"": 928, ""no_sync"": 3, ""capacity"": 160}",0.318125,0.1371391796871454,0.1371391796871454,scene
+False,1.0,clean,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B0a,20,1600,20,{},1.0,0.0,0.0,scene
+False,1.0,clean,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B0a-R,20,1600,20,{},1.0,0.0,0.0,scene
+False,0.95,clean,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B0d,20,1600,20,"{""capacity"": 80}",0.95,0.22360679774997902,0.22360679774997902,scene
+False,1.0,clean,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B1,20,1600,20,{},1.0,0.0,0.0,scene
+False,1.0,clean,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B2,20,1600,20,{},1.0,0.0,0.0,scene
+True,1.0,clean,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B3,20,1600,20,{},1.0,0.0,0.0,scene
+True,0.95,clean,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B4,20,1600,20,"{""capacity"": 80}",0.95,0.22360679774997902,0.22360679774997902,scene
+True,0.95,clean,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B4t,20,1600,20,"{""below_criterion"": 25, ""capacity"": 80}",0.934375,0.230733776586556,0.230733776586556,scene
+True,0.9,clean,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),P,20,1600,20,"{""below_criterion"": 65, ""capacity"": 160}",0.859375,0.34524197749740076,0.34524197749740076,scene
+False,0.95,harsh,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B0a,20,1600,20,"{""below_criterion"": 1492, ""no_sync"": 80}",0.0175,0.02272547839806794,0.02272547839806794,scene
+False,1.0,harsh,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B0a-R,20,1600,20,"{""below_criterion"": 1068}",0.3325,0.31571764533986274,0.31571764533986274,scene
+False,0.0,harsh,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B0d,20,1600,20,"{""no_sync"": 383, ""deadline_miss"": 1137, ""capacity"": 80}",0.0,0.0,0.0,scene
+False,0.95,harsh,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B1,20,1600,20,"{""below_criterion"": 1510, ""no_sync"": 80}",0.00625,0.01647366319151173,0.01647366319151173,scene
+False,0.95,harsh,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B2,20,1600,20,"{""below_criterion"": 1512, ""no_sync"": 80}",0.005,0.01591507064653533,0.01591507064653533,scene
+True,0.0,harsh,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B3,20,1600,20,"{""no_sync"": 240, ""deadline_miss"": 1360}",0.0,0.0,0.0,scene
+True,0.0,harsh,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B4,20,1600,20,"{""no_sync"": 383, ""deadline_miss"": 1137, ""capacity"": 80}",0.0,0.0,0.0,scene
+True,0.0,harsh,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B4t,20,1600,20,"{""no_sync"": 400, ""deadline_miss"": 1120, ""capacity"": 80}",0.0,0.0,0.0,scene
+True,0.0,harsh,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),P,20,1600,20,"{""no_sync"": 477, ""deadline_miss"": 963, ""capacity"": 160}",0.0,0.0,0.0,scene
+False,1.0,mild,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B0a,20,1600,20,"{""below_criterion"": 1}",0.999375,0.0027950849718747276,0.0027950849718747276,scene
+False,1.0,mild,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B0a-R,20,1600,20,{},1.0,0.0,0.0,scene
+False,0.95,mild,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B0d,20,1600,20,"{""capacity"": 80}",0.95,0.22360679774997902,0.22360679774997902,scene
+False,1.0,mild,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B1,20,1600,20,"{""below_criterion"": 1}",0.999375,0.0027950849718747276,0.0027950849718747276,scene
+False,1.0,mild,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B2,20,1600,20,"{""below_criterion"": 1}",0.999375,0.0027950849718747276,0.0027950849718747276,scene
+True,1.0,mild,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B3,20,1600,20,{},1.0,0.0,0.0,scene
+True,0.95,mild,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B4,20,1600,20,"{""capacity"": 80}",0.95,0.22360679774997902,0.22360679774997902,scene
+True,0.95,mild,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B4t,20,1600,20,"{""below_criterion"": 25, ""capacity"": 80}",0.934375,0.230733776586556,0.230733776586556,scene
+True,0.9,mild,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),P,20,1600,20,"{""below_criterion"": 65, ""capacity"": 160}",0.859375,0.34524197749740076,0.34524197749740076,scene
+False,1.0,moderate,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B0a,20,1600,20,"{""below_criterion"": 472}",0.7050000000000001,0.3304054526757916,0.3304054526757916,scene
+False,1.0,moderate,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B0a-R,20,1600,20,"{""below_criterion"": 230}",0.8562499999999998,0.3216297929051513,0.3216297929051513,scene
+False,0.94625,moderate,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B0d,20,1600,20,"{""below_criterion"": 377, ""no_sync"": 3, ""deadline_miss"": 3, ""capacity"": 80}",0.7106250000000001,0.18278164100771632,0.18278164100771632,scene
+False,1.0,moderate,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B1,20,1600,20,"{""below_criterion"": 595}",0.628125,0.37488759280195194,0.37488759280195194,scene
+False,1.0,moderate,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B2,20,1600,20,"{""below_criterion"": 612}",0.6174999999999999,0.3888114480120964,0.3888114480120964,scene
+True,0.795,moderate,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B3,20,1600,20,"{""deadline_miss"": 298, ""no_sync"": 30}",0.795,0.09357659401457409,0.09357659401457409,scene
+True,0.93625,moderate,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B4,20,1600,20,"{""below_criterion"": 452, ""no_sync"": 8, ""deadline_miss"": 14, ""capacity"": 80}",0.6537499999999999,0.1645917996934106,0.1645917996934106,scene
+True,0.9487500000000001,moderate,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),B4t,20,1600,20,"{""below_criterion"": 110, ""no_sync"": 2, ""capacity"": 80}",0.8799999999999999,0.2176202027192764,0.2176202027192764,scene
+True,0.9,moderate,coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study),P,20,1600,20,"{""below_criterion"": 324, ""capacity"": 160}",0.6975,0.28612658221953374,0.28612658221953374,scene

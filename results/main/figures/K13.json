@@ -1,0 +1,18 @@
+{
+  "n_cells_P_better": 6,
+  "n_cells_B4t_better": 34,
+  "n_cells_undetermined": 8,
+  "source_table": "operating_map.csv",
+  "figure": "K13",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "Карта області працездатності",
+  "title_en": "Operating region map",
+  "experiment": "E15",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ],
+  "dpi": 300
+}

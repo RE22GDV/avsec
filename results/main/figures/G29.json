@@ -1,6 +1,6 @@
 {
   "source_table": "codewords.csv",
-  "bound_holds": true,
+  "bound_holds": false,
   "figure": "G29",
   "lang": "uk",
   "run_dir": "runs/main",
@@ -11,5 +11,6 @@
     "png",
     "svg",
     "pdf"
-  ]
+  ],
+  "dpi": 300
 }

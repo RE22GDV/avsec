@@ -1,4 +1,4 @@
 channel,clip,frame_id,method,percentile,psnr_full
-harsh,uav_forest_canopy,13,P,10,11.568952788302205
-mild,uav_village,6,P,50,24.145430427405522
-mild,uav_sky_horizon,3,P,90,27.414987978731453
+harsh,uav_cal_sea_edge,8,P,10,11.678069093405565
+mild,uav_shoreline,10,P,50,24.067924362045225
+clean,uav_val_sand_texture,8,P,90,28.7331428537455

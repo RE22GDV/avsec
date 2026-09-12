@@ -1,9 +1,0 @@
-admissible,bit_exact,channel,coverage,line_recovery_fraction,method,mse_full,psnr_full,reason,ssim_full,status_counts,sync_edges_found
-True,False,clean,1.0,1.0,B4,110.6533203125,27.69115910776688,,0.8112199119950678,"{""verified"": 8}",926
-True,False,mild,1.0,1.0,B4,110.6533203125,27.69115910776688,,0.8112199119950678,"{""verified"": 8}",927
-True,False,moderate,0.5,0.9983,B4,1786.1954142252605,15.61151390818631,,0.6260713058079959,"{""header_unrecoverable"": 4, ""verified"": 4}",925
-True,False,harsh,0.125,0.9618,B4,3657.2916056315103,12.49920771689904,,0.4007693196229433,"{""no_sync"": 4, ""verified"": 1, ""payload_unrecoverable"": 1, ""header_unrecoverable"": 2}",903
-True,False,clean,1.0,1.0,P,183.18391927083334,25.50193014235134,,0.7105913392759176,"{""verified"": 16, ""filler"": 2}",926
-True,False,mild,1.0,1.0,P,183.18391927083334,25.50193014235134,,0.7105913392759176,"{""verified"": 16, ""filler"": 2}",927
-True,False,moderate,0.625,0.9983,P,830.1160685221354,18.939415403057488,,0.6251228118314047,"{""header_unrecoverable"": 6, ""verified"": 10, ""filler"": 2}",925
-True,False,harsh,0.0,0.9618,P,3276.85888671875,12.976226213588703,,0.4217725958813507,"{""header_unrecoverable"": 17, ""header_invalid"": 1}",903

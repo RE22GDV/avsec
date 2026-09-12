@@ -1,0 +1,49 @@
+agree,case,damaged_bytes,decoder_recovered,first_symbol,mode,n_symbols,predicted_recoverable
+True,0,35,False,0,unknown errors,140,False
+True,0,35,True,0,erasures,140,True
+True,1,70,False,137,unknown errors,279,False
+True,1,70,False,137,erasures,279,False
+True,2,106,False,274,unknown errors,419,False
+True,2,106,False,274,erasures,419,False
+True,3,141,False,411,unknown errors,558,False
+True,3,141,False,411,erasures,558,False
+True,4,175,False,548,unknown errors,698,False
+True,4,175,False,548,erasures,698,False
+True,5,210,False,685,unknown errors,837,False
+True,5,210,False,685,erasures,837,False
+True,6,245,False,822,unknown errors,977,False
+True,6,245,False,822,erasures,977,False
+True,7,280,False,959,unknown errors,1116,False
+True,7,280,False,959,erasures,1116,False
+True,8,314,False,1096,unknown errors,1256,False
+True,8,314,False,1096,erasures,1256,False
+True,9,349,False,1233,unknown errors,1395,False
+True,9,349,False,1233,erasures,1395,False
+True,10,385,False,1370,unknown errors,1535,False
+True,10,385,False,1370,erasures,1535,False
+True,11,420,False,1507,unknown errors,1674,False
+True,11,420,False,1507,erasures,1674,False
+True,12,454,False,1644,unknown errors,1814,False
+True,12,454,False,1644,erasures,1814,False
+True,13,489,False,246,unknown errors,1953,False
+True,13,489,False,246,erasures,1953,False
+True,14,524,False,523,unknown errors,2093,False
+True,14,524,False,523,erasures,2093,False
+True,15,559,False,799,unknown errors,2232,False
+True,15,559,False,799,erasures,2232,False
+True,16,593,False,1076,unknown errors,2372,False
+True,16,593,False,1076,erasures,2372,False
+True,17,629,False,375,unknown errors,2511,False
+True,17,629,False,375,erasures,2511,False
+True,18,663,False,792,unknown errors,2651,False
+True,18,663,False,792,erasures,2651,False
+True,19,698,False,509,unknown errors,2790,False
+True,19,698,False,509,erasures,2790,False
+True,20,733,False,508,unknown errors,2930,False
+True,20,733,False,508,erasures,2930,False
+True,21,768,False,363,unknown errors,3069,False
+True,21,768,False,363,erasures,3069,False
+True,22,803,False,224,unknown errors,3209,False
+True,22,803,False,224,erasures,3209,False
+True,23,838,False,71,unknown errors,3348,False
+True,23,838,False,71,erasures,3348,False

@@ -1,0 +1,58 @@
+# Statistical plan, fixed BEFORE the final run.
+#
+# `avsec analyze --plan configs/analysis_plan.yaml` reads this file; its
+# SHA-256 fingerprint is written into analysis.json next to every number it
+# produced, and `avsec verify` re-reads the plan from there.  A number and the
+# plan it was computed under therefore cannot be separated.
+#
+# Nothing here may be changed after the run without saying so: the point of a
+# pre-declared plan is that the family of tests and the primary comparison were
+# not chosen once the results were visible.
+
+# --- what is being measured --------------------------------------------------
+metric: psnr_full             # quality of the picture actually displayed, over
+                              # the instants the method delivered one
+secondary:
+  - ssim_full
+  - coverage                  # share of the frame that is verified and current
+  - psnr_verified
+  - availability              # share of SCHEDULED instants that delivered
+  - psnr_displayed            # quality of what was on screen, gaps included
+
+# --- the one pre-registered comparison ---------------------------------------
+primary: [P, B4]
+
+# The conditions the primary claim is about.  A result in a channel outside
+# this list is exploratory.
+primary_channels: [clean, moderate, bursty]
+
+# --- the family the Holm correction is for -----------------------------------
+# Fixed in advance.  Pairs outside it are still computed and reported, but they
+# are marked exploratory and take no part in the adjustment, so adding one can
+# never change a decision inside the family.
+family:
+  - [P, B4]      # does the proposal beat the scheme it extends?
+  - [P, B4t]     # does it beat that scheme once B4 has P's transport?
+  - [B4t, B4]    # how much of any difference is just transport parameters?
+  - [P, B3]      # does it beat the strongest authenticated baseline?
+  - [P, B0d]     # what does the whole protected path cost against no crypto?
+
+# --- how uncertainty is estimated --------------------------------------------
+# `scene`  - generalises to new views of the recordings already used;
+# `source` - generalises to a NEW recording.  The natural-imagery run uses
+#            `source`; the synthetic run has one scene per generator, so the
+#            two coincide there.
+unit_of_independence: scene
+n_boot: 10000
+seed: 20240909
+
+# Smallest difference treated as practically meaningful.  Used for the
+# equivalence test, so "no difference found" and "shown to be equivalent" stay
+# different statements.
+equivalence_margin: 0.5
+
+# --- the operating criterion --------------------------------------------------
+# An engineering requirement of this study, not a standard for drone video.
+criterion:
+  coverage_verified_min: 0.90
+  psnr_full_min: 20.0

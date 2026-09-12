@@ -1,0 +1,6 @@
+category,channel,mean_P_minus_B4,n_scenes
+low-detail,clean,-2.389806023212383,14
+low-detail,mild,-2.389806023212383,14
+low-detail,moderate,0.17589806402626249,14
+low-detail,bursty,2.0012599944243,14
+low-detail,harsh,0.0,14

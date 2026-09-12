@@ -44,9 +44,11 @@ TOLERANCE = 5e-3
 def _read_csv(path: str) -> List[Dict[str, str]]:
     import csv
 
-    if not os.path.exists(path):
+    from avsec.utils import open_table, table_exists
+
+    if not table_exists(path):
         return []
-    with open(path, encoding="utf-8", newline="") as fh:
+    with open_table(path) as fh:
         return list(csv.DictReader(fh))
 
 

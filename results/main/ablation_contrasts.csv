@@ -1,0 +1,4 @@
+against,availability_delta,availability_hi,availability_lo,availability_significant,coverage_delta,coverage_hi,coverage_lo,coverage_significant,n_descriptions,n_scenes,placement,psnr_full_delta,psnr_full_hi,psnr_full_lo,psnr_full_significant,study
+"P (2 descriptions, BAWP)",-0.0278,0.0,-0.0648,False,0.0388,0.0914,-0.0151,False,1,6,block,0.4167,1.1995,-0.4963,False,factorial
+"P (2 descriptions, BAWP)",-0.0278,0.0,-0.0648,False,0.033,0.0828,-0.0186,False,1,6,bawp,0.3793,1.1398,-0.558,False,factorial
+"P (2 descriptions, BAWP)",0.0,0.0,0.0,False,0.0677,0.0914,0.0428,True,2,6,block,-0.2699,0.0636,-0.6444,False,factorial

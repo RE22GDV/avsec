@@ -47,15 +47,41 @@ TABLES = (
     "verification.json", "analysis_plan.yaml",
 )
 
-#: frames.csv is 22 MB; the per-scene aggregate is what the tables actually
-#: read, so the full per-frame table is summarised instead of copied whole.
-#: Row budget for the per-frame tables.  Enough to re-derive every aggregate to
-#: within its own interval (see results/README.md for the comparison), small
-#: enough that the evidence folder stays clonable.
-LARGE = {"frames.csv": 12_000, "units.csv": 12_000,
-         "sweeps_frames.csv": 12_000,
-         "operating_map_scenes.csv": 12_000,
-         "chain_scenes.csv": 12_000, "ablation_scenes.csv": 12_000}
+#: Per-frame tables are tens of megabytes, and most of that is columns no
+#: published number is computed from: eighty-one columns of per-stage counters
+#: for twelve that the analysis reads.
+#:
+#: Earlier this was solved by keeping every n-th ROW.  That made
+#: ``avsec verify --input results/main`` recompute from a different dataset
+#: than the one the report published, which is exactly the check the folder
+#: exists to support.  So now every row is kept and the unused COLUMNS are
+#: dropped: the same size, and the verification is real.
+PROJECT = {
+    "frames.csv": (
+        "method", "scene", "clip", "source_id", "repetition", "frame_id",
+        "channel", "channel_plan", "channel_axis", "channel_value", "status",
+        "detail", "job_id", "trace_id", "provenance", "profile_id",
+        "availability", "psnr_displayed", "displayed_source", "gap_policy",
+        "psnr_full", "ssim_full", "psnr_verified", "ssim_verified", "coverage",
+        "mse_full", "bit_exact", "stale_fraction", "estimated_fraction",
+        "max_age_frames", "units_sent", "units_verified", "units_rejected",
+        "symbol_errors_pre_fec", "corrected_symbols", "payload_bytes",
+        "wire_bytes", "rasters", "sync_found", "resynchronised",
+        "x_desc_total", "x_desc_touched", "x_desc_fec_failed",
+        "x_desc_unusable", "x_desc_partial", "x_bands_total",
+        "x_band_complete", "x_band_partial_segments",
+        "x_band_reduced_descriptions", "x_band_no_usable_description",
+    ),
+    "sweeps_frames.csv": (
+        "method", "scene", "clip", "repetition", "frame_id", "channel",
+        "channel_axis", "channel_value", "axis", "cofactors", "status",
+        "availability", "psnr_displayed", "psnr_full", "ssim_full", "coverage",
+        "symbol_errors_pre_fec",
+    ),
+}
+
+#: Tables still kept whole, because they are already small.
+LARGE: dict = {}
 
 
 def _copy(src_dir: str, dst_dir: str, name: str) -> str:
@@ -65,11 +91,49 @@ def _copy(src_dir: str, dst_dir: str, name: str) -> str:
     dst = os.path.join(dst_dir, name)
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     size = os.path.getsize(src)
+    cols = PROJECT.get(name)
+    if cols:
+        return _project(src, dst, cols)
     limit = LARGE.get(name)
     if limit:
         return _summarise(src, dst, limit)
     shutil.copy2(src, dst)
     return f"{name} ({size / 1e6:.2f} MB)"
+
+
+def _project(src: str, dst: str, keep) -> str:
+    """Every row, only the columns any published number is computed from."""
+    import csv
+
+    with open(src, encoding="utf-8", newline="") as fh:
+        reader = csv.DictReader(fh)
+        fields = [c for c in (reader.fieldnames or []) if c in keep]
+        rows = list(reader)
+    dropped = [c for c in (rows[0] if rows else {}) if c not in fields]
+    import gzip
+
+    # Gzip, not thinning: every row survives, and the reader opens either form.
+    with gzip.open(dst + ".gz", "wt", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore")
+        w.writeheader()
+        w.writerows(rows)
+    name = os.path.basename(dst)
+    with open(dst + ".README", "w", encoding="utf-8") as fh:
+        fh.write(
+            f"{name}.gz: УСІ {len(rows)} рядків збережено (gzip); з "
+            f"{len(fields) + len(dropped)} стовпців лишено {len(fields)}.\n\n"
+            "Прорідження рядків тут НЕ застосовується: команда\n"
+            "  avsec verify --input <ця тека>\n"
+            "перераховує кожне опубліковане число саме з цього файла, і робити "
+            "це на іншій вибірці означало б перевіряти інший набір даних.\n\n"
+            "Прибрані стовпці - це посценні лічильники етапів, яких не читає "
+            "жоден опублікований агрегат:\n  "
+            + ", ".join(sorted(dropped)) + "\n\n"
+            "Повна таблиця з усіма стовпцями відтворюється прогоном з "
+            "кореневого README: у режимі key_mode: lab результат детермінований.\n")
+    return (f"{name}.gz ({os.path.getsize(dst + '.gz') / 1e6:.2f} MB, "
+            f"усі {len(rows)} рядків, "
+            f"{len(fields)} з {len(fields) + len(dropped)} стовпців)")
 
 
 def _summarise(src: str, dst: str, limit: int) -> str:

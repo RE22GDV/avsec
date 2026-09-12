@@ -1,5 +1,5 @@
 {
-  "clip": "clip_edges_fast_v9",
+  "clip": "clip_illumination_slow_v0",
   "channel": "bursty",
   "source_table": "frames.csv",
   "figure": "K08",

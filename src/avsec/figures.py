@@ -125,11 +125,15 @@ class FigureContext:
         """A CSV from the run, or ``FigurePending`` naming what is missing."""
         if name in self._cache:
             return self._cache[name]
+        from avsec.utils import open_table, table_exists
+
         p = self.path(name)
-        if not os.path.exists(p):
+        if not table_exists(p):
             raise FigurePending(f"немає таблиці {name} - відповідний експеримент "
                                 "не запускався у цьому прогоні")
-        with open(p, encoding="utf-8", newline="") as fh:
+        # Evidence directories store the per-frame tables gzipped: every row is
+        # there, at a size a repository can carry.
+        with open_table(p) as fh:
             rows = list(csv.DictReader(fh))
         if not rows:
             raise FigurePending(f"таблиця {name} порожня")

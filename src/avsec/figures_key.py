@@ -879,8 +879,8 @@ def k11(ctx: FigureContext) -> Dict[str, Any]:
     A waterfall reads as though each component "contributes" a fixed amount.
     It does not: whatever is applied first collects the gain that the later
     steps would also have produced.  Both orderings of the same two end points
-    are drawn here, so the reader can see how much of a step's credit is the
-    step and how much is its position (R09).
+    are drawn here - and a step that could not run at all is drawn as that,
+    not as a zero-height bar (R09).
     """
     plt = _plt()
     rows = ctx.table("chain.csv")
@@ -891,64 +891,104 @@ def k11(ctx: FigureContext) -> Dict[str, Any]:
         raise FigurePending("chain.csv має лише один порядок кроків; "
                             "перезапустіть E13")
 
-    fig, axes = plt.subplots(1, 2, figsize=(12.4, 5.0))
+    fig, axes = plt.subplots(1, 2, figsize=(12.8, 6.4))
+    fig.subplots_adjust(bottom=0.30)
+
+    def _wrap(text: str, width: int) -> str:
+        import textwrap
+
+        return "\n".join(textwrap.wrap(text, width)) or text
+
     out: List[Dict[str, Any]] = []
     titles = {"fwd": "спершу параметри транспорту",
               "rev": "спершу два механізми"}
-    totals: Dict[str, Dict[str, float]] = {}
+    totals: Dict[str, Dict[str, Any]] = {}
     for ax, order in zip(axes, ["fwd", "rev"]):
         sel = sorted([r for r in rows if r.get("order") == order],
                      key=lambda r: int(float(r.get("step", 0))))
         labels = [r.get("label", "?") for r in sel]
-        deltas = [_float(r, "delta_psnr_full", 0.0) for r in sel]
+        ok = [r.get("admissible") == "True" for r in sel]
+        deltas = [_float(r, "delta_psnr_full", 0.0) if o else float("nan")
+                  for r, o in zip(sel, ok)]
         mech_mask = ["опис" in l or "BAWP" in l for l in labels]
-        colors = [BAD if m else "#1976d2" for m in mech_mask]
+        lo = [_float(r, "delta_psnr_full_lo") if o else float("nan")
+              for r, o in zip(sel, ok)]
+        hi = [_float(r, "delta_psnr_full_hi") if o else float("nan")
+              for r, o in zip(sel, ok)]
         x = np.arange(len(labels))
-        lo = [_float(r, "delta_psnr_full_lo") for r in sel]
-        hi = [_float(r, "delta_psnr_full_hi") for r in sel]
-        err = np.array([[max(0.0, d - l) if np.isfinite(l) else 0.0
-                         for d, l in zip(deltas, lo)],
-                        [max(0.0, h - d) if np.isfinite(h) else 0.0
-                         for d, h in zip(deltas, hi)]])
-        ax.bar(x, deltas, 0.62, color=colors,
+        drawn = [0.0 if not np.isfinite(d) else d for d in deltas]
+        colors = [NEUTRAL if not o else (BAD if m else "#1976d2")
+                  for o, m in zip(ok, mech_mask)]
+        err = np.array([[max(0.0, d - l) if np.isfinite(l) and np.isfinite(d)
+                         else 0.0 for d, l in zip(deltas, lo)],
+                        [max(0.0, h - d) if np.isfinite(h) and np.isfinite(d)
+                         else 0.0 for d, h in zip(deltas, hi)]])
+        ax.bar(x, drawn, 0.62, color=colors,
                yerr=err if err.any() else None, capsize=3, ecolor="#37474f")
         ax.axhline(0, color="#37474f", lw=0.9)
         ax.set_xticks(x)
-        ax.set_xticklabels(labels, rotation=20, ha="right", fontsize=7.5)
-        ax.set_title(f"{titles.get(order, order)}", fontsize=10)
+        ax.set_xticklabels([_wrap(l, 22) for l in labels], rotation=18,
+                           ha="right", fontsize=7)
+        ax.set_title(titles.get(order, order), fontsize=10)
         ax.set_ylabel("внесок кроку, дБ")
-        mech = sum(d for d, m in zip(deltas, mech_mask) if m and np.isfinite(d))
-        trans = sum(d for d, m in zip(deltas, mech_mask) if not m and np.isfinite(d))
-        totals[order] = {"mechanisms": mech, "transport": trans}
-        for i, (lbl, d) in enumerate(zip(labels, deltas)):
-            if np.isfinite(d) and i:
-                ax.annotate(f"{d:+.2f}", (i, d), xytext=(0, 6 if d >= 0 else -13),
-                            textcoords="offset points", ha="center", fontsize=7.5)
-            out.append({"order": order, "step": i, "label": lbl, "delta": d,
+        mech = sum(d for d, m, o in zip(deltas, mech_mask, ok) if m and o)
+        trans = sum(d for d, m, o in zip(deltas, mech_mask, ok) if not m and o)
+        blocked = [l for l, o, m in zip(labels, ok, mech_mask) if not o and m]
+        totals[order] = {"mechanisms": mech, "transport": trans,
+                         "blocked": blocked}
+        for i, (lbl, d, o) in enumerate(zip(labels, deltas, ok)):
+            if not o:
+                # A step that never ran is marked as such, at the axis, in
+                # words - not as a bar of height zero.  Consecutive blocked
+                # steps are staggered so the labels do not overlap.
+                n_before = sum(1 for k in range(i) if not ok[k])
+                ax.annotate("НЕДОПУСТИМО\nне вміщується\nу бюджет", (i, 0.0),
+                            xytext=(0, 16 + 36 * (n_before % 2)),
+                            textcoords="offset points", ha="center",
+                            fontsize=6.5, color=BAD, weight="bold",
+                            linespacing=1.3)
+            elif i:
+                ax.annotate(f"{d:+.2f}", (i, d),
+                            xytext=(0, 6 if d >= 0 else -13),
+                            textcoords="offset points", ha="center",
+                            fontsize=7.5)
+            out.append({"order": order, "step": i, "label": lbl,
+                        "delta": d if o else None, "admissible": bool(o),
                         "is_mechanism": bool(mech_mask[i])})
-    lim = max(abs(np.nanmin([o["delta"] for o in out])),
-              abs(np.nanmax([o["delta"] for o in out]))) * 1.35
+    finite = [o["delta"] for o in out if o["delta"] is not None
+              and np.isfinite(o["delta"])]
+    lim = (max(abs(min(finite)), abs(max(finite))) * 1.45) if finite else 1.0
     for ax in axes:
         ax.set_ylim(-lim, lim)
 
     mf = totals.get("fwd", {}).get("mechanisms", float("nan"))
     mr = totals.get("rev", {}).get("mechanisms", float("nan"))
+    blocked = totals.get("rev", {}).get("blocked", [])
     fig.suptitle("K11. Порядок кроків вирішує, кому дістанеться виграш", y=0.99,
                  fontsize=12)
-    same_sign = np.isfinite(mf) and np.isfinite(mr) and (mf < 0) == (mr < 0)
-    footnote(ctx, fig,
-             f"Ті самі дві кінцеві точки (B4 і P), той самий матеріал, той "
-             f"самий канал — різний лише порядок змін. Внесок MDC+BAWP: "
-             f"{mf:+.2f} дБ за прямого порядку і {mr:+.2f} дБ за зворотного "
-             f"(різниця {abs(mf - mr):.2f} дБ). "
-             + ("Знак однаковий в обох розкладах, тож висновок про механізми "
-                "не є артефактом порядку." if same_sign else
-                "ЗНАК різний: жоден окремий розклад не може обґрунтувати "
-                "висновок про користь механізмів."))
+    if blocked:
+        note = (f"Ті самі дві кінцеві точки (B4 і P), той самий матеріал, той "
+                f"самий канал — різний лише порядок змін. Зворотний порядок "
+                f"НЕ ПРОХОДИТЬСЯ: {', '.join(blocked)} не вміщуються у "
+                f"растровий бюджет, доки не зменшено розмір одиниці. Тобто "
+                f"механізми не є самостійним доповненням до базової схеми — "
+                f"вони застосовні лише після тих самих змін транспорту, які й "
+                f"дають увесь виграш ({mf:+.2f} дБ за прямого порядку).")
+    else:
+        same = np.isfinite(mf) and np.isfinite(mr) and (mf < 0) == (mr < 0)
+        note = (f"Ті самі дві кінцеві точки, той самий матеріал і канал — "
+                f"різний лише порядок. Внесок MDC+BAWP: {mf:+.2f} дБ за "
+                f"прямого порядку і {mr:+.2f} за зворотного "
+                f"(різниця {abs(mf - mr):.2f} дБ). "
+                + ("Знак однаковий, тож висновок не є артефактом порядку."
+                   if same else
+                   "ЗНАК різний: жоден окремий розклад не може обґрунтувати "
+                   "висновок про користь механізмів."))
+    footnote(ctx, fig, note)
     return export(ctx, "K11", fig, out,
                   {"mechanism_gain_forward_db": mf,
                    "mechanism_gain_reverse_db": mr,
-                   "sign_agrees": bool(same_sign),
+                   "reverse_order_blocked": blocked,
                    "source_table": "chain.csv"})
 
 
@@ -983,6 +1023,16 @@ def k12(ctx: FigureContext) -> Dict[str, Any]:
         a, b = r.get("a"), r.get("b")
         sign = 1.0 if a == "P" else -1.0
         m = sign * _float(r, "mean")
+        if not np.isfinite(m):
+            # A channel where no method delivered a single usable instant has
+            # no effect to plot, and saying so beats an empty row (R05).
+            ax.annotate("жоден метод не дав придатного моменту показу",
+                        (0.0, i), xytext=(12, 0), textcoords="offset points",
+                        fontsize=8, color=NEUTRAL, va="center")
+            out.append({"channel": ch, "mean": None, "n_units": 0,
+                        "unit_of_independence": unit, "significant": False,
+                        "note": "немає даних"})
+            continue
         lo = sign * _float(r, "hi" if sign < 0 else "lo")
         hi = sign * _float(r, "lo" if sign < 0 else "hi")
         n = int(_float(r, "n_units", _float(r, "n_scenes", 0)))

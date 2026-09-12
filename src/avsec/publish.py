@@ -42,10 +42,12 @@ class RunView:
     run_dir: str
 
     def csv(self, name: str) -> List[Dict[str, Any]]:
+        from avsec.utils import open_table, table_exists
+
         p = os.path.join(self.run_dir, name)
-        if not os.path.exists(p):
+        if not table_exists(p):
             return []
-        with open(p, encoding="utf-8", newline="") as fh:
+        with open_table(p) as fh:
             return list(csv.DictReader(fh))
 
     def json(self, name: str) -> Dict[str, Any]:
@@ -262,34 +264,60 @@ def failure_section(view: RunView) -> str:
 def e05_section(view: RunView) -> str:
     rows = [r for r in view.csv("codewords.csv") if r.get("admissible") == "True"]
     joint = view.csv("joint_loss.csv")
+    checks = view.csv("rs_cross_check.csv")
     if not rows:
         return "_E05 не запускалась у цьому прогоні._"
+
+    def _pick(seq, scheme, **eq):
+        return [x for x in seq if x.get("scheme") == scheme
+                and all(x.get(k) == v for k, v in eq.items())]
+
     body = []
     for scheme in sorted({r["scheme"] for r in rows}):
-        sel = [r for r in rows if r["scheme"] == scheme
-               and r.get("n_descriptions") == "2" and r.get("column_twist") == "1"
-               and r.get("burst_lines") == "16"]
+        sel = _pick(rows, scheme, n_descriptions="2", column_twist="1",
+                    burst_lines="16")
         if not sel:
             continue
         r = sel[0]
-        jl = [j for j in joint if j["scheme"] == scheme
-              and j.get("n_descriptions") == "2" and j.get("column_twist") == "1"
-              and j.get("burst_lines") == "16" and j.get("stripe_lost") == "True"]
-        p_lost = sum(_f(j, "fraction", 0.0) for j in jl)
-        body.append([scheme, r["accumulation_rows"], r["worst_damaged_bytes"],
-                     r["rs_nsym"],
-                     "так" if r["survives_as_erasures"] == "True" else "ні",
-                     f"{p_lost:.3f}"])
-    return (_table(["розміщення", "буфер, рядків", "макс. пошкоджених Б",
-                    "RS nsym", "виживає як стирання", "P(втрачено обидва описи)"],
-                   body)
-            + "\n\nОдин burst 16 рядків растру, два описи, вичерпний перебір усіх "
-              "початкових позицій.  Дві колонки праворуч вимірюють **різні** "
-              "речі: чи виправить FEC пошкоджене кодове слово, і чи втрачені "
-              "обидва описи однієї смуги зображення - за двох описів гарантія "
-              "«зачеплено не більше двох класів» сама по собі не гарантує "
-              "виживання жодного опису.")
+        jl = _pick(joint, scheme, n_descriptions="2", column_twist="1",
+                   burst_lines="16")
+        lost = sum(_f(j, "fraction", 0.0) for j in jl
+                   if j.get("stripe_lost") == "True")
+        touched = sum(_f(j, "fraction", 0.0) for j in jl
+                      if j.get("outcome") == "touched"
+                      and _f(j, "descriptions_in_one_stripe", 0.0) >= 2)
+        uncorr = _f(r, "frac_positions_uncorrectable", float("nan"))
+        body.append([scheme, r.get("accumulation_rows", ""),
+                     r.get("worst_damaged_symbols", ""),
+                     r.get("worst_damaged_bytes", ""),
+                     f"{uncorr:.3f}" if uncorr == uncorr else "—",
+                     f"{touched:.3f}", f"{lost:.3f}"])
 
+    agree = sum(1 for c in checks if c.get("agree") == "True")
+    spb = rows[0].get("symbols_per_byte", "?")
+    nblk = rows[0].get("n_rs_blocks_per_unit", "?")
+    note = (
+        "\n\nОдин burst 16 рядків растру, два описи, вичерпний перебір усіх "
+        "початкових позицій.\n\n"
+        f"**Про одиниці.** На один байт припадає {spb} клітинки модема, і одиниця "
+        f"транспорту — це не одне кодове слово, а {nblk}: заголовок плюс блоки "
+        "payload, кожен зі своїм бюджетом виправлення. Колонка «пошкоджено Б» "
+        "рахує саме байти, а «невідновних позицій» — частку початків burst, "
+        "за яких хоч одне RS-слово одиниці не відновлюється. Раніше тут "
+        "стояли клітинки, названі байтами, і порівнювалися з бюджетом одного "
+        "слова.\n\n"
+        "**Про «зачеплено» і «втрачено».** Це різні події: опис, який FEC "
+        "відновив, не втрачено. Дві праві колонки показують обидві, і різниця "
+        "між ними — це робота FEC.\n\n")
+    if checks:
+        note += (f"**Звірка з декодером.** Аналітичний вирок збігся зі "
+                 f"справжнім декодуванням Ріда — Соломона у {agree} з "
+                 f"{len(checks)} контрольних випадків "
+                 "(`rs_cross_check.csv`).")
+    return (_table(["розміщення", "буфер, рядків", "пошкоджено клітинок",
+                    "пошкоджено Б", "частка невідновних позицій",
+                    "P(зачеплено обидва описи)", "P(втрачено обидва описи)"],
+                   body) + note)
 
 
 def e01_section(view: RunView) -> str:
@@ -688,23 +716,58 @@ def build_readme_block(view: RunView, figures_dir: str) -> str:
     chain = view.json("e13.json")
     decomposition = ""
     if chain:
+        blocked = (chain.get("reverse_order") or {}).get(
+            "mechanism_steps_blocked") or []
         decomposition = (
             f" Покроковий розклад цієї різниці (E13) показує, що її дають "
             f"**параметри транспорту** ({chain.get('transport_gain_db', 0):+.2f} дБ), "
             f"тоді як самі запропоновані механізми — кілька описів і BAWP — "
-            f"**віднімають** {abs(chain.get('mechanism_gain_db', 0)):.2f} дБ.")
+            f"дають {chain.get('mechanism_gain_db', 0):+.2f} дБ.")
+        if blocked:
+            decomposition += (
+                " Пройдений у зворотному порядку, цей розклад **не існує "
+                "взагалі**: при вихідному розмірі одиниці механізми не "
+                "вміщуються в бюджет, тобто вони не є самостійним доповненням "
+                "до базової схеми.")
+
+    # The retuned baseline is the comparison that decides whether the two
+    # mechanisms are worth anything, so it goes in the headline (R08).
+    retuned = ""
+    b4t = [r for r in view.csv("paired_effects.csv")
+           if {r.get("a"), r.get("b")} == {"P", "B4t"}]
+    if b4t:
+        from avsec.analysis import orient
+
+        signed = []
+        for r in b4t:
+            rec = dict(r)
+            for k in ("mean", "lo", "hi"):
+                rec[k] = _f(rec, k)
+            o = orient(rec, "P")
+            if o["mean"] == o["mean"] and r.get("significant_holm") == "True":
+                signed.append((r["channel"], o["mean"]))
+        if signed and all(m < 0 for _c, m in signed):
+            worst = min(m for _c, m in signed)
+            best = max(m for _c, m in signed)
+            retuned = (
+                f" **Переналаштована база `B4t`** — та сама схема з транспортом "
+                f"`P`, але без обох механізмів — значуще перевершує `P` в усіх "
+                f"{len(signed)} каналах, де різниця встановлена "
+                f"({best:+.2f}…{worst:+.2f} дБ).")
     if better and worse:
         headline = (f"**Перевага запропонованої схеми залежить від каналу.** "
                     f"`P` значуще краща за `B4` на {', '.join(better)} і значуще "
                     f"гірша на {', '.join(worse)}. Загального виграшу немає, і "
                     f"це головний результат прогону, а не застереження до нього."
-                    + decomposition)
+                    + decomposition + retuned)
     elif better:
         headline = (f"**`P` значуще перевершує `B4`** на каналах "
-                    f"{', '.join(better)}; програшів не зафіксовано.")
+                    f"{', '.join(better)}; програшів не зафіксовано."
+                    + decomposition + retuned)
     elif worse:
         headline = (f"**`P` значуще програє `B4`** на каналах "
-                    f"{', '.join(worse)}; виграшів не зафіксовано.")
+                    f"{', '.join(worse)}; виграшів не зафіксовано."
+                    + decomposition + retuned)
     else:
         headline = ("**Різниця між `P` і `B4` не встановлена в жодному каналі** — "
                     "інтервали містять нуль. Це не доказ рівності.")
@@ -737,6 +800,11 @@ def build_readme_block(view: RunView, figures_dir: str) -> str:
         cp, cb = cov.get((ch, "P")), cov.get((ch, "B4"))
         cov_txt = ("" if cp is None or cb is None
                    else f", перевірене покриття {cp:.3f} проти {cb:.3f}")
+        if mean != mean:
+            lines.append(
+                f"- **`{ch}`:** жоден метод не дав жодного придатного моменту "
+                f"показу — порівнювати нічого.")
+            continue
         nd = 3 if abs(mean) < 0.05 else 2
         lines.append(
             f"- **`{ch}`:** P − B4 = {mean:+.{nd}f} дБ "

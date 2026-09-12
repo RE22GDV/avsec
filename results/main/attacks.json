@@ -10,7 +10,7 @@
         "n_blocks": 192.0,
         "n_frames_used": 1.0
       },
-      "seconds": 0.001341900002444163,
+      "seconds": 0.0011663000004773494,
       "notes": "Recovering a static permutation does not break an independently regenerated permutation."
     },
     {
@@ -22,7 +22,7 @@
         "mean_match_cost": 0.0,
         "permutation_accuracy": 1.0
       },
-      "seconds": 0.032649400003720075,
+      "seconds": 0.0320702999997593,
       "notes": "",
       "content": "smooth"
     },
@@ -36,7 +36,7 @@
         "neighbour_accuracy": 0.949438202247191,
         "reconstruction_psnr_db": 24.681112285187794
       },
-      "seconds": 0.08397819999663625,
+      "seconds": 0.08003390000158106,
       "notes": "Greedy best-buddy jigsaw solver; no learned model is used.",
       "content": "smooth"
     },
@@ -49,7 +49,7 @@
         "mean_match_cost": 0.0,
         "permutation_accuracy": 0.3333333333333333
       },
-      "seconds": 0.03340359999856446,
+      "seconds": 0.03417450000051758,
       "notes": "",
       "content": "edges"
     },
@@ -63,7 +63,7 @@
         "neighbour_accuracy": 0.033707865168539325,
         "reconstruction_psnr_db": 6.033210412854942
       },
-      "seconds": 0.08312819999991916,
+      "seconds": 0.07755210000323132,
       "notes": "Greedy best-buddy jigsaw solver; no learned model is used.",
       "content": "edges"
     },
@@ -74,9 +74,9 @@
       "metrics": {
         "n_blocks": 192.0,
         "mean_match_cost": 0.0,
-        "permutation_accuracy": 0.5364583333333334
+        "permutation_accuracy": 0.453125
       },
-      "seconds": 0.03271810000296682,
+      "seconds": 0.03323190000082832,
       "notes": "",
       "content": "text"
     },
@@ -86,11 +86,11 @@
       "success": false,
       "metrics": {
         "n_blocks": 192.0,
-        "direct_accuracy": 0.0,
-        "neighbour_accuracy": 0.03089887640449438,
-        "reconstruction_psnr_db": 13.027386367024139
+        "direct_accuracy": 0.005208333333333333,
+        "neighbour_accuracy": 0.0056179775280898875,
+        "reconstruction_psnr_db": 10.97623838504598
       },
-      "seconds": 0.08869279999635182,
+      "seconds": 0.09314000000085798,
       "notes": "Greedy best-buddy jigsaw solver; no learned model is used.",
       "content": "text"
     },
@@ -103,7 +103,7 @@
         "mean_match_cost": 0.0,
         "permutation_accuracy": 1.0
       },
-      "seconds": 0.032230999997409526,
+      "seconds": 0.031855900000664406,
       "notes": "",
       "content": "texture"
     },
@@ -117,7 +117,7 @@
         "neighbour_accuracy": 0.6741573033707865,
         "reconstruction_psnr_db": 14.620146310552848
       },
-      "seconds": 0.10983660000056261,
+      "seconds": 0.10096269999849028,
       "notes": "Greedy best-buddy jigsaw solver; no learned model is used.",
       "content": "texture"
     },
@@ -130,7 +130,7 @@
         "n_frames": 12.0,
         "n_blocks": 192.0
       },
-      "seconds": 0.006470000000263099,
+      "seconds": 0.003502799998386763,
       "notes": "Shows why a per-frame permutation is required; still not a confidentiality proof for the per-frame variant."
     },
     {
@@ -141,9 +141,9 @@
         "seed_found": 44257.0,
         "seeds_tried": 44257.0,
         "key_space": 65535.0,
-        "seeds_per_second": 7651.613928300501
+        "seeds_per_second": 8603.658513472348
       },
-      "seconds": 5.78400849999889,
+      "seconds": 5.143974499998876,
       "notes": "key space 2^16-1 = 65535; searched 44257"
     }
   ],
@@ -524,6 +524,7 @@
         "B2",
         "B3",
         "B4",
+        "B4t",
         "P"
       ],
       "profiles": {
@@ -544,7 +545,8 @@
             "block",
             278,
             0
-          ]
+          ],
+          "interleaver_window": 0
         },
         "B3": {
           "stripe_height": 24,
@@ -563,7 +565,8 @@
             "block",
             278,
             0
-          ]
+          ],
+          "interleaver_window": 0
         },
         "B4": {
           "stripe_height": 24,
@@ -582,7 +585,28 @@
             "block",
             278,
             0
-          ]
+          ],
+          "interleaver_window": 0
+        },
+        "B4t": {
+          "stripe_height": 24,
+          "n_descriptions": 1,
+          "codec": "dct",
+          "quality": 8,
+          "max_unit_payload": 320,
+          "fec_nsym": 128,
+          "fec_header_nsym": 48,
+          "modulation": [
+            4,
+            8,
+            2
+          ],
+          "interleaver": [
+            "block",
+            278,
+            0
+          ],
+          "interleaver_window": 0
         },
         "P": {
           "stripe_height": 24,
@@ -601,7 +625,8 @@
             "bawp",
             0,
             8
-          ]
+          ],
+          "interleaver_window": 0
         }
       },
       "crypto": {
@@ -660,17 +685,50 @@
       "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
       "cpu_count": 32,
       "packages": {
-        "numpy": "2.1.2",
-        "scipy": "1.16.0",
-        "cv2": "4.13.0",
+        "numpy": "2.5.3",
+        "scipy": "1.18.1",
+        "cv2": "5.0.0",
         "cryptography": "50.0.1",
         "reedsolo": "unknown",
-        "PIL": "11.0.0",
-        "matplotlib": "3.9.2",
-        "yaml": "6.0.2"
+        "PIL": "12.3.0",
+        "matplotlib": "3.11.2",
+        "yaml": "6.0.3"
       },
       "avsec_version": "0.1.0",
-      "git_commit": "26dcb4a75436e5ac0db9c369cbef8ff20128a44a"
+      "git_commit": "25534623fc247da4a07c7238f46cae4b068b68b3",
+      "git_worktree": "clean",
+      "git_dirty": false,
+      "git_dirty_files": [],
+      "git_branch": "main",
+      "git_describe": "v1.0.0-2-g2553462",
+      "git_dirty_note": "",
+      "pip_freeze": [
+        "-e git+https://github.com/RE22GDV/avsec.git@25534623fc247da4a07c7238f46cae4b068b68b3#egg=avsec",
+        "PyYAML==6.0.3",
+        "Pygments==2.21.0",
+        "cffi==2.1.1",
+        "colorama==0.4.6",
+        "contourpy==1.4.0",
+        "cryptography==50.0.1",
+        "cycler==0.12.1",
+        "fonttools==4.65.0",
+        "iniconfig==2.3.0",
+        "kiwisolver==1.5.1",
+        "matplotlib==3.11.2",
+        "numpy==2.5.3",
+        "opencv-python==5.0.0.93",
+        "packaging==26.3",
+        "pillow==12.3.0",
+        "pluggy==1.6.0",
+        "pycparser==3.0",
+        "pyparsing==3.3.2",
+        "pytest-timeout==2.4.0",
+        "pytest==9.1.1",
+        "python-dateutil==2.9.0.post0",
+        "reedsolo==1.7.0",
+        "scipy==1.18.1",
+        "six==1.17.0"
+      ]
     },
     "inputs": {},
     "counters": {}

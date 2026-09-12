@@ -5,19 +5,19 @@
     "dropouts",
     "degrade_recover"
   ],
-  "n_frames": 48,
+  "n_frames": 40,
   "impairment_windows": {
     "clean_burst_clean": [
-      12,
-      24
+      10,
+      20
     ],
     "dropouts": [
-      12,
-      24
+      10,
+      20
     ],
     "degrade_recover": [
-      12,
-      24
+      10,
+      20
     ]
   },
   "schedules": {
@@ -27,11 +27,11 @@
         "mild"
       ],
       [
-        12,
+        10,
         "harsh"
       ],
       [
-        24,
+        20,
         "mild"
       ]
     ],
@@ -41,11 +41,11 @@
         "mild"
       ],
       [
-        12,
+        10,
         "mild[frame_drop_prob=0.25]"
       ],
       [
-        24,
+        20,
         "mild"
       ]
     ],
@@ -55,24 +55,24 @@
         "clean"
       ],
       [
-        12,
+        10,
         "mild"
       ],
       [
-        16,
+        13,
         "moderate"
       ],
       [
-        20,
+        16,
         "harsh"
       ],
       [
-        24,
+        20,
         "mild"
       ]
     ]
   },
-  "n_rows": 5184,
+  "n_rows": 4320,
   "n_recovery_cases": 108,
   "n_censored": 0,
   "session_continuity": "увесь кліп - одне завдання; приймач не скидається на межі фази, змінюється лише модель спотворень",

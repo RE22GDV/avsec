@@ -9,5 +9,89 @@
     "payload_x_fec",
     "window"
   ],
-  "note": "це дослідження МЕХАНІЗМУ: решта транспорту зафіксована. Порівняння найкращих систем за однаковим бюджетом вимагає переналаштування кожної клітинки і звітується окремо"
+  "factorial_contrasts": [
+    {
+      "study": "factorial",
+      "against": "P (2 descriptions, BAWP)",
+      "n_descriptions": 1,
+      "placement": "block",
+      "psnr_full_delta": 0.4167,
+      "psnr_full_lo": -0.4963,
+      "psnr_full_hi": 1.1995,
+      "psnr_full_significant": false,
+      "coverage_delta": 0.0388,
+      "coverage_lo": -0.0151,
+      "coverage_hi": 0.0914,
+      "coverage_significant": false,
+      "availability_delta": -0.0278,
+      "availability_lo": -0.0648,
+      "availability_hi": 0.0,
+      "availability_significant": false,
+      "n_scenes": 6
+    },
+    {
+      "study": "factorial",
+      "against": "P (2 descriptions, BAWP)",
+      "n_descriptions": 1,
+      "placement": "bawp",
+      "psnr_full_delta": 0.3793,
+      "psnr_full_lo": -0.558,
+      "psnr_full_hi": 1.1398,
+      "psnr_full_significant": false,
+      "coverage_delta": 0.033,
+      "coverage_lo": -0.0186,
+      "coverage_hi": 0.0828,
+      "coverage_significant": false,
+      "availability_delta": -0.0278,
+      "availability_lo": -0.0648,
+      "availability_hi": 0.0,
+      "availability_significant": false,
+      "n_scenes": 6
+    },
+    {
+      "study": "factorial",
+      "against": "P (2 descriptions, BAWP)",
+      "n_descriptions": 2,
+      "placement": "block",
+      "psnr_full_delta": -0.2699,
+      "psnr_full_lo": -0.6444,
+      "psnr_full_hi": 0.0636,
+      "psnr_full_significant": false,
+      "coverage_delta": 0.0677,
+      "coverage_lo": 0.0428,
+      "coverage_hi": 0.0914,
+      "coverage_significant": true,
+      "availability_delta": 0.0,
+      "availability_lo": 0.0,
+      "availability_hi": 0.0,
+      "availability_significant": false,
+      "n_scenes": 6
+    }
+  ],
+  "payload_fec_interaction": {
+    "available": true,
+    "payloads": [
+      160,
+      240,
+      320,
+      480
+    ],
+    "fec_nsym": [
+      32,
+      64,
+      96,
+      128
+    ],
+    "fec_effect_per_payload_db": {
+      "160": 7.277,
+      "240": 10.354,
+      "320": 10.141,
+      "480": 4.434
+    },
+    "spread_db": 5.921,
+    "additive_on_this_grid": false,
+    "statement": "ефект сильнішого FEC змінюється на 5.92 дБ між розмірами одиниці; тобто фактори взаємодіють: виграш від FEC залежить від розміру одиниці",
+    "caveat": "клітинки, недопустимі за бюджетом, виключені; сітка нерівномірно заповнена, і це не «повний факторний план»"
+  },
+  "note": "це дослідження МЕХАНІЗМУ: решта транспорту зафіксована. Порівняння найкращих систем за однаковим бюджетом вимагає переналаштування кожної клітинки і звітується окремо. Кожна клітинка збережена посценно (ablation_scenes.csv), а різниці до P - з парними інтервалами (ablation_contrasts.csv)"
 }

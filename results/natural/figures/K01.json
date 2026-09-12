@@ -1,0 +1,16 @@
+{
+  "channel": "bursty",
+  "source_table": "summary.csv",
+  "figure": "K01",
+  "lang": "uk",
+  "run_dir": "runs/natural",
+  "title_uk": "Що кожен метод справді дає",
+  "title_en": "What each method really provides",
+  "experiment": "E02",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ],
+  "dpi": 300
+}

@@ -1,0 +1,16 @@
+{
+  "unit_of_independence": "scene",
+  "source_table": "paired_effects.csv",
+  "figure": "K12",
+  "lang": "uk",
+  "run_dir": "runs/main",
+  "title_uk": "24 незалежні джерела",
+  "title_en": "Twenty-four independent sources",
+  "experiment": "E14",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ],
+  "dpi": 300
+}

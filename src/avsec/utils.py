@@ -242,6 +242,26 @@ def _pip_freeze() -> List[str]:
     return sorted(l.strip() for l in (out or "").splitlines() if l.strip())
 
 
+
+def open_table(path: str):
+    """Open a CSV that may be stored gzipped, transparently.
+
+    Evidence directories keep the per-frame tables as ``.csv.gz``: every row
+    is there, which is what ``avsec verify`` needs, at a size a repository can
+    carry.  Callers should not have to care which form they got.
+    """
+    import gzip
+
+    if os.path.exists(path):
+        return open(path, encoding="utf-8", newline="")
+    if os.path.exists(path + ".gz"):
+        return gzip.open(path + ".gz", "rt", encoding="utf-8", newline="")
+    raise FileNotFoundError(path)
+
+
+def table_exists(path: str) -> bool:
+    return os.path.exists(path) or os.path.exists(path + ".gz")
+
 # --------------------------------------------------------------------------- io
 def ensure_dir(path: str) -> str:
     if path:

@@ -1,0 +1,16 @@
+{
+  "metric": "psnr_full",
+  "source_table": "frames.csv",
+  "figure": "G08",
+  "lang": "uk",
+  "run_dir": "runs/natural",
+  "title_uk": "Результати окремих сцен",
+  "title_en": "Per-scene results",
+  "experiment": "E02",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ],
+  "dpi": 300
+}

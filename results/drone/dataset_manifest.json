@@ -16,7 +16,13 @@
       "first_frame_dhash": "17ffbe78e4861481",
       "license": "unknown",
       "split": "test",
-      "notes": "real UAV footage: pan across 'sea_open' in the Epha Dune photograph, motion=slow, 256x192, 16 frames"
+      "notes": "window-motion sequence over a natural image: pan across 'sea_open' in the Epha Dune photograph, motion=slow, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "60,620,1580,1660",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     },
     {
       "clip_id": "uav_sky_horizon",
@@ -34,7 +40,13 @@
       "first_frame_dhash": "ffffff73982667b6",
       "license": "unknown",
       "split": "test",
-      "notes": "real UAV footage: pan across 'sky_horizon' in the Epha Dune photograph, motion=slow, 256x192, 16 frames"
+      "notes": "window-motion sequence over a natural image: pan across 'sky_horizon' in the Epha Dune photograph, motion=slow, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "1500,40,3020,1050",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     },
     {
       "clip_id": "uav_forest_canopy",
@@ -52,7 +64,13 @@
       "first_frame_dhash": "59939cdf4fb6bf66",
       "license": "unknown",
       "split": "test",
-      "notes": "real UAV footage: pan across 'forest_canopy' in the Epha Dune photograph, motion=slow, 256x192, 16 frames"
+      "notes": "window-motion sequence over a natural image: pan across 'forest_canopy' in the Epha Dune photograph, motion=slow, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "900,1500,2420,2520",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     },
     {
       "clip_id": "uav_forest_fast",
@@ -70,7 +88,13 @@
       "first_frame_dhash": "52695329a5a5d95b",
       "license": "unknown",
       "split": "test",
-      "notes": "real UAV footage: pan across 'forest_fast' in the Epha Dune photograph, motion=fast, 256x192, 16 frames"
+      "notes": "window-motion sequence over a natural image: pan across 'forest_fast' in the Epha Dune photograph, motion=fast, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "300,1420,2220,2580",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     },
     {
       "clip_id": "uav_dune_ridge",
@@ -88,7 +112,13 @@
       "first_frame_dhash": "4a79da3b2db9a9a8",
       "license": "unknown",
       "split": "test",
-      "notes": "real UAV footage: pan across 'dune_ridge' in the Epha Dune photograph, motion=slow, 256x192, 16 frames"
+      "notes": "window-motion sequence over a natural image: pan across 'dune_ridge' in the Epha Dune photograph, motion=slow, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "2500,1450,4020,2480",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     },
     {
       "clip_id": "uav_dune_fast",
@@ -106,7 +136,13 @@
       "first_frame_dhash": "b06ae56a7ca46667",
       "license": "unknown",
       "split": "test",
-      "notes": "real UAV footage: pan across 'dune_fast' in the Epha Dune photograph, motion=fast, 256x192, 16 frames"
+      "notes": "window-motion sequence over a natural image: pan across 'dune_fast' in the Epha Dune photograph, motion=fast, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "2180,1300,4080,2520",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     },
     {
       "clip_id": "uav_shoreline",
@@ -124,7 +160,13 @@
       "first_frame_dhash": "bcf1cd0d1d0a1232",
       "license": "unknown",
       "split": "test",
-      "notes": "real UAV footage: pan across 'shoreline' in the Epha Dune photograph, motion=slow, 256x192, 16 frames"
+      "notes": "window-motion sequence over a natural image: pan across 'shoreline' in the Epha Dune photograph, motion=slow, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "120,760,1800,1860",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     },
     {
       "clip_id": "uav_village",
@@ -142,7 +184,13 @@
       "first_frame_dhash": "61bbd8c66a3f330f",
       "license": "unknown",
       "split": "test",
-      "notes": "real UAV footage: pan across 'village' in the Epha Dune photograph, motion=slow, 256x192, 16 frames"
+      "notes": "window-motion sequence over a natural image: pan across 'village' in the Epha Dune photograph, motion=slow, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "2320,700,3240,1330",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     },
     {
       "clip_id": "uav_dune_forest_edge",
@@ -160,7 +208,13 @@
       "first_frame_dhash": "3973c553d95cf4e6",
       "license": "unknown",
       "split": "test",
-      "notes": "real UAV footage: pan across 'dune_forest_edge' in the Epha Dune photograph, motion=slow, 256x192, 16 frames"
+      "notes": "window-motion sequence over a natural image: pan across 'dune_forest_edge' in the Epha Dune photograph, motion=slow, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "2000,1660,3520,2660",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     },
     {
       "clip_id": "uav_spit_far",
@@ -178,7 +232,13 @@
       "first_frame_dhash": "ffefe6c01424c3b0",
       "license": "unknown",
       "split": "test",
-      "notes": "real UAV footage: pan across 'spit_far' in the Epha Dune photograph, motion=slow, 256x192, 16 frames"
+      "notes": "window-motion sequence over a natural image: pan across 'spit_far' in the Epha Dune photograph, motion=slow, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "1150,300,2670,1320",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     },
     {
       "clip_id": "uav_cal_sea_edge",
@@ -195,8 +255,14 @@
       "content_sha256": "c830a35e557ec46100275470b08edc26ed1ba433699cd9b06a3473ab9f6d29f5",
       "first_frame_dhash": "f2c60e950b142935",
       "license": "unknown",
-      "split": "calibration",
-      "notes": "real UAV footage: pan across 'cal_sea_edge' in the Epha Dune photograph, motion=slow, 256x192, 16 frames"
+      "split": "test",
+      "notes": "window-motion sequence over a natural image: pan across 'cal_sea_edge' in the Epha Dune photograph, motion=slow, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "0,1100,1520,2120",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     },
     {
       "clip_id": "uav_cal_canopy_mix",
@@ -213,8 +279,14 @@
       "content_sha256": "f62931da69f5af6f83bd7c8fb65d8dc042aba135799b4bf47b1b63c5bbe4211c",
       "first_frame_dhash": "efdefcf5edb6ed7a",
       "license": "unknown",
-      "split": "calibration",
-      "notes": "real UAV footage: pan across 'cal_canopy_mix' in the Epha Dune photograph, motion=slow, 256x192, 16 frames"
+      "split": "test",
+      "notes": "window-motion sequence over a natural image: pan across 'cal_canopy_mix' in the Epha Dune photograph, motion=slow, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "1400,1760,2920,2620",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     },
     {
       "clip_id": "uav_cal_dune_flat",
@@ -231,8 +303,14 @@
       "content_sha256": "ed593d926be25f6ad2f4b9937c890540967171bb585acf44da95e4f1c1d4b580",
       "first_frame_dhash": "f4b0982b160e0e87",
       "license": "unknown",
-      "split": "calibration",
-      "notes": "real UAV footage: pan across 'cal_dune_flat' in the Epha Dune photograph, motion=slow, 256x192, 16 frames"
+      "split": "test",
+      "notes": "window-motion sequence over a natural image: pan across 'cal_dune_flat' in the Epha Dune photograph, motion=slow, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "3000,1800,4200,2620",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     },
     {
       "clip_id": "uav_cal_water_east",
@@ -249,8 +327,14 @@
       "content_sha256": "628f50064834b24bf7d5374b56d432d80308fd99484b9aeefd7d9e585c9a3a14",
       "first_frame_dhash": "01202000020381e0",
       "license": "unknown",
-      "split": "calibration",
-      "notes": "real UAV footage: pan across 'cal_water_east' in the Epha Dune photograph, motion=slow, 256x192, 16 frames"
+      "split": "test",
+      "notes": "window-motion sequence over a natural image: pan across 'cal_water_east' in the Epha Dune photograph, motion=slow, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "2980,600,4180,1470",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     },
     {
       "clip_id": "uav_val_treeline",
@@ -267,8 +351,14 @@
       "content_sha256": "6665ce4410f0ab0b193b518f8910aaba23ac4466b82ec5bd56d0e40321d50d57",
       "first_frame_dhash": "d65edeaeaa0f2ea7",
       "license": "unknown",
-      "split": "validation",
-      "notes": "real UAV footage: pan across 'val_treeline' in the Epha Dune photograph, motion=slow, 256x192, 16 frames"
+      "split": "test",
+      "notes": "window-motion sequence over a natural image: pan across 'val_treeline' in the Epha Dune photograph, motion=slow, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "700,1150,2220,2170",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     },
     {
       "clip_id": "uav_val_sand_texture",
@@ -285,8 +375,14 @@
       "content_sha256": "123468c2ae8203ecb32bc0953289dfec86d36ad9663819ca9f24f56ed32b5be8",
       "first_frame_dhash": "3b73d2d091495078",
       "license": "unknown",
-      "split": "validation",
-      "notes": "real UAV footage: pan across 'val_sand_texture' in the Epha Dune photograph, motion=fast, 256x192, 16 frames"
+      "split": "test",
+      "notes": "window-motion sequence over a natural image: pan across 'val_sand_texture' in the Epha Dune photograph, motion=fast, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "2600,1980,4120,2630",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     },
     {
       "clip_id": "uav_val_coast_curve",
@@ -303,27 +399,1133 @@
       "content_sha256": "ba676f9b32a1b625314c9aaa2857b8004d0d2cf37651d7426ac244d20352cbfb",
       "first_frame_dhash": "1b2fff7cf0c80d29",
       "license": "unknown",
-      "split": "validation",
-      "notes": "real UAV footage: pan across 'val_coast_curve' in the Epha Dune photograph, motion=slow, 256x192, 16 frames"
+      "split": "test",
+      "notes": "window-motion sequence over a natural image: pan across 'val_coast_curve' in the Epha Dune photograph, motion=slow, 256x192, 16 frames",
+      "source_id": "photo:curonian_spit_epha_dune",
+      "derivation": "послідовність зі штучним рухом вікна по природному зображенні: одна фотографія, вирізка панорамується між двома прямокутниками",
+      "crop": "200,500,1720,1520",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": "A.Savin"
     }
   ],
   "validation": {
     "ok": true,
     "problems": [],
-    "warnings": [],
+    "warnings": [
+      "17 natural scenes come from only 1 independent source(s): a bootstrap over scenes does not generalise to a new recording",
+      "63 pair(s) of clips are windows on the same image and do overlap geometrically; non-overlap is not claimed"
+    ],
     "n_clips": 17,
     "n_scenes": 17,
+    "n_sources": 1,
+    "sources_per_split": {
+      "calibration": 0,
+      "validation": 0,
+      "test": 1
+    },
     "scenes_per_split": {
-      "calibration": 4,
-      "validation": 3,
-      "test": 10
+      "calibration": 0,
+      "validation": 0,
+      "test": 17
     },
     "clips_per_split": {
-      "calibration": 4,
-      "validation": 3,
-      "test": 10
+      "calibration": 0,
+      "validation": 0,
+      "test": 17
     },
     "duplicates": [],
+    "crop_overlaps": [
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sea_open",
+        "clip_b": "uav_sky_horizon",
+        "intersection_px": 34400,
+        "iou": 0.0112,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sea_open",
+        "clip_b": "uav_forest_canopy",
+        "intersection_px": 108800,
+        "iou": 0.036,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sea_open",
+        "clip_b": "uav_forest_fast",
+        "intersection_px": 307200,
+        "iou": 0.0878,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sea_open",
+        "clip_b": "uav_dune_ridge",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sea_open",
+        "clip_b": "uav_dune_fast",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sea_open",
+        "clip_b": "uav_shoreline",
+        "intersection_px": 1314000,
+        "iou": 0.6213,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sea_open",
+        "clip_b": "uav_village",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sea_open",
+        "clip_b": "uav_dune_forest_edge",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sea_open",
+        "clip_b": "uav_spit_far",
+        "intersection_px": 301000,
+        "iou": 0.1064,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sea_open",
+        "clip_b": "uav_cal_sea_edge",
+        "intersection_px": 817600,
+        "iou": 0.3534,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sea_open",
+        "clip_b": "uav_cal_canopy_mix",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sea_open",
+        "clip_b": "uav_cal_dune_flat",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sea_open",
+        "clip_b": "uav_cal_water_east",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sea_open",
+        "clip_b": "uav_val_treeline",
+        "intersection_px": 448800,
+        "iou": 0.1673,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sea_open",
+        "clip_b": "uav_val_sand_texture",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sea_open",
+        "clip_b": "uav_val_coast_curve",
+        "intersection_px": 1242000,
+        "iou": 0.6574,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sky_horizon",
+        "clip_b": "uav_forest_canopy",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sky_horizon",
+        "clip_b": "uav_forest_fast",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sky_horizon",
+        "clip_b": "uav_dune_ridge",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sky_horizon",
+        "clip_b": "uav_dune_fast",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sky_horizon",
+        "clip_b": "uav_shoreline",
+        "intersection_px": 87000,
+        "iou": 0.0264,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sky_horizon",
+        "clip_b": "uav_village",
+        "intersection_px": 245000,
+        "iou": 0.131,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sky_horizon",
+        "clip_b": "uav_dune_forest_edge",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sky_horizon",
+        "clip_b": "uav_spit_far",
+        "intersection_px": 877500,
+        "iou": 0.3974,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sky_horizon",
+        "clip_b": "uav_cal_sea_edge",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sky_horizon",
+        "clip_b": "uav_cal_canopy_mix",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sky_horizon",
+        "clip_b": "uav_cal_dune_flat",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sky_horizon",
+        "clip_b": "uav_cal_water_east",
+        "intersection_px": 18000,
+        "iou": 0.007,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sky_horizon",
+        "clip_b": "uav_val_treeline",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sky_horizon",
+        "clip_b": "uav_val_sand_texture",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_sky_horizon",
+        "clip_b": "uav_val_coast_curve",
+        "intersection_px": 121000,
+        "iou": 0.0408,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_canopy",
+        "clip_b": "uav_forest_fast",
+        "intersection_px": 1346400,
+        "iou": 0.5538,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_canopy",
+        "clip_b": "uav_dune_ridge",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_canopy",
+        "clip_b": "uav_dune_fast",
+        "intersection_px": 244800,
+        "iou": 0.0676,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_canopy",
+        "clip_b": "uav_shoreline",
+        "intersection_px": 324000,
+        "iou": 0.1054,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_canopy",
+        "clip_b": "uav_village",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_canopy",
+        "clip_b": "uav_dune_forest_edge",
+        "intersection_px": 361200,
+        "iou": 0.1333,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_canopy",
+        "clip_b": "uav_spit_far",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_canopy",
+        "clip_b": "uav_cal_sea_edge",
+        "intersection_px": 384400,
+        "iou": 0.1415,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_canopy",
+        "clip_b": "uav_cal_canopy_mix",
+        "intersection_px": 775200,
+        "iou": 0.3723,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_canopy",
+        "clip_b": "uav_cal_dune_flat",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_canopy",
+        "clip_b": "uav_cal_water_east",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_canopy",
+        "clip_b": "uav_val_treeline",
+        "intersection_px": 884400,
+        "iou": 0.399,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_canopy",
+        "clip_b": "uav_val_sand_texture",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_canopy",
+        "clip_b": "uav_val_coast_curve",
+        "intersection_px": 16400,
+        "iou": 0.0053,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_fast",
+        "clip_b": "uav_dune_ridge",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_fast",
+        "clip_b": "uav_dune_fast",
+        "intersection_px": 44000,
+        "iou": 0.0098,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_fast",
+        "clip_b": "uav_shoreline",
+        "intersection_px": 660000,
+        "iou": 0.1933,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_fast",
+        "clip_b": "uav_village",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_fast",
+        "clip_b": "uav_dune_forest_edge",
+        "intersection_px": 202400,
+        "iou": 0.0571,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_fast",
+        "clip_b": "uav_spit_far",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_fast",
+        "clip_b": "uav_cal_sea_edge",
+        "intersection_px": 854000,
+        "iou": 0.2921,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_fast",
+        "clip_b": "uav_cal_canopy_mix",
+        "intersection_px": 672400,
+        "iou": 0.2349,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_fast",
+        "clip_b": "uav_cal_dune_flat",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_fast",
+        "clip_b": "uav_cal_water_east",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_fast",
+        "clip_b": "uav_val_treeline",
+        "intersection_px": 1140000,
+        "iou": 0.4322,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_fast",
+        "clip_b": "uav_val_sand_texture",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_forest_fast",
+        "clip_b": "uav_val_coast_curve",
+        "intersection_px": 142000,
+        "iou": 0.0391,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_ridge",
+        "clip_b": "uav_dune_fast",
+        "intersection_px": 1565600,
+        "iou": 0.6754,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_ridge",
+        "clip_b": "uav_shoreline",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_ridge",
+        "clip_b": "uav_village",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_ridge",
+        "clip_b": "uav_dune_forest_edge",
+        "intersection_px": 836400,
+        "iou": 0.3719,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_ridge",
+        "clip_b": "uav_spit_far",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_ridge",
+        "clip_b": "uav_cal_sea_edge",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_ridge",
+        "clip_b": "uav_cal_canopy_mix",
+        "intersection_px": 302400,
+        "iou": 0.1176,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_ridge",
+        "clip_b": "uav_cal_dune_flat",
+        "intersection_px": 693600,
+        "iou": 0.3737,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_ridge",
+        "clip_b": "uav_cal_water_east",
+        "intersection_px": 20800,
+        "iou": 0.008,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_ridge",
+        "clip_b": "uav_val_treeline",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_ridge",
+        "clip_b": "uav_val_sand_texture",
+        "intersection_px": 710000,
+        "iou": 0.3851,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_ridge",
+        "clip_b": "uav_val_coast_curve",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_fast",
+        "clip_b": "uav_shoreline",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_fast",
+        "clip_b": "uav_village",
+        "intersection_px": 27600,
+        "iou": 0.0096,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_fast",
+        "clip_b": "uav_dune_forest_edge",
+        "intersection_px": 1152400,
+        "iou": 0.4291,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_fast",
+        "clip_b": "uav_spit_far",
+        "intersection_px": 9800,
+        "iou": 0.0025,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_fast",
+        "clip_b": "uav_cal_sea_edge",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_fast",
+        "clip_b": "uav_cal_canopy_mix",
+        "intersection_px": 562400,
+        "iou": 0.1836,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_fast",
+        "clip_b": "uav_cal_dune_flat",
+        "intersection_px": 777600,
+        "iou": 0.308,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_fast",
+        "clip_b": "uav_cal_water_east",
+        "intersection_px": 187000,
+        "iou": 0.0589,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_fast",
+        "clip_b": "uav_val_treeline",
+        "intersection_px": 34800,
+        "iou": 0.0091,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_fast",
+        "clip_b": "uav_val_sand_texture",
+        "intersection_px": 799200,
+        "iou": 0.3188,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_fast",
+        "clip_b": "uav_val_coast_curve",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_shoreline",
+        "clip_b": "uav_village",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_shoreline",
+        "clip_b": "uav_dune_forest_edge",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_shoreline",
+        "clip_b": "uav_spit_far",
+        "intersection_px": 364000,
+        "iou": 0.12,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_shoreline",
+        "clip_b": "uav_cal_sea_edge",
+        "intersection_px": 1064000,
+        "iou": 0.4558,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_shoreline",
+        "clip_b": "uav_cal_canopy_mix",
+        "intersection_px": 40000,
+        "iou": 0.0128,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_shoreline",
+        "clip_b": "uav_cal_dune_flat",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_shoreline",
+        "clip_b": "uav_cal_water_east",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_shoreline",
+        "clip_b": "uav_val_treeline",
+        "intersection_px": 781000,
+        "iou": 0.2984,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_shoreline",
+        "clip_b": "uav_val_sand_texture",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_shoreline",
+        "clip_b": "uav_val_coast_curve",
+        "intersection_px": 1155200,
+        "iou": 0.515,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_village",
+        "clip_b": "uav_dune_forest_edge",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_village",
+        "clip_b": "uav_spit_far",
+        "intersection_px": 217000,
+        "iou": 0.1134,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_village",
+        "clip_b": "uav_cal_sea_edge",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_village",
+        "clip_b": "uav_cal_canopy_mix",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_village",
+        "clip_b": "uav_cal_dune_flat",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_village",
+        "clip_b": "uav_cal_water_east",
+        "intersection_px": 163800,
+        "iou": 0.1122,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_village",
+        "clip_b": "uav_val_treeline",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_village",
+        "clip_b": "uav_val_sand_texture",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_village",
+        "clip_b": "uav_val_coast_curve",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_forest_edge",
+        "clip_b": "uav_spit_far",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_forest_edge",
+        "clip_b": "uav_cal_sea_edge",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_forest_edge",
+        "clip_b": "uav_cal_canopy_mix",
+        "intersection_px": 791200,
+        "iou": 0.3886,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_forest_edge",
+        "clip_b": "uav_cal_dune_flat",
+        "intersection_px": 426400,
+        "iou": 0.2052,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_forest_edge",
+        "clip_b": "uav_cal_water_east",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_forest_edge",
+        "clip_b": "uav_val_treeline",
+        "intersection_px": 112200,
+        "iou": 0.0379,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_forest_edge",
+        "clip_b": "uav_val_sand_texture",
+        "intersection_px": 598000,
+        "iou": 0.3131,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_dune_forest_edge",
+        "clip_b": "uav_val_coast_curve",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_spit_far",
+        "clip_b": "uav_cal_sea_edge",
+        "intersection_px": 81400,
+        "iou": 0.027,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_spit_far",
+        "clip_b": "uav_cal_canopy_mix",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_spit_far",
+        "clip_b": "uav_cal_dune_flat",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_spit_far",
+        "clip_b": "uav_cal_water_east",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_spit_far",
+        "clip_b": "uav_val_treeline",
+        "intersection_px": 181900,
+        "iou": 0.0623,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_spit_far",
+        "clip_b": "uav_val_sand_texture",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_spit_far",
+        "clip_b": "uav_val_coast_curve",
+        "intersection_px": 467400,
+        "iou": 0.1775,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_sea_edge",
+        "clip_b": "uav_cal_canopy_mix",
+        "intersection_px": 43200,
+        "iou": 0.0153,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_sea_edge",
+        "clip_b": "uav_cal_dune_flat",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_sea_edge",
+        "clip_b": "uav_cal_water_east",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_sea_edge",
+        "clip_b": "uav_val_treeline",
+        "intersection_px": 795400,
+        "iou": 0.345,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_sea_edge",
+        "clip_b": "uav_val_sand_texture",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_sea_edge",
+        "clip_b": "uav_val_coast_curve",
+        "intersection_px": 554400,
+        "iou": 0.2177,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_canopy_mix",
+        "clip_b": "uav_cal_dune_flat",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_canopy_mix",
+        "clip_b": "uav_cal_water_east",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_canopy_mix",
+        "clip_b": "uav_val_treeline",
+        "intersection_px": 336200,
+        "iou": 0.1333,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_canopy_mix",
+        "clip_b": "uav_val_sand_texture",
+        "intersection_px": 204800,
+        "iou": 0.098,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_canopy_mix",
+        "clip_b": "uav_val_coast_curve",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_dune_flat",
+        "clip_b": "uav_cal_water_east",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_dune_flat",
+        "clip_b": "uav_val_treeline",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_dune_flat",
+        "clip_b": "uav_val_sand_texture",
+        "intersection_px": 716800,
+        "iou": 0.5711,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_dune_flat",
+        "clip_b": "uav_val_coast_curve",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_water_east",
+        "clip_b": "uav_val_treeline",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_water_east",
+        "clip_b": "uav_val_sand_texture",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_cal_water_east",
+        "clip_b": "uav_val_coast_curve",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_val_treeline",
+        "clip_b": "uav_val_sand_texture",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_val_treeline",
+        "clip_b": "uav_val_coast_curve",
+        "intersection_px": 377400,
+        "iou": 0.1386,
+        "overlaps": true
+      },
+      {
+        "source_id": "photo:curonian_spit_epha_dune",
+        "clip_a": "uav_val_sand_texture",
+        "clip_b": "uav_val_coast_curve",
+        "intersection_px": 0,
+        "iou": 0.0,
+        "overlaps": false
+      }
+    ],
+    "n_crop_pairs_overlapping": 63,
     "categories": [
       "high-detail",
       "low-detail",
@@ -331,6 +1533,7 @@
     ],
     "provenances": [
       "local_file"
-    ]
+    ],
+    "independence_note": "одиниця незалежності для узагальнення на НОВІ записи - source_id (1 шт.), а не сцена (17 шт.)"
   }
 }

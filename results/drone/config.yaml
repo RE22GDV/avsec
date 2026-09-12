@@ -40,6 +40,7 @@ methods:
 - B2
 - B3
 - B4
+- B4t
 - P
 profiles:
   B0d:
@@ -83,6 +84,23 @@ profiles:
     quality: 12
     max_unit_payload: 640
     fec_nsym: 96
+    fec_header_nsym: 48
+    modulation:
+    - 4
+    - 8
+    - 2
+    interleaver:
+    - block
+    - 278
+    - 0
+    interleaver_window: 0
+  B4t:
+    stripe_height: 24
+    n_descriptions: 1
+    codec: dct
+    quality: 8
+    max_unit_payload: 320
+    fec_nsym: 128
     fec_header_nsym: 48
     modulation:
     - 4

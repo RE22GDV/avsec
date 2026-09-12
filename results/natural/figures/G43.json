@@ -1,0 +1,16 @@
+{
+  "method": "P",
+  "source_table": "budgets.json",
+  "figure": "G43",
+  "lang": "uk",
+  "run_dir": "runs/natural",
+  "title_uk": "Подієвий розклад",
+  "title_en": "Event schedule",
+  "experiment": "E07",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ],
+  "dpi": 300
+}

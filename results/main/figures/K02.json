@@ -1,5 +1,5 @@
 {
-  "crossover_burst_lines": 28.46353663321493,
+  "crossover_burst_lines": 28.333184300356898,
   "source_table": "sweeps.csv",
   "figure": "K02",
   "lang": "uk",
@@ -11,5 +11,6 @@
     "png",
     "svg",
     "pdf"
-  ]
+  ],
+  "dpi": 300
 }

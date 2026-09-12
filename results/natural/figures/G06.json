@@ -1,0 +1,16 @@
+{
+  "criterion": "coverage>=0.9 and psnr_full>=20.0 on every scheduled display instant (engineering requirement of this study)",
+  "source_table": "operability.csv",
+  "figure": "G06",
+  "lang": "uk",
+  "run_dir": "runs/natural",
+  "title_uk": "Працездатність",
+  "title_en": "Operability",
+  "experiment": "E02",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ],
+  "dpi": 300
+}

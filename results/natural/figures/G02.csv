@@ -1,0 +1,4 @@
+channel,clip,coverage,estimated_fraction,percentile,stale_fraction
+harsh,nat_122435702,0.0,1.0,10,0.0
+bursty,nat_074983792,0.9375,0.0625,50,0.0
+bursty,nat_116466520,1.0,0.0,90,0.0

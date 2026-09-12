@@ -10,6 +10,7 @@
       "B2",
       "B3",
       "B4",
+      "B4t",
       "P"
     ],
     "channels": [
@@ -58,15 +59,15 @@
     "schedule": [],
     "workers": 12
   },
-  "config_id": "a56957124aebce41",
-  "n_jobs_this_call": 2000,
-  "n_jobs_total": 2000,
-  "n_frames": 32000,
-  "wall_s_this_call": 549.42,
+  "config_id": "c91a0f6a13e57b88",
+  "n_jobs_this_call": 3825,
+  "n_jobs_total": 3825,
+  "n_frames": 61200,
+  "wall_s_this_call": 834.04,
   "failures": [],
   "completeness": {
-    "n_planned": 2000,
-    "n_done": 2000,
+    "n_planned": 3825,
+    "n_done": 3825,
     "n_missing": 0,
     "n_failed": 0,
     "complete": true,
@@ -75,31 +76,32 @@
     "truncated": false
   },
   "channel_axes": [],
-  "wall_s_measured": 550.7,
+  "wall_s_measured": 837.0,
   "estimate_before_run": {
-    "n_jobs": 2000,
-    "n_frames_total": 32000,
-    "estimated_wall_s": 610.2,
-    "estimated_wall_human": "0h10m10s",
-    "estimated_output_bytes": 13440000,
-    "estimated_output_mb": 13.44,
+    "n_jobs": 3825,
+    "n_frames_total": 61200,
+    "estimated_wall_s": 1193.6,
+    "estimated_wall_human": "0h19m53s",
+    "estimated_output_bytes": 25704000,
+    "estimated_output_mb": 25.7,
     "jobs_per_method": {
-      "B0a": 250,
-      "B0a-R": 250,
-      "B0d": 250,
-      "B1": 250,
-      "B2": 250,
-      "B3": 250,
-      "B4": 250,
-      "P": 250
+      "B0a": 425,
+      "B0a-R": 425,
+      "B0d": 425,
+      "B1": 425,
+      "B2": 425,
+      "B3": 425,
+      "B4": 425,
+      "B4t": 425,
+      "P": 425
     },
     "jobs_per_channel": {
-      "clean": 400,
-      "mild": 400,
-      "moderate": 400,
-      "bursty": 400,
-      "harsh": 400
+      "clean": 765,
+      "mild": 765,
+      "moderate": 765,
+      "bursty": 765,
+      "harsh": 765
     },
-    "cost_model": "measured one frame per method (B0a=143ms, B0a-R=40ms, B0d=167ms, B1=19ms, B2=17ms, B3=114ms, B4=177ms, P=299ms); parallel speedup 6.4x assumed for 16 process workers (measured efficiency 0.40, not the worker count)"
+    "cost_model": "measured one frame per method (B0a=149ms, B0a-R=41ms, B0d=157ms, B1=16ms, B2=17ms, B3=100ms, B4=167ms, B4t=194ms, P=283ms); parallel speedup 6.4x assumed for 16 process workers (measured efficiency 0.40, not the worker count)"
   }
 }

@@ -1,0 +1,13 @@
+admissible,delta,is_mechanism,label,order,step
+True,0.0,False,B4 (база),fwd,0
+True,0.1398,False,+ менша одиниця 640→320 Б,fwd,1
+True,2.9932,False,+ сильніший FEC nsym 96→128,fwd,2
+True,-0.854,False,+ нижча якість 12→8,fwd,3
+True,-0.3354,True,+ два описи (MDC),fwd,4
+True,0.3152,True,+ BAWP = P,fwd,5
+True,0.0,False,B4 (база),rev,0
+False,,True,+ два описи (MDC),rev,1
+False,,True,+ BAWP,rev,2
+True,1.4823,False,+ менша одиниця 640→320 Б,rev,3
+True,1.5706,False,+ сильніший FEC nsym 96→128,rev,4
+True,-0.7942,False,+ нижча якість 12→8 = P,rev,5

@@ -1,4 +1,4 @@
 channel,clip,frame_id,method,percentile,psnr_full
-harsh,clip_clouds_fast_v4,12,P,10,12.154805043379223
-moderate,clip_illumination_slow_v0,5,P,50,26.149727796645056
-mild,clip_lowlight_fast_v8,0,P,90,33.68156884742583
+harsh,clip_clouds_fast_v4,1,P,10,12.296016417390618
+clean,clip_illumination_slow_v0,14,P,50,26.18923660965219
+clean,clip_lowlight_fast_v8,12,P,90,33.7294387668225

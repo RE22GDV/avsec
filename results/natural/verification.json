@@ -1,0 +1,4839 @@
+{
+  "kind": "verify",
+  "run_dir": "D:\\Zahist_dannih\\Chiper_signal\\results\\natural",
+  "plan": {
+    "metric": "psnr_full",
+    "secondary": [
+      "ssim_full",
+      "coverage",
+      "psnr_verified",
+      "availability",
+      "psnr_displayed"
+    ],
+    "primary_comparison": [
+      "P",
+      "B4"
+    ],
+    "primary_channels": [
+      "clean",
+      "moderate",
+      "bursty"
+    ],
+    "family": [
+      [
+        "P",
+        "B4"
+      ],
+      [
+        "P",
+        "B4t"
+      ],
+      [
+        "B4t",
+        "B4"
+      ],
+      [
+        "P",
+        "B3"
+      ],
+      [
+        "P",
+        "B0d"
+      ]
+    ],
+    "n_boot": 10000,
+    "seed": 20240909,
+    "criterion": {
+      "coverage_verified_min": 0.9,
+      "psnr_full_min": 20.0,
+      "note": "робочий критерій цього дослідження: поточне автентифіковане покриття >= 0.90 і PSNR усього показаного кадру >= 20 дБ; це інженерна вимога, а не універсальний стандарт"
+    },
+    "unit_of_independence": "source",
+    "equivalence_margin": 0.5,
+    "aggregation": "frames -> repetitions -> clips -> scenes -> sources; the bootstrap resamples sources",
+    "channel_pooling": "не виконується: канали - це різні умови, а не повторні реалізації однієї; об'єднаного показника ALL немає",
+    "test": "двобічний bootstrap-тест на парних різницях між методами на однакових незалежних джерелах; поряд наводиться критерій знакових рангів Вілкоксона",
+    "multiplicity": "Holm step-down over the pre-declared family above; pairs outside it are exploratory and do not take part in the adjustment",
+    "negative_results": "відсутність значущості не є доказом рівності; для цього окремо рахується TOST з межею ±0.5 дБ"
+  },
+  "plan_fingerprint": "9149f5acf1486802",
+  "tolerance": 0.005,
+  "n_checks": 249,
+  "n_failed": 0,
+  "ok": true,
+  "checks": [
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0a",
+      "b": "B0a-R",
+      "published_mean": -5.1137701789916585,
+      "recomputed_mean": -5.1138,
+      "published_ci": [
+        -5.358008045298695,
+        -4.86996042706169
+      ],
+      "recomputed_ci": [
+        -5.358,
+        -4.87
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0a",
+      "b": "B0d",
+      "published_mean": -5.763619165095404,
+      "recomputed_mean": -5.7636,
+      "published_ci": [
+        -7.134018803225547,
+        -4.514385039194874
+      ],
+      "recomputed_ci": [
+        -7.134,
+        -4.5144
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0a",
+      "b": "B1",
+      "published_mean": 0.11600038588066688,
+      "recomputed_mean": 0.116,
+      "published_ci": [
+        0.07515949964684318,
+        0.16151962366942185
+      ],
+      "recomputed_ci": [
+        0.0752,
+        0.1615
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0a",
+      "b": "B2",
+      "published_mean": 0.13827781181748872,
+      "recomputed_mean": 0.1383,
+      "published_ci": [
+        0.0943173995782373,
+        0.18387093597746265
+      ],
+      "recomputed_ci": [
+        0.0943,
+        0.1839
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0a",
+      "b": "B3",
+      "published_mean": -11.179564794471153,
+      "recomputed_mean": -11.1796,
+      "published_ci": [
+        -12.789482507392524,
+        -9.80865999033778
+      ],
+      "recomputed_ci": [
+        -12.7895,
+        -9.8087
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0a",
+      "b": "B4",
+      "published_mean": -5.806011285938992,
+      "recomputed_mean": -5.806,
+      "published_ci": [
+        -7.235436065830493,
+        -4.491211929762617
+      ],
+      "recomputed_ci": [
+        -7.2354,
+        -4.4912
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0a",
+      "b": "B4t",
+      "published_mean": -7.465475294432841,
+      "recomputed_mean": -7.4655,
+      "published_ci": [
+        -8.856999047242569,
+        -6.218744654103382
+      ],
+      "recomputed_ci": [
+        -8.857,
+        -6.2187
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0a",
+      "b": "P",
+      "published_mean": -7.110220767707022,
+      "recomputed_mean": -7.1102,
+      "published_ci": [
+        -8.744534888253115,
+        -5.660142055010217
+      ],
+      "recomputed_ci": [
+        -8.7445,
+        -5.6601
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0a-R",
+      "b": "B0d",
+      "published_mean": -0.6498489861037451,
+      "recomputed_mean": -0.6498,
+      "published_ci": [
+        -1.8908851176463257,
+        0.4841849475117879
+      ],
+      "recomputed_ci": [
+        -1.8909,
+        0.4842
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.28347,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0a-R",
+      "b": "B1",
+      "published_mean": 5.229770564872326,
+      "recomputed_mean": 5.2298,
+      "published_ci": [
+        4.988505521118607,
+        5.487995382388561
+      ],
+      "recomputed_ci": [
+        4.9885,
+        5.488
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0a-R",
+      "b": "B2",
+      "published_mean": 5.252047990809147,
+      "recomputed_mean": 5.252,
+      "published_ci": [
+        5.020588581660586,
+        5.499329879367314
+      ],
+      "recomputed_ci": [
+        5.0206,
+        5.4993
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0a-R",
+      "b": "B3",
+      "published_mean": -6.065794615479494,
+      "recomputed_mean": -6.0658,
+      "published_ci": [
+        -7.528230651968785,
+        -4.800828120817367
+      ],
+      "recomputed_ci": [
+        -7.5282,
+        -4.8008
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0a-R",
+      "b": "B4",
+      "published_mean": -0.6922411069473338,
+      "recomputed_mean": -0.6922,
+      "published_ci": [
+        -1.9852938682966492,
+        0.49736732195898975
+      ],
+      "recomputed_ci": [
+        -1.9853,
+        0.4974
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.27497,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0a-R",
+      "b": "B4t",
+      "published_mean": -2.3517051154411823,
+      "recomputed_mean": -2.3517,
+      "published_ci": [
+        -3.6146591968182604,
+        -1.2258736027158
+      ],
+      "recomputed_ci": [
+        -3.6147,
+        -1.2259
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0002,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0a-R",
+      "b": "P",
+      "published_mean": -1.9964505887153627,
+      "recomputed_mean": -1.9965,
+      "published_ci": [
+        -3.480429723711195,
+        -0.6876411256259087
+      ],
+      "recomputed_ci": [
+        -3.4804,
+        -0.6876
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0057,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0d",
+      "b": "B1",
+      "published_mean": 5.879619550976071,
+      "recomputed_mean": 5.8796,
+      "published_ci": [
+        4.630257590153221,
+        7.257490889894035
+      ],
+      "recomputed_ci": [
+        4.6303,
+        7.2575
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0d",
+      "b": "B2",
+      "published_mean": 5.9018969769128935,
+      "recomputed_mean": 5.9019,
+      "published_ci": [
+        4.641074349978324,
+        7.288361899575447
+      ],
+      "recomputed_ci": [
+        4.6411,
+        7.2884
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0d",
+      "b": "B3",
+      "published_mean": -5.4159456293757495,
+      "recomputed_mean": -5.4159,
+      "published_ci": [
+        -5.967697838328668,
+        -4.8273915375207785
+      ],
+      "recomputed_ci": [
+        -5.9677,
+        -4.8274
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0d",
+      "b": "B4",
+      "published_mean": -0.04239212084358864,
+      "recomputed_mean": -0.0424,
+      "published_ci": [
+        -0.12111852134930906,
+        0.037725708552381054
+      ],
+      "recomputed_ci": [
+        -0.1211,
+        0.0377
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.30597,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0d",
+      "b": "B4t",
+      "published_mean": -1.7018561293374375,
+      "recomputed_mean": -1.7019,
+      "published_ci": [
+        -2.035679619251835,
+        -1.3195496603030028
+      ],
+      "recomputed_ci": [
+        -2.0357,
+        -1.3195
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B0d",
+      "b": "P",
+      "published_mean": -1.3466016026116177,
+      "recomputed_mean": -1.3466,
+      "published_ci": [
+        -1.758532213579719,
+        -0.8817696324467227
+      ],
+      "recomputed_ci": [
+        -1.7585,
+        -0.8818
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B1",
+      "b": "B2",
+      "published_mean": 0.02227742593682182,
+      "recomputed_mean": 0.0223,
+      "published_ci": [
+        -0.015415775368278272,
+        0.05681218167131712
+      ],
+      "recomputed_ci": [
+        -0.0154,
+        0.0568
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.23138,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B1",
+      "b": "B3",
+      "published_mean": -11.295565180351819,
+      "recomputed_mean": -11.2956,
+      "published_ci": [
+        -12.906579837188252,
+        -9.91406571081444
+      ],
+      "recomputed_ci": [
+        -12.9066,
+        -9.9141
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B1",
+      "b": "B4",
+      "published_mean": -5.92201167181966,
+      "recomputed_mean": -5.922,
+      "published_ci": [
+        -7.346572303752979,
+        -4.607284002750239
+      ],
+      "recomputed_ci": [
+        -7.3466,
+        -4.6073
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B1",
+      "b": "B4t",
+      "published_mean": -7.581475680313508,
+      "recomputed_mean": -7.5815,
+      "published_ci": [
+        -8.964234494790094,
+        -6.332847544223065
+      ],
+      "recomputed_ci": [
+        -8.9642,
+        -6.3328
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B1",
+      "b": "P",
+      "published_mean": -7.22622115358769,
+      "recomputed_mean": -7.2262,
+      "published_ci": [
+        -8.858687704704312,
+        -5.764813335116283
+      ],
+      "recomputed_ci": [
+        -8.8587,
+        -5.7648
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B2",
+      "b": "B3",
+      "published_mean": -11.317842606288641,
+      "recomputed_mean": -11.3178,
+      "published_ci": [
+        -12.936409957166374,
+        -9.931822515936014
+      ],
+      "recomputed_ci": [
+        -12.9364,
+        -9.9318
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B2",
+      "b": "B4",
+      "published_mean": -5.9442890977564815,
+      "recomputed_mean": -5.9443,
+      "published_ci": [
+        -7.385444975740851,
+        -4.620085708593288
+      ],
+      "recomputed_ci": [
+        -7.3854,
+        -4.6201
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B2",
+      "b": "B4t",
+      "published_mean": -7.603753106250331,
+      "recomputed_mean": -7.6038,
+      "published_ci": [
+        -9.000562786250724,
+        -6.34929590432785
+      ],
+      "recomputed_ci": [
+        -9.0006,
+        -6.3493
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B2",
+      "b": "P",
+      "published_mean": -7.2484985795245125,
+      "recomputed_mean": -7.2485,
+      "published_ci": [
+        -8.8886038900372,
+        -5.78477074696621
+      ],
+      "recomputed_ci": [
+        -8.8886,
+        -5.7848
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B3",
+      "b": "B4",
+      "published_mean": 5.373553508532161,
+      "recomputed_mean": 5.3736,
+      "published_ci": [
+        4.780213829413868,
+        5.939693457866822
+      ],
+      "recomputed_ci": [
+        4.7802,
+        5.9397
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B3",
+      "b": "B4t",
+      "published_mean": 3.7140895000383116,
+      "recomputed_mean": 3.7141,
+      "published_ci": [
+        3.3246112834852837,
+        4.120243780597641
+      ],
+      "recomputed_ci": [
+        3.3246,
+        4.1202
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B3",
+      "b": "P",
+      "published_mean": 4.069344026764131,
+      "recomputed_mean": 4.0693,
+      "published_ci": [
+        3.726893850432089,
+        4.450152339525243
+      ],
+      "recomputed_ci": [
+        3.7269,
+        4.4502
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B4",
+      "b": "B4t",
+      "published_mean": -1.6594640084938488,
+      "recomputed_mean": -1.6595,
+      "published_ci": [
+        -2.0188320231105847,
+        -1.2645781217520833
+      ],
+      "recomputed_ci": [
+        -2.0188,
+        -1.2646
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B4",
+      "b": "P",
+      "published_mean": -1.304209481768029,
+      "recomputed_mean": -1.3042,
+      "published_ci": [
+        -1.6901833788767127,
+        -0.8593681211025862
+      ],
+      "recomputed_ci": [
+        -1.6902,
+        -0.8594
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "bursty",
+      "a": "B4t",
+      "b": "P",
+      "published_mean": 0.3552545267258197,
+      "recomputed_mean": 0.3553,
+      "published_ci": [
+        0.06036801783313819,
+        0.6395454106596046
+      ],
+      "recomputed_ci": [
+        0.0604,
+        0.6395
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0168,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0a",
+      "b": "B0a-R",
+      "published_mean": 0.0,
+      "recomputed_mean": 0.0,
+      "published_ci": [
+        0.0,
+        0.0
+      ],
+      "recomputed_ci": [
+        0.0,
+        0.0
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0a",
+      "b": "B0d",
+      "published_mean": 26.283233115956307,
+      "recomputed_mean": 26.2832,
+      "published_ci": [
+        24.325683428211526,
+        27.751911099028067
+      ],
+      "recomputed_ci": [
+        24.3257,
+        27.7519
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0a",
+      "b": "B1",
+      "published_mean": 0.0,
+      "recomputed_mean": 0.0,
+      "published_ci": [
+        0.0,
+        0.0
+      ],
+      "recomputed_ci": [
+        0.0,
+        0.0
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0a",
+      "b": "B2",
+      "published_mean": 0.0,
+      "recomputed_mean": 0.0,
+      "published_ci": [
+        0.0,
+        0.0
+      ],
+      "recomputed_ci": [
+        0.0,
+        0.0
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0a",
+      "b": "B3",
+      "published_mean": 26.283233115956307,
+      "recomputed_mean": 26.2832,
+      "published_ci": [
+        24.325683428211526,
+        27.751911099028067
+      ],
+      "recomputed_ci": [
+        24.3257,
+        27.7519
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0a",
+      "b": "B4",
+      "published_mean": 26.283233115956307,
+      "recomputed_mean": 26.2832,
+      "published_ci": [
+        24.325683428211526,
+        27.751911099028067
+      ],
+      "recomputed_ci": [
+        24.3257,
+        27.7519
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0a",
+      "b": "B4t",
+      "published_mean": 27.496934887508093,
+      "recomputed_mean": 27.4969,
+      "published_ci": [
+        25.675675035956175,
+        28.884353514418468
+      ],
+      "recomputed_ci": [
+        25.6757,
+        28.8844
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0a",
+      "b": "P",
+      "published_mean": 28.673039139168687,
+      "recomputed_mean": 28.673,
+      "published_ci": [
+        26.754440463547244,
+        30.146077218252962
+      ],
+      "recomputed_ci": [
+        26.7544,
+        30.1461
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0a-R",
+      "b": "B0d",
+      "published_mean": 26.283233115956307,
+      "recomputed_mean": 26.2832,
+      "published_ci": [
+        24.325683428211526,
+        27.751911099028067
+      ],
+      "recomputed_ci": [
+        24.3257,
+        27.7519
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0a-R",
+      "b": "B1",
+      "published_mean": 0.0,
+      "recomputed_mean": 0.0,
+      "published_ci": [
+        0.0,
+        0.0
+      ],
+      "recomputed_ci": [
+        0.0,
+        0.0
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0a-R",
+      "b": "B2",
+      "published_mean": 0.0,
+      "recomputed_mean": 0.0,
+      "published_ci": [
+        0.0,
+        0.0
+      ],
+      "recomputed_ci": [
+        0.0,
+        0.0
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0a-R",
+      "b": "B3",
+      "published_mean": 26.283233115956307,
+      "recomputed_mean": 26.2832,
+      "published_ci": [
+        24.325683428211526,
+        27.751911099028067
+      ],
+      "recomputed_ci": [
+        24.3257,
+        27.7519
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0a-R",
+      "b": "B4",
+      "published_mean": 26.283233115956307,
+      "recomputed_mean": 26.2832,
+      "published_ci": [
+        24.325683428211526,
+        27.751911099028067
+      ],
+      "recomputed_ci": [
+        24.3257,
+        27.7519
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0a-R",
+      "b": "B4t",
+      "published_mean": 27.496934887508093,
+      "recomputed_mean": 27.4969,
+      "published_ci": [
+        25.675675035956175,
+        28.884353514418468
+      ],
+      "recomputed_ci": [
+        25.6757,
+        28.8844
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0a-R",
+      "b": "P",
+      "published_mean": 28.673039139168687,
+      "recomputed_mean": 28.673,
+      "published_ci": [
+        26.754440463547244,
+        30.146077218252962
+      ],
+      "recomputed_ci": [
+        26.7544,
+        30.1461
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0d",
+      "b": "B1",
+      "published_mean": -26.283233115956307,
+      "recomputed_mean": -26.2832,
+      "published_ci": [
+        -27.751911099028067,
+        -24.325683428211526
+      ],
+      "recomputed_ci": [
+        -27.7519,
+        -24.3257
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0d",
+      "b": "B2",
+      "published_mean": -26.283233115956307,
+      "recomputed_mean": -26.2832,
+      "published_ci": [
+        -27.751911099028067,
+        -24.325683428211526
+      ],
+      "recomputed_ci": [
+        -27.7519,
+        -24.3257
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0d",
+      "b": "B3",
+      "published_mean": 0.0,
+      "recomputed_mean": 0.0,
+      "published_ci": [
+        0.0,
+        0.0
+      ],
+      "recomputed_ci": [
+        0.0,
+        0.0
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0d",
+      "b": "B4",
+      "published_mean": 0.0,
+      "recomputed_mean": 0.0,
+      "published_ci": [
+        0.0,
+        0.0
+      ],
+      "recomputed_ci": [
+        0.0,
+        0.0
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0d",
+      "b": "B4t",
+      "published_mean": 1.2137017715517877,
+      "recomputed_mean": 1.2137,
+      "published_ci": [
+        1.1054317899981403,
+        1.3593677458602242
+      ],
+      "recomputed_ci": [
+        1.1054,
+        1.3594
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B0d",
+      "b": "P",
+      "published_mean": 2.389806023212383,
+      "recomputed_mean": 2.3898,
+      "published_ci": [
+        2.236617848112393,
+        2.549409544760763
+      ],
+      "recomputed_ci": [
+        2.2366,
+        2.5494
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B1",
+      "b": "B2",
+      "published_mean": 0.0,
+      "recomputed_mean": 0.0,
+      "published_ci": [
+        0.0,
+        0.0
+      ],
+      "recomputed_ci": [
+        0.0,
+        0.0
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B1",
+      "b": "B3",
+      "published_mean": 26.283233115956307,
+      "recomputed_mean": 26.2832,
+      "published_ci": [
+        24.325683428211526,
+        27.751911099028067
+      ],
+      "recomputed_ci": [
+        24.3257,
+        27.7519
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B1",
+      "b": "B4",
+      "published_mean": 26.283233115956307,
+      "recomputed_mean": 26.2832,
+      "published_ci": [
+        24.325683428211526,
+        27.751911099028067
+      ],
+      "recomputed_ci": [
+        24.3257,
+        27.7519
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B1",
+      "b": "B4t",
+      "published_mean": 27.496934887508093,
+      "recomputed_mean": 27.4969,
+      "published_ci": [
+        25.675675035956175,
+        28.884353514418468
+      ],
+      "recomputed_ci": [
+        25.6757,
+        28.8844
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B1",
+      "b": "P",
+      "published_mean": 28.673039139168687,
+      "recomputed_mean": 28.673,
+      "published_ci": [
+        26.754440463547244,
+        30.146077218252962
+      ],
+      "recomputed_ci": [
+        26.7544,
+        30.1461
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B2",
+      "b": "B3",
+      "published_mean": 26.283233115956307,
+      "recomputed_mean": 26.2832,
+      "published_ci": [
+        24.325683428211526,
+        27.751911099028067
+      ],
+      "recomputed_ci": [
+        24.3257,
+        27.7519
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B2",
+      "b": "B4",
+      "published_mean": 26.283233115956307,
+      "recomputed_mean": 26.2832,
+      "published_ci": [
+        24.325683428211526,
+        27.751911099028067
+      ],
+      "recomputed_ci": [
+        24.3257,
+        27.7519
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B2",
+      "b": "B4t",
+      "published_mean": 27.496934887508093,
+      "recomputed_mean": 27.4969,
+      "published_ci": [
+        25.675675035956175,
+        28.884353514418468
+      ],
+      "recomputed_ci": [
+        25.6757,
+        28.8844
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B2",
+      "b": "P",
+      "published_mean": 28.673039139168687,
+      "recomputed_mean": 28.673,
+      "published_ci": [
+        26.754440463547244,
+        30.146077218252962
+      ],
+      "recomputed_ci": [
+        26.7544,
+        30.1461
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B3",
+      "b": "B4",
+      "published_mean": 0.0,
+      "recomputed_mean": 0.0,
+      "published_ci": [
+        0.0,
+        0.0
+      ],
+      "recomputed_ci": [
+        0.0,
+        0.0
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B3",
+      "b": "B4t",
+      "published_mean": 1.2137017715517877,
+      "recomputed_mean": 1.2137,
+      "published_ci": [
+        1.1054317899981403,
+        1.3593677458602242
+      ],
+      "recomputed_ci": [
+        1.1054,
+        1.3594
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B3",
+      "b": "P",
+      "published_mean": 2.389806023212383,
+      "recomputed_mean": 2.3898,
+      "published_ci": [
+        2.236617848112393,
+        2.549409544760763
+      ],
+      "recomputed_ci": [
+        2.2366,
+        2.5494
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B4",
+      "b": "B4t",
+      "published_mean": 1.2137017715517877,
+      "recomputed_mean": 1.2137,
+      "published_ci": [
+        1.1054317899981403,
+        1.3593677458602242
+      ],
+      "recomputed_ci": [
+        1.1054,
+        1.3594
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B4",
+      "b": "P",
+      "published_mean": 2.389806023212383,
+      "recomputed_mean": 2.3898,
+      "published_ci": [
+        2.236617848112393,
+        2.549409544760763
+      ],
+      "recomputed_ci": [
+        2.2366,
+        2.5494
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "clean",
+      "a": "B4t",
+      "b": "P",
+      "published_mean": 1.1761042516605948,
+      "recomputed_mean": 1.1761,
+      "published_ci": [
+        1.0230738781682214,
+        1.324565422400853
+      ],
+      "recomputed_ci": [
+        1.0231,
+        1.3246
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0a",
+      "b": "B0a-R",
+      "published_mean": -2.909444046078214,
+      "recomputed_mean": -2.9094,
+      "published_ci": [
+        -3.1779385163066722,
+        -2.6153614553195843
+      ],
+      "recomputed_ci": [
+        -3.1779,
+        -2.6154
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0a",
+      "b": "B0d",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0a",
+      "b": "B1",
+      "published_mean": 0.5678708386241509,
+      "recomputed_mean": 0.5679,
+      "published_ci": [
+        0.47328190530364045,
+        0.6601858676374683
+      ],
+      "recomputed_ci": [
+        0.4733,
+        0.6602
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0a",
+      "b": "B2",
+      "published_mean": 0.549990406977818,
+      "recomputed_mean": 0.55,
+      "published_ci": [
+        0.4629125403392284,
+        0.6391358837235563
+      ],
+      "recomputed_ci": [
+        0.4629,
+        0.6391
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0a",
+      "b": "B3",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0a",
+      "b": "B4",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0a",
+      "b": "B4t",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0a",
+      "b": "P",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0a-R",
+      "b": "B0d",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0a-R",
+      "b": "B1",
+      "published_mean": 3.477314884702364,
+      "recomputed_mean": 3.4773,
+      "published_ci": [
+        3.1307592338151773,
+        3.7915103161254846
+      ],
+      "recomputed_ci": [
+        3.1308,
+        3.7915
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0a-R",
+      "b": "B2",
+      "published_mean": 3.459434453056031,
+      "recomputed_mean": 3.4594,
+      "published_ci": [
+        3.119361655615848,
+        3.7682119040844744
+      ],
+      "recomputed_ci": [
+        3.1194,
+        3.7682
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0a-R",
+      "b": "B3",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0a-R",
+      "b": "B4",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0a-R",
+      "b": "B4t",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0a-R",
+      "b": "P",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0d",
+      "b": "B1",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0d",
+      "b": "B2",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0d",
+      "b": "B3",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0d",
+      "b": "B4",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0d",
+      "b": "B4t",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B0d",
+      "b": "P",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B1",
+      "b": "B2",
+      "published_mean": -0.017880431646332923,
+      "recomputed_mean": -0.0179,
+      "published_ci": [
+        -0.06358516614872288,
+        0.016912562358955704
+      ],
+      "recomputed_ci": [
+        -0.0636,
+        0.0169
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.39086,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B1",
+      "b": "B3",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B1",
+      "b": "B4",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B1",
+      "b": "B4t",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B1",
+      "b": "P",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B2",
+      "b": "B3",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B2",
+      "b": "B4",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B2",
+      "b": "B4t",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B2",
+      "b": "P",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B3",
+      "b": "B4",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B3",
+      "b": "B4t",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B3",
+      "b": "P",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B4",
+      "b": "B4t",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B4",
+      "b": "P",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "harsh",
+      "a": "B4t",
+      "b": "P",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "published_ci": [
+        NaN,
+        NaN
+      ],
+      "recomputed_ci": [
+        NaN,
+        NaN
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 0,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": true,
+      "detail": "жоден метод не дав придатного моменту показу"
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0a",
+      "b": "B0a-R",
+      "published_mean": -0.26756660673950655,
+      "recomputed_mean": -0.2676,
+      "published_ci": [
+        -0.3165379561030417,
+        -0.22585729883977199
+      ],
+      "recomputed_ci": [
+        -0.3165,
+        -0.2259
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0a",
+      "b": "B0d",
+      "published_mean": 1.9548909257986524,
+      "recomputed_mean": 1.9549,
+      "published_ci": [
+        0.6266852281044266,
+        3.0463127271428383
+      ],
+      "recomputed_ci": [
+        0.6267,
+        3.0463
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0033,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0a",
+      "b": "B1",
+      "published_mean": 0.9095849933894975,
+      "recomputed_mean": 0.9096,
+      "published_ci": [
+        0.7534539720846958,
+        1.0764171918549374
+      ],
+      "recomputed_ci": [
+        0.7535,
+        1.0764
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0a",
+      "b": "B2",
+      "published_mean": 0.8909204941743868,
+      "recomputed_mean": 0.8909,
+      "published_ci": [
+        0.7372314311175282,
+        1.0590313914349836
+      ],
+      "recomputed_ci": [
+        0.7372,
+        1.059
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0a",
+      "b": "B3",
+      "published_mean": 1.9548909257986524,
+      "recomputed_mean": 1.9549,
+      "published_ci": [
+        0.6266852281044266,
+        3.0463127271428383
+      ],
+      "recomputed_ci": [
+        0.6267,
+        3.0463
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0033,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0a",
+      "b": "B4",
+      "published_mean": 1.9548909257986524,
+      "recomputed_mean": 1.9549,
+      "published_ci": [
+        0.6266852281044266,
+        3.0463127271428383
+      ],
+      "recomputed_ci": [
+        0.6267,
+        3.0463
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0033,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0a",
+      "b": "B4t",
+      "published_mean": 3.168592697350441,
+      "recomputed_mean": 3.1686,
+      "published_ci": [
+        1.9617521424849853,
+        4.200221595212022
+      ],
+      "recomputed_ci": [
+        1.9618,
+        4.2002
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0a",
+      "b": "P",
+      "published_mean": 4.344696949011035,
+      "recomputed_mean": 4.3447,
+      "published_ci": [
+        3.0242949891551234,
+        5.474706837370899
+      ],
+      "recomputed_ci": [
+        3.0243,
+        5.4747
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0a-R",
+      "b": "B0d",
+      "published_mean": 2.222457532538159,
+      "recomputed_mean": 2.2225,
+      "published_ci": [
+        0.9220752443108254,
+        3.308549358005443
+      ],
+      "recomputed_ci": [
+        0.9221,
+        3.3085
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0006,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0a-R",
+      "b": "B1",
+      "published_mean": 1.177151600129004,
+      "recomputed_mean": 1.1772,
+      "published_ci": [
+        0.9966659462144978,
+        1.3635837416938315
+      ],
+      "recomputed_ci": [
+        0.9967,
+        1.3636
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0a-R",
+      "b": "B2",
+      "published_mean": 1.1584871009138933,
+      "recomputed_mean": 1.1585,
+      "published_ci": [
+        0.9790710455483757,
+        1.3462316171965603
+      ],
+      "recomputed_ci": [
+        0.9791,
+        1.3462
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0a-R",
+      "b": "B3",
+      "published_mean": 2.222457532538159,
+      "recomputed_mean": 2.2225,
+      "published_ci": [
+        0.9220752443108254,
+        3.308549358005443
+      ],
+      "recomputed_ci": [
+        0.9221,
+        3.3085
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0006,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0a-R",
+      "b": "B4",
+      "published_mean": 2.222457532538159,
+      "recomputed_mean": 2.2225,
+      "published_ci": [
+        0.9220752443108254,
+        3.308549358005443
+      ],
+      "recomputed_ci": [
+        0.9221,
+        3.3085
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0006,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0a-R",
+      "b": "B4t",
+      "published_mean": 3.4361593040899465,
+      "recomputed_mean": 3.4362,
+      "published_ci": [
+        2.261588420387056,
+        4.461889372522835
+      ],
+      "recomputed_ci": [
+        2.2616,
+        4.4619
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0a-R",
+      "b": "P",
+      "published_mean": 4.612263555750543,
+      "recomputed_mean": 4.6123,
+      "published_ci": [
+        3.3211700606944508,
+        5.7348308977678695
+      ],
+      "recomputed_ci": [
+        3.3212,
+        5.7348
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0d",
+      "b": "B1",
+      "published_mean": -1.045305932409155,
+      "recomputed_mean": -1.0453,
+      "published_ci": [
+        -2.113234496705318,
+        0.2621845256567473
+      ],
+      "recomputed_ci": [
+        -2.1132,
+        0.2622
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.08129,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0d",
+      "b": "B2",
+      "published_mean": -1.0639704316242657,
+      "recomputed_mean": -1.064,
+      "published_ci": [
+        -2.1332652874593867,
+        0.24379119188893417
+      ],
+      "recomputed_ci": [
+        -2.1333,
+        0.2438
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.07669,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0d",
+      "b": "B3",
+      "published_mean": 0.0,
+      "recomputed_mean": 0.0,
+      "published_ci": [
+        0.0,
+        0.0
+      ],
+      "recomputed_ci": [
+        0.0,
+        0.0
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0d",
+      "b": "B4",
+      "published_mean": 0.0,
+      "recomputed_mean": 0.0,
+      "published_ci": [
+        0.0,
+        0.0
+      ],
+      "recomputed_ci": [
+        0.0,
+        0.0
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0d",
+      "b": "B4t",
+      "published_mean": 1.2137017715517877,
+      "recomputed_mean": 1.2137,
+      "published_ci": [
+        1.1054317899981403,
+        1.3593677458602242
+      ],
+      "recomputed_ci": [
+        1.1054,
+        1.3594
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B0d",
+      "b": "P",
+      "published_mean": 2.389806023212383,
+      "recomputed_mean": 2.3898,
+      "published_ci": [
+        2.236617848112393,
+        2.549409544760763
+      ],
+      "recomputed_ci": [
+        2.2366,
+        2.5494
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B1",
+      "b": "B2",
+      "published_mean": -0.018664499215110757,
+      "recomputed_mean": -0.0187,
+      "published_ci": [
+        -0.0445396849028053,
+        0.006352577534095069
+      ],
+      "recomputed_ci": [
+        -0.0445,
+        0.0064
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.15308,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B1",
+      "b": "B3",
+      "published_mean": 1.045305932409155,
+      "recomputed_mean": 1.0453,
+      "published_ci": [
+        -0.2621845256567475,
+        2.113234496705317
+      ],
+      "recomputed_ci": [
+        -0.2622,
+        2.1132
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.08129,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B1",
+      "b": "B4",
+      "published_mean": 1.045305932409155,
+      "recomputed_mean": 1.0453,
+      "published_ci": [
+        -0.2621845256567475,
+        2.113234496705317
+      ],
+      "recomputed_ci": [
+        -0.2622,
+        2.1132
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.08129,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B1",
+      "b": "B4t",
+      "published_mean": 2.2590077039609424,
+      "recomputed_mean": 2.259,
+      "published_ci": [
+        1.0767086036932707,
+        3.2522203398706933
+      ],
+      "recomputed_ci": [
+        1.0767,
+        3.2522
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0003,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B1",
+      "b": "P",
+      "published_mean": 3.4351119556215375,
+      "recomputed_mean": 3.4351,
+      "published_ci": [
+        2.1425913586100984,
+        4.518203874129926
+      ],
+      "recomputed_ci": [
+        2.1426,
+        4.5182
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B2",
+      "b": "B3",
+      "published_mean": 1.0639704316242657,
+      "recomputed_mean": 1.064,
+      "published_ci": [
+        -0.2437911918889354,
+        2.1332652874593854
+      ],
+      "recomputed_ci": [
+        -0.2438,
+        2.1333
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.07669,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B2",
+      "b": "B4",
+      "published_mean": 1.0639704316242657,
+      "recomputed_mean": 1.064,
+      "published_ci": [
+        -0.2437911918889354,
+        2.1332652874593854
+      ],
+      "recomputed_ci": [
+        -0.2438,
+        2.1333
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.07669,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B2",
+      "b": "B4t",
+      "published_mean": 2.2776722031760532,
+      "recomputed_mean": 2.2777,
+      "published_ci": [
+        1.088477847667585,
+        3.2714867775923966
+      ],
+      "recomputed_ci": [
+        1.0885,
+        3.2715
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0003,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B2",
+      "b": "P",
+      "published_mean": 3.4537764548366483,
+      "recomputed_mean": 3.4538,
+      "published_ci": [
+        2.1493644611858964,
+        4.542977390073297
+      ],
+      "recomputed_ci": [
+        2.1494,
+        4.543
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B3",
+      "b": "B4",
+      "published_mean": 0.0,
+      "recomputed_mean": 0.0,
+      "published_ci": [
+        0.0,
+        0.0
+      ],
+      "recomputed_ci": [
+        0.0,
+        0.0
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 1.0,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B3",
+      "b": "B4t",
+      "published_mean": 1.2137017715517877,
+      "recomputed_mean": 1.2137,
+      "published_ci": [
+        1.1054317899981403,
+        1.3593677458602242
+      ],
+      "recomputed_ci": [
+        1.1054,
+        1.3594
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B3",
+      "b": "P",
+      "published_mean": 2.389806023212383,
+      "recomputed_mean": 2.3898,
+      "published_ci": [
+        2.236617848112393,
+        2.549409544760763
+      ],
+      "recomputed_ci": [
+        2.2366,
+        2.5494
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B4",
+      "b": "B4t",
+      "published_mean": 1.2137017715517877,
+      "recomputed_mean": 1.2137,
+      "published_ci": [
+        1.1054317899981403,
+        1.3593677458602242
+      ],
+      "recomputed_ci": [
+        1.1054,
+        1.3594
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B4",
+      "b": "P",
+      "published_mean": 2.389806023212383,
+      "recomputed_mean": 2.3898,
+      "published_ci": [
+        2.236617848112393,
+        2.549409544760763
+      ],
+      "recomputed_ci": [
+        2.2366,
+        2.5494
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "mild",
+      "a": "B4t",
+      "b": "P",
+      "published_mean": 1.1761042516605948,
+      "recomputed_mean": 1.1761,
+      "published_ci": [
+        1.0230738781682214,
+        1.324565422400853
+      ],
+      "recomputed_ci": [
+        1.0231,
+        1.3246
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0a",
+      "b": "B0a-R",
+      "published_mean": -2.183293994510947,
+      "recomputed_mean": -2.1833,
+      "published_ci": [
+        -2.4424575546412783,
+        -1.9309627547260666
+      ],
+      "recomputed_ci": [
+        -2.4425,
+        -1.931
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0a",
+      "b": "B0d",
+      "published_mean": -3.008894815095767,
+      "recomputed_mean": -3.0089,
+      "published_ci": [
+        -4.643402767060479,
+        -1.7012013255609644
+      ],
+      "recomputed_ci": [
+        -4.6434,
+        -1.7012
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0005,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0a",
+      "b": "B1",
+      "published_mean": 0.8604507404810912,
+      "recomputed_mean": 0.8605,
+      "published_ci": [
+        0.7247485369084143,
+        1.0039216040571073
+      ],
+      "recomputed_ci": [
+        0.7247,
+        1.0039
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0a",
+      "b": "B2",
+      "published_mean": 0.8506926027228653,
+      "recomputed_mean": 0.8507,
+      "published_ci": [
+        0.7132523200535595,
+        0.9991463906605633
+      ],
+      "recomputed_ci": [
+        0.7133,
+        0.9991
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0a",
+      "b": "B3",
+      "published_mean": -5.332028382170127,
+      "recomputed_mean": -5.332,
+      "published_ci": [
+        -6.703448672910022,
+        -4.315200711860579
+      ],
+      "recomputed_ci": [
+        -6.7034,
+        -4.3152
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0a",
+      "b": "B4",
+      "published_mean": -2.582521631787197,
+      "recomputed_mean": -2.5825,
+      "published_ci": [
+        -3.913790335468959,
+        -1.471342810507154
+      ],
+      "recomputed_ci": [
+        -3.9138,
+        -1.4713
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0002,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0a",
+      "b": "B4t",
+      "published_mean": -3.6758847597846858,
+      "recomputed_mean": -3.6759,
+      "published_ci": [
+        -4.904580621148889,
+        -2.7226569942094643
+      ],
+      "recomputed_ci": [
+        -4.9046,
+        -2.7227
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0a",
+      "b": "P",
+      "published_mean": -2.659351484345026,
+      "recomputed_mean": -2.6594,
+      "published_ci": [
+        -4.048402351373834,
+        -1.5828290183470242
+      ],
+      "recomputed_ci": [
+        -4.0484,
+        -1.5828
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0002,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0a-R",
+      "b": "B0d",
+      "published_mean": -0.8256008205848203,
+      "recomputed_mean": -0.8256,
+      "published_ci": [
+        -2.2926042030784823,
+        0.36580487322703586
+      ],
+      "recomputed_ci": [
+        -2.2926,
+        0.3658
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.22538,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0a-R",
+      "b": "B1",
+      "published_mean": 3.0437447349920386,
+      "recomputed_mean": 3.0437,
+      "published_ci": [
+        2.7162721576283473,
+        3.3657737779761323
+      ],
+      "recomputed_ci": [
+        2.7163,
+        3.3658
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0a-R",
+      "b": "B2",
+      "published_mean": 3.0339865972338123,
+      "recomputed_mean": 3.034,
+      "published_ci": [
+        2.698991163031972,
+        3.3640112635398407
+      ],
+      "recomputed_ci": [
+        2.699,
+        3.364
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0a-R",
+      "b": "B3",
+      "published_mean": -3.148734387659179,
+      "recomputed_mean": -3.1487,
+      "published_ci": [
+        -4.342356044336384,
+        -2.2627695353923793
+      ],
+      "recomputed_ci": [
+        -4.3424,
+        -2.2628
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0a-R",
+      "b": "B4",
+      "published_mean": -0.3992276372762506,
+      "recomputed_mean": -0.3992,
+      "published_ci": [
+        -1.5539184797503611,
+        0.5817515929302428
+      ],
+      "recomputed_ci": [
+        -1.5539,
+        0.5818
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.46845,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0a-R",
+      "b": "B4t",
+      "published_mean": -1.4925907652737394,
+      "recomputed_mean": -1.4926,
+      "published_ci": [
+        -2.547492098760432,
+        -0.6676931506815231
+      ],
+      "recomputed_ci": [
+        -2.5475,
+        -0.6677
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0035,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0a-R",
+      "b": "P",
+      "published_mean": -0.4760574898340784,
+      "recomputed_mean": -0.4761,
+      "published_ci": [
+        -1.6653351352024777,
+        0.4323568225929534
+      ],
+      "recomputed_ci": [
+        -1.6653,
+        0.4324
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.38196,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0d",
+      "b": "B1",
+      "published_mean": 3.8693455555768574,
+      "recomputed_mean": 3.8693,
+      "published_ci": [
+        2.533111754617226,
+        5.539140000313847
+      ],
+      "recomputed_ci": [
+        2.5331,
+        5.5391
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0d",
+      "b": "B2",
+      "published_mean": 3.859587417818632,
+      "recomputed_mean": 3.8596,
+      "published_ci": [
+        2.519418714192978,
+        5.538366730916618
+      ],
+      "recomputed_ci": [
+        2.5194,
+        5.5384
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0d",
+      "b": "B3",
+      "published_mean": -2.323133567074359,
+      "recomputed_mean": -2.3231,
+      "published_ci": [
+        -2.7836940873893283,
+        -1.8702803191248927
+      ],
+      "recomputed_ci": [
+        -2.7837,
+        -1.8703
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0d",
+      "b": "B4",
+      "published_mean": 0.4263731833085697,
+      "recomputed_mean": 0.4264,
+      "published_ci": [
+        0.1641947196082073,
+        0.7634704727774221
+      ],
+      "recomputed_ci": [
+        0.1642,
+        0.7635
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0085,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0d",
+      "b": "B4t",
+      "published_mean": -0.666989944688919,
+      "recomputed_mean": -0.667,
+      "published_ci": [
+        -1.1256785642346128,
+        -0.20081127419296207
+      ],
+      "recomputed_ci": [
+        -1.1257,
+        -0.2008
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0043,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B0d",
+      "b": "P",
+      "published_mean": 0.34954333075074195,
+      "recomputed_mean": 0.3495,
+      "published_ci": [
+        -0.06965412462543098,
+        0.7519762682194118
+      ],
+      "recomputed_ci": [
+        -0.0697,
+        0.752
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.09769,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B1",
+      "b": "B2",
+      "published_mean": -0.009758137758225871,
+      "recomputed_mean": -0.0098,
+      "published_ci": [
+        -0.04008358196591806,
+        0.01888254845876494
+      ],
+      "recomputed_ci": [
+        -0.0401,
+        0.0189
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.52315,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B1",
+      "b": "B3",
+      "published_mean": -6.192479122651217,
+      "recomputed_mean": -6.1925,
+      "published_ci": [
+        -7.593843294557778,
+        -5.12134267771604
+      ],
+      "recomputed_ci": [
+        -7.5938,
+        -5.1213
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B1",
+      "b": "B4",
+      "published_mean": -3.442972372268289,
+      "recomputed_mean": -3.443,
+      "published_ci": [
+        -4.796907112864496,
+        -2.317550236717517
+      ],
+      "recomputed_ci": [
+        -4.7969,
+        -2.3176
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B1",
+      "b": "B4t",
+      "published_mean": -4.5363355002657775,
+      "recomputed_mean": -4.5363,
+      "published_ci": [
+        -5.801987125683226,
+        -3.5369929203816493
+      ],
+      "recomputed_ci": [
+        -5.802,
+        -3.537
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B1",
+      "b": "P",
+      "published_mean": -3.5198022248261167,
+      "recomputed_mean": -3.5198,
+      "published_ci": [
+        -4.941354473883004,
+        -2.3881013269546623
+      ],
+      "recomputed_ci": [
+        -4.9414,
+        -2.3881
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B2",
+      "b": "B3",
+      "published_mean": -6.182720984892989,
+      "recomputed_mean": -6.1827,
+      "published_ci": [
+        -7.596662829209506,
+        -5.103781551225993
+      ],
+      "recomputed_ci": [
+        -7.5967,
+        -5.1038
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B2",
+      "b": "B4",
+      "published_mean": -3.433214234510063,
+      "recomputed_mean": -3.4332,
+      "published_ci": [
+        -4.7927163870690555,
+        -2.3057239018625615
+      ],
+      "recomputed_ci": [
+        -4.7927,
+        -2.3057
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B2",
+      "b": "B4t",
+      "published_mean": -4.526577362507551,
+      "recomputed_mean": -4.5266,
+      "published_ci": [
+        -5.807799095140746,
+        -3.5239415626470123
+      ],
+      "recomputed_ci": [
+        -5.8078,
+        -3.5239
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B2",
+      "b": "P",
+      "published_mean": -3.5100440870678904,
+      "recomputed_mean": -3.51,
+      "published_ci": [
+        -4.952771057488807,
+        -2.3755023635197623
+      ],
+      "recomputed_ci": [
+        -4.9528,
+        -2.3755
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B3",
+      "b": "B4",
+      "published_mean": 2.7495067503829285,
+      "recomputed_mean": 2.7495,
+      "published_ci": [
+        2.326493095099475,
+        3.1518013754098657
+      ],
+      "recomputed_ci": [
+        2.3265,
+        3.1518
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B3",
+      "b": "B4t",
+      "published_mean": 1.65614362238544,
+      "recomputed_mean": 1.6561,
+      "published_ci": [
+        1.461531721789495,
+        1.8593054633518404
+      ],
+      "recomputed_ci": [
+        1.4615,
+        1.8593
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B3",
+      "b": "P",
+      "published_mean": 2.672676897825101,
+      "recomputed_mean": 2.6727,
+      "published_ci": [
+        2.4813289980641997,
+        2.866965257765176
+      ],
+      "recomputed_ci": [
+        2.4813,
+        2.867
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B4",
+      "b": "B4t",
+      "published_mean": -1.0933631279974887,
+      "recomputed_mean": -1.0934,
+      "published_ci": [
+        -1.419360279202591,
+        -0.7765472020431485
+      ],
+      "recomputed_ci": [
+        -1.4194,
+        -0.7765
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B4",
+      "b": "P",
+      "published_mean": -0.0768298525578278,
+      "recomputed_mean": -0.0768,
+      "published_ci": [
+        -0.415371631570401,
+        0.2711587640788721
+      ],
+      "recomputed_ci": [
+        -0.4154,
+        0.2712
+      ],
+      "published_significant": false,
+      "recomputed_significant": false,
+      "n_units": 14,
+      "p_raw": 0.66893,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "paired_effect",
+      "channel": "moderate",
+      "a": "B4t",
+      "b": "P",
+      "published_mean": 1.016533275439661,
+      "recomputed_mean": 1.0165,
+      "published_ci": [
+        0.7973971848880059,
+        1.2318622605938925
+      ],
+      "recomputed_ci": [
+        0.7974,
+        1.2319
+      ],
+      "published_significant": true,
+      "recomputed_significant": true,
+      "n_units": 14,
+      "p_raw": 0.0001,
+      "ok": true,
+      "no_data": false,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "bursty",
+      "method": "B0a",
+      "published_mean": 15.738806898236929,
+      "recomputed_mean": 15.7388,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "bursty",
+      "method": "B0a-R",
+      "published_mean": 20.85257707722859,
+      "recomputed_mean": 20.8526,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "bursty",
+      "method": "B0d",
+      "published_mean": 21.502426063332333,
+      "recomputed_mean": 21.5024,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "bursty",
+      "method": "B1",
+      "published_mean": 15.622806512356263,
+      "recomputed_mean": 15.6228,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "bursty",
+      "method": "B2",
+      "published_mean": 15.60052908641944,
+      "recomputed_mean": 15.6005,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "bursty",
+      "method": "B3",
+      "published_mean": 26.91837169270809,
+      "recomputed_mean": 26.9184,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "bursty",
+      "method": "B4",
+      "published_mean": 21.544818184175927,
+      "recomputed_mean": 21.5448,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "bursty",
+      "method": "B4t",
+      "published_mean": 23.204282192669773,
+      "recomputed_mean": 23.2043,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "bursty",
+      "method": "P",
+      "published_mean": 22.849027665943954,
+      "recomputed_mean": 22.849,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "clean",
+      "method": "B0a",
+      "published_mean": 53.203624238098776,
+      "recomputed_mean": 53.2036,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "clean",
+      "method": "B0a-R",
+      "published_mean": 53.203624238098776,
+      "recomputed_mean": 53.2036,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "clean",
+      "method": "B0d",
+      "published_mean": 26.92039112214247,
+      "recomputed_mean": 26.9204,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "clean",
+      "method": "B1",
+      "published_mean": 53.203624238098776,
+      "recomputed_mean": 53.2036,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "clean",
+      "method": "B2",
+      "published_mean": 53.203624238098776,
+      "recomputed_mean": 53.2036,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "clean",
+      "method": "B3",
+      "published_mean": 26.92039112214247,
+      "recomputed_mean": 26.9204,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "clean",
+      "method": "B4",
+      "published_mean": 26.92039112214247,
+      "recomputed_mean": 26.9204,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "clean",
+      "method": "B4t",
+      "published_mean": 25.706689350590676,
+      "recomputed_mean": 25.7067,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "clean",
+      "method": "P",
+      "published_mean": 24.530585098930086,
+      "recomputed_mean": 24.5306,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "harsh",
+      "method": "B0a",
+      "published_mean": 15.751378281417345,
+      "recomputed_mean": 15.7514,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "harsh",
+      "method": "B0a-R",
+      "published_mean": 18.66082232749556,
+      "recomputed_mean": 18.6608,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "harsh",
+      "method": "B0d",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "n_units": 0,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "harsh",
+      "method": "B1",
+      "published_mean": 15.183507442793196,
+      "recomputed_mean": 15.1835,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "harsh",
+      "method": "B2",
+      "published_mean": 15.20138787443953,
+      "recomputed_mean": 15.2014,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "harsh",
+      "method": "B3",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "n_units": 0,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "harsh",
+      "method": "B4",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "n_units": 0,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "harsh",
+      "method": "B4t",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "n_units": 0,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "harsh",
+      "method": "P",
+      "published_mean": NaN,
+      "recomputed_mean": NaN,
+      "n_units": 0,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "mild",
+      "method": "B0a",
+      "published_mean": 28.875282047941123,
+      "recomputed_mean": 28.8753,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "mild",
+      "method": "B0a-R",
+      "published_mean": 29.142848654680623,
+      "recomputed_mean": 29.1428,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "mild",
+      "method": "B0d",
+      "published_mean": 26.92039112214247,
+      "recomputed_mean": 26.9204,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "mild",
+      "method": "B1",
+      "published_mean": 27.96569705455162,
+      "recomputed_mean": 27.9657,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "mild",
+      "method": "B2",
+      "published_mean": 27.984361553766735,
+      "recomputed_mean": 27.9844,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "mild",
+      "method": "B3",
+      "published_mean": 26.92039112214247,
+      "recomputed_mean": 26.9204,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "mild",
+      "method": "B4",
+      "published_mean": 26.92039112214247,
+      "recomputed_mean": 26.9204,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "mild",
+      "method": "B4t",
+      "published_mean": 25.706689350590676,
+      "recomputed_mean": 25.7067,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "mild",
+      "method": "P",
+      "published_mean": 24.530585098930086,
+      "recomputed_mean": 24.5306,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "moderate",
+      "method": "B0a",
+      "published_mean": 21.59021759164035,
+      "recomputed_mean": 21.5902,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "moderate",
+      "method": "B0a-R",
+      "published_mean": 23.773511586151297,
+      "recomputed_mean": 23.7735,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "moderate",
+      "method": "B0d",
+      "published_mean": 24.59911240673612,
+      "recomputed_mean": 24.5991,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "moderate",
+      "method": "B1",
+      "published_mean": 20.729766851159262,
+      "recomputed_mean": 20.7298,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "moderate",
+      "method": "B2",
+      "published_mean": 20.739524988917484,
+      "recomputed_mean": 20.7395,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "moderate",
+      "method": "B3",
+      "published_mean": 26.922245973810476,
+      "recomputed_mean": 26.9222,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "moderate",
+      "method": "B4",
+      "published_mean": 24.17273922342755,
+      "recomputed_mean": 24.1727,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "moderate",
+      "method": "B4t",
+      "published_mean": 25.266102351425037,
+      "recomputed_mean": 25.2661,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "summary",
+      "channel": "moderate",
+      "method": "P",
+      "published_mean": 24.249569075985374,
+      "recomputed_mean": 24.2496,
+      "n_units": 14,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "provenance",
+      "item": "git commit",
+      "ok": true,
+      "detail": "25534623fc247da4a07c7238f46cae4b068b68b3"
+    },
+    {
+      "kind": "provenance",
+      "item": "working tree clean at run time",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "kind": "provenance",
+      "item": "resolved configuration",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "provenance",
+      "item": "seeds recorded",
+      "ok": true,
+      "detail": "{\"seed\": 20240909, \"channel_seed\": 20240909, \"crypto_seed\": 20240909, \"key_mode\": \"lab\"}"
+    },
+    {
+      "kind": "provenance",
+      "item": "key mode is the reproducible lab mode",
+      "ok": true,
+      "detail": "lab"
+    },
+    {
+      "kind": "provenance",
+      "item": "dependency versions",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "provenance",
+      "item": "exact package list (pip freeze)",
+      "ok": true,
+      "detail": "25 записів"
+    },
+    {
+      "kind": "provenance",
+      "item": "matrix plan",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "provenance",
+      "item": "dataset validated",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "kind": "provenance",
+      "item": "input content hashes",
+      "ok": true,
+      "detail": "24 кліпів"
+    },
+    {
+      "kind": "provenance",
+      "item": "independent sources recorded",
+      "ok": true,
+      "detail": "24 джерел на 24 кліпів"
+    },
+    {
+      "kind": "figure",
+      "figure": "K01",
+      "ok": true,
+      "not_applicable": false,
+      "detail": "",
+      "data_table": "results/natural\\figures\\K01.csv"
+    },
+    {
+      "kind": "figure",
+      "figure": "K02",
+      "ok": true,
+      "not_applicable": true,
+      "detail": "E03 не запускався у цій теці",
+      "data_table": ""
+    },
+    {
+      "kind": "figure",
+      "figure": "K03",
+      "ok": true,
+      "not_applicable": true,
+      "detail": "E04 не запускався у цій теці",
+      "data_table": ""
+    },
+    {
+      "kind": "figure",
+      "figure": "K04",
+      "ok": true,
+      "not_applicable": true,
+      "detail": "E05 не запускався у цій теці",
+      "data_table": ""
+    },
+    {
+      "kind": "figure",
+      "figure": "K05",
+      "ok": true,
+      "not_applicable": false,
+      "detail": "",
+      "data_table": "results/natural\\figures\\K05.csv"
+    },
+    {
+      "kind": "figure",
+      "figure": "K06",
+      "ok": true,
+      "not_applicable": true,
+      "detail": "E01 не запускався у цій теці",
+      "data_table": ""
+    },
+    {
+      "kind": "figure",
+      "figure": "K07",
+      "ok": true,
+      "not_applicable": false,
+      "detail": "",
+      "data_table": "results/natural\\figures\\K07.csv"
+    },
+    {
+      "kind": "figure",
+      "figure": "K08",
+      "ok": true,
+      "not_applicable": false,
+      "detail": "",
+      "data_table": "results/natural\\figures\\K08.csv"
+    },
+    {
+      "kind": "figure",
+      "figure": "K09",
+      "ok": true,
+      "not_applicable": false,
+      "detail": "",
+      "data_table": "results/natural\\figures\\K09.csv"
+    },
+    {
+      "kind": "figure",
+      "figure": "K10",
+      "ok": true,
+      "not_applicable": true,
+      "detail": "E08 не запускався у цій теці",
+      "data_table": ""
+    },
+    {
+      "kind": "figure",
+      "figure": "K11",
+      "ok": true,
+      "not_applicable": false,
+      "detail": "",
+      "data_table": "results/natural\\figures\\K11.csv"
+    },
+    {
+      "kind": "figure",
+      "figure": "K12",
+      "ok": true,
+      "not_applicable": false,
+      "detail": "",
+      "data_table": "results/natural\\figures\\K12.csv"
+    },
+    {
+      "kind": "figure",
+      "figure": "K13",
+      "ok": true,
+      "not_applicable": true,
+      "detail": "E15 не запускався у цій теці",
+      "data_table": ""
+    }
+  ],
+  "provenance": {
+    "commit": "25534623fc247da4a07c7238f46cae4b068b68b3",
+    "worktree": "clean",
+    "n_clips": 24,
+    "n_sources": 24,
+    "seeds": {
+      "seed": 20240909,
+      "channel_seed": 20240909,
+      "crypto_seed": 20240909,
+      "key_mode": "lab"
+    }
+  },
+  "statement": "усі опубліковані числа відтворено з таблиць цієї теки"
+}

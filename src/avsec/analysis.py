@@ -210,11 +210,13 @@ def _source_map(run_dir: str) -> Dict[str, str]:
 def _read_rows(run_dir: str) -> List[Dict[str, Any]]:
     import csv
 
+    from avsec.utils import open_table, table_exists
+
     path = os.path.join(run_dir, "frames.csv")
-    if not os.path.exists(path):
+    if not table_exists(path):
         raise FileNotFoundError(
             f"{path} not found - run `avsec matrix` before `avsec analyze`")
-    with open(path, encoding="utf-8", newline="") as fh:
+    with open_table(path) as fh:
         rows = list(csv.DictReader(fh))
     # Every scheduled instant already has a row in frames.csv, with its own
     # status (R05).  ``failures.csv`` is per *job*, so only the jobs that

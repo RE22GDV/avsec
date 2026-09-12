@@ -1,0 +1,17 @@
+{
+  "transport_gain_db": 2.279,
+  "mechanism_gain_db": -0.020199999999999996,
+  "source_table": "chain.csv",
+  "figure": "K05",
+  "lang": "uk",
+  "run_dir": "runs/natural",
+  "title_uk": "Звідки береться перевага",
+  "title_en": "Where the advantage comes from",
+  "experiment": "E13",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ],
+  "dpi": 300
+}

@@ -1,3 +1,10 @@
-Це ПРОРІДЖЕНА копія: 12515 з 62575 рядків, кожен 5-й, детермінований крок.
-Повна таблиця лишається у прогоні (`runs/`) і відтворюється командами з README.
-Усі опубліковані числа рахуються з ПОВНОЇ таблиці, не з цієї.
+frames.csv.gz: УСІ 72000 рядків збережено (gzip); з 81 стовпців лишено 48.
+
+Прорідження рядків тут НЕ застосовується: команда
+  avsec verify --input <ця тека>
+перераховує кожне опубліковане число саме з цього файла, і робити це на іншій вибірці означало б перевіряти інший набір даних.
+
+Прибрані стовпці - це посценні лічильники етапів, яких не читає жоден опублікований агрегат:
+  status_auth_failed, status_filler, status_fragment_recovered, status_frame_verified, status_header_invalid, status_header_unrecoverable, status_no_sync, status_payload_unrecoverable, status_raster_dropped, status_verified, symbol_error_denominator, x_authenticated, x_band_degraded_frac, x_band_lost_frac, x_channel_trace, x_combine, x_coverage_meaning, x_desc_fec_failed_frac, x_desc_touched_frac, x_desc_unusable_frac, x_est_dx, x_est_dy, x_filler_units, x_fragments, x_fragments_recovered, x_frame_verified, x_rasters_delivered, x_repetitions_received, x_repetitions_sent, x_segments, x_sync_score, x_units_from_other_frames, x_units_per_raster
+
+Повна таблиця з усіма стовпцями відтворюється прогоном з кореневого README: у режимі key_mode: lab результат детермінований.

@@ -1,0 +1,9 @@
+authentication,channel,confidentiality,coverage,integrity,method,psnr_full
+none,bursty,none,1.0,none,B0a,15.738806898236929
+none,bursty,none,1.0,none,B0a-R,20.85257707722859
+none,bursty,broken (LFSR block permutation),1.0,none,B1,15.622806512356263
+none,bursty,"weak (keyed permutation, no diffusion)",1.0,none,B2,15.60052908641944
+none,bursty,none,0.7459126253211075,CRC-like via RS only,B0d,21.502426063332333
+"AEAD, whole frame",bursty,AEAD,1.0,128-bit tag,B3,26.91837169270809
+"AEAD, per unit",bursty,AEAD,0.7487271285262356,128-bit tag per unit,B4,21.544818184175927
+"AEAD, per unit",bursty,AEAD,0.8141127232142857,128-bit tag per unit,P,22.849027665943954

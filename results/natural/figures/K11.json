@@ -1,0 +1,21 @@
+{
+  "mechanism_gain_forward_db": -0.020199999999999996,
+  "mechanism_gain_reverse_db": 0,
+  "reverse_order_blocked": [
+    "+ два описи (MDC)",
+    "+ BAWP"
+  ],
+  "source_table": "chain.csv",
+  "figure": "K11",
+  "lang": "uk",
+  "run_dir": "runs/natural",
+  "title_uk": "Порядок кроків вирішує",
+  "title_en": "The order of the steps decides",
+  "experiment": "E13",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ],
+  "dpi": 300
+}

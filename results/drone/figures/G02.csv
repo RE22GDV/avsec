@@ -1,4 +1,4 @@
 channel,clip,coverage,estimated_fraction,percentile,stale_fraction
-harsh,uav_forest_canopy,0.0,1.0,10,0.0
-mild,uav_village,1.0,0.0,50,0.0
-mild,uav_sky_horizon,1.0,0.0,90,0.0
+harsh,uav_cal_sea_edge,0.0,1.0,10,0.0
+mild,uav_shoreline,1.0,0.0,50,0.0
+clean,uav_val_sand_texture,1.0,0.0,90,0.0

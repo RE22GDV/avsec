@@ -1,4 +1,4 @@
 channel,clip,coverage,estimated_fraction,percentile,stale_fraction
 harsh,clip_clouds_fast_v4,0.0,1.0,10,0.0
-moderate,clip_illumination_slow_v0,1.0,0.0,50,0.0
-mild,clip_lowlight_fast_v8,1.0,0.0,90,0.0
+clean,clip_illumination_slow_v0,1.0,0.0,50,0.0
+clean,clip_lowlight_fast_v8,1.0,0.0,90,0.0

@@ -1,0 +1,32 @@
+{
+  "run_id": "ce437da4856845a9",
+  "name": "figure_index.csv",
+  "source": "runs/natural",
+  "destination": "results\\natural",
+  "tables": [
+    "run_manifest.json (0.01 MB)",
+    "dataset_manifest.csv (0.02 MB)",
+    "dataset_manifest.json (0.03 MB)",
+    "channel_traces.jsonl (0.51 MB)",
+    "frames.csv.gz (1.76 MB, усі 50400 рядків, 48 з 81 стовпців)",
+    "units.csv (2.17 MB)",
+    "budgets.csv (0.00 MB)",
+    "budgets.json (0.10 MB)",
+    "failures_summary.csv (0.00 MB)",
+    "paired_effects.csv (0.17 MB)",
+    "summary.csv (0.03 MB)",
+    "operability.csv (0.01 MB)",
+    "analysis.json (0.06 MB)",
+    "jobs.csv (0.70 MB)",
+    "matrix.json (0.00 MB)",
+    "config.yaml (0.00 MB)",
+    "programme_run.json (0.00 MB)",
+    "chain.csv (0.00 MB)",
+    "chain_scenes.csv (0.01 MB)",
+    "e13.json (0.00 MB)",
+    "verification.json (0.11 MB)",
+    "analysis_plan.yaml (0.00 MB)"
+  ],
+  "figure_files": 116,
+  "total_mb": 15.24
+}

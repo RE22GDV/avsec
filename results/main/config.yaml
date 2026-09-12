@@ -40,6 +40,7 @@ methods:
 - B2
 - B3
 - B4
+- B4t
 - P
 profiles:
   B0d:
@@ -58,6 +59,7 @@ profiles:
     - block
     - 278
     - 0
+    interleaver_window: 0
   B3:
     stripe_height: 24
     n_descriptions: 1
@@ -74,6 +76,7 @@ profiles:
     - block
     - 278
     - 0
+    interleaver_window: 0
   B4:
     stripe_height: 24
     n_descriptions: 1
@@ -90,6 +93,24 @@ profiles:
     - block
     - 278
     - 0
+    interleaver_window: 0
+  B4t:
+    stripe_height: 24
+    n_descriptions: 1
+    codec: dct
+    quality: 8
+    max_unit_payload: 320
+    fec_nsym: 128
+    fec_header_nsym: 48
+    modulation:
+    - 4
+    - 8
+    - 2
+    interleaver:
+    - block
+    - 278
+    - 0
+    interleaver_window: 0
   P:
     stripe_height: 24
     n_descriptions: 2
@@ -106,6 +127,7 @@ profiles:
     - bawp
     - 0
     - 8
+    interleaver_window: 0
 crypto:
   algorithm: chacha20poly1305
   tag_bytes: 16

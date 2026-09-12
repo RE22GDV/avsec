@@ -16,7 +16,13 @@
       "first_frame_dhash": "0000001999999999",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'horizon', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames"
+      "notes": "procedural research clip 'horizon', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames",
+      "source_id": "synthetic:horizon-v0",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_horizon_fast_v3",
@@ -30,11 +36,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "8a9d979b7f31ca11ca2565eb02736962d0d8861b3b44bc14e972c7ef1f1228db",
+      "content_sha256": "97a634ab3d0688c05fdcc3d5f6ac8008113a25926230e9fe8d7ebdbc6dbc2fd1",
       "first_frame_dhash": "0002201938393838",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'horizon', motion=fast, phase0=0.37, viewpoint variant 3, 256x192, 16 frames"
+      "notes": "procedural research clip 'horizon', motion=fast, phase0=0.37, viewpoint variant 3, 256x192, 16 frames",
+      "source_id": "synthetic:horizon-v3",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_road_slow_v0",
@@ -52,7 +64,13 @@
       "first_frame_dhash": "0c0c141696131311",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'road', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames"
+      "notes": "procedural research clip 'road', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames",
+      "source_id": "synthetic:road-v0",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_road_fast_v5",
@@ -66,11 +84,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "4127a5882c8c0fae271320f725509d590f4ad1e7ce4bbb8bf792c37e1a57b874",
+      "content_sha256": "16a91a9c089d79785f35f5af495f6bfc69a7861de7b61296c2b7fb3024e929cf",
       "first_frame_dhash": "ec67149617121333",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'road', motion=fast, phase0=0.51, viewpoint variant 5, 256x192, 16 frames"
+      "notes": "procedural research clip 'road', motion=fast, phase0=0.51, viewpoint variant 5, 256x192, 16 frames",
+      "source_id": "synthetic:road-v5",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_targets_slow_v0",
@@ -88,7 +112,13 @@
       "first_frame_dhash": "870787878b8b8f87",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'targets', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames"
+      "notes": "procedural research clip 'targets', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames",
+      "source_id": "synthetic:targets-v0",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_targets_fast_v7",
@@ -102,11 +132,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "d96484daec247e01186ae75e2a217e9b53771a6b17d4913ed3d389deb7032d47",
+      "content_sha256": "b43bac6afb200a9cb8688ed967d5d8a1ee684444a748478ebfd75fbb4500adb2",
       "first_frame_dhash": "0e2e0e0e0e0b0f0f",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'targets', motion=fast, phase0=0.29, viewpoint variant 7, 256x192, 16 frames"
+      "notes": "procedural research clip 'targets', motion=fast, phase0=0.29, viewpoint variant 7, 256x192, 16 frames",
+      "source_id": "synthetic:targets-v7",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_texture_slow_v0",
@@ -124,7 +160,13 @@
       "first_frame_dhash": "b55bb45ba55ab64b",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'texture', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames"
+      "notes": "procedural research clip 'texture', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames",
+      "source_id": "synthetic:texture-v0",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_texture_fast_v2",
@@ -138,11 +180,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "9932400a3b61cdf369089c3316d5ed538a3d6df1a02b5ae36a017fd64b0b887e",
+      "content_sha256": "639af2d0f95cae7185cb45aa65c4900eb74742cf2f51e4bf27ad417595ed92d6",
       "first_frame_dhash": "b6497649a55934da",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'texture', motion=fast, phase0=0.61, viewpoint variant 2, 256x192, 16 frames"
+      "notes": "procedural research clip 'texture', motion=fast, phase0=0.61, viewpoint variant 2, 256x192, 16 frames",
+      "source_id": "synthetic:texture-v2",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_edges_slow_v0",
@@ -160,7 +208,13 @@
       "first_frame_dhash": "80a2a2a2a2a28200",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'edges', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames"
+      "notes": "procedural research clip 'edges', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames",
+      "source_id": "synthetic:edges-v0",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_edges_fast_v9",
@@ -174,11 +228,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "2c2a7f61cd09147093611189471ea6500661cda04d55947f52b34c1afb9f3057",
+      "content_sha256": "9f3389499559456128dc7c331bae2bfa417ab9913d2dfc806b9d2134ccf78903",
       "first_frame_dhash": "343434a4acaced3d",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'edges', motion=fast, phase0=0.13, viewpoint variant 9, 256x192, 16 frames"
+      "notes": "procedural research clip 'edges', motion=fast, phase0=0.13, viewpoint variant 9, 256x192, 16 frames",
+      "source_id": "synthetic:edges-v9",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_clouds_slow_v0",
@@ -196,7 +256,13 @@
       "first_frame_dhash": "a773aa591b593539",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'clouds', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames"
+      "notes": "procedural research clip 'clouds', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames",
+      "source_id": "synthetic:clouds-v0",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_clouds_fast_v4",
@@ -210,11 +276,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "919a6a07e6254cfa9c497621fd7f6b42b2d63b5f07b12c1916594d0cdf2f4c4f",
-      "first_frame_dhash": "39bcf48b2d4c1612",
+      "content_sha256": "a9b409739157e4d34f251117066c47c5fe58a7edbce0e50b3a1105b1ca258e20",
+      "first_frame_dhash": "39bcf48b2d6c1612",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'clouds', motion=fast, phase0=0.44, viewpoint variant 4, 256x192, 16 frames"
+      "notes": "procedural research clip 'clouds', motion=fast, phase0=0.44, viewpoint variant 4, 256x192, 16 frames",
+      "source_id": "synthetic:clouds-v4",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_grid_slow_v0",
@@ -232,7 +304,13 @@
       "first_frame_dhash": "86868696b6b4b4f4",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'grid', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames"
+      "notes": "procedural research clip 'grid', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames",
+      "source_id": "synthetic:grid-v0",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_grid_fast_v6",
@@ -246,11 +324,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "513daecc81f466207419ba7516e3c46b9af9cd6e8e65751eaa7b6e6914197bce",
+      "content_sha256": "2453f46f9dcc3b0f5d64085613010caa3f2a65997cd5c9f93aeb99c64e42c2a7",
       "first_frame_dhash": "03831f1f0e3c7cf8",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'grid', motion=fast, phase0=0.72, viewpoint variant 6, 256x192, 16 frames"
+      "notes": "procedural research clip 'grid', motion=fast, phase0=0.72, viewpoint variant 6, 256x192, 16 frames",
+      "source_id": "synthetic:grid-v6",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_lowlight_slow_v0",
@@ -268,7 +352,13 @@
       "first_frame_dhash": "c0c4cccc5c78b810",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'lowlight', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames"
+      "notes": "procedural research clip 'lowlight', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames",
+      "source_id": "synthetic:lowlight-v0",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_lowlight_fast_v8",
@@ -282,11 +372,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "520e22f1e89c4ab5ccb856837b7a426304cec91999b743a7413b4ba6eaec379e",
+      "content_sha256": "afef2c7d0ea195493ecadaa5526bff5392b8db1345b8d6936d0c8559362ed93c",
       "first_frame_dhash": "80868686b6727070",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'lowlight', motion=fast, phase0=0.18, viewpoint variant 8, 256x192, 16 frames"
+      "notes": "procedural research clip 'lowlight', motion=fast, phase0=0.18, viewpoint variant 8, 256x192, 16 frames",
+      "source_id": "synthetic:lowlight-v8",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_text_slow_v0",
@@ -300,11 +396,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "15434346e02fdae15f0c74369bff16e48f518e033b94b816f00eb791d7426f31",
-      "first_frame_dhash": "564e6c5c2c1c4800",
+      "content_sha256": "9d4ba3ac44c61d85f33ad8b7f9bf736cce345ee707c10568d83d80d6de42bd09",
+      "first_frame_dhash": "4c54584c88785800",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'text', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames"
+      "notes": "procedural research clip 'text', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames",
+      "source_id": "synthetic:text-v0",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_text_fast_v11",
@@ -318,11 +420,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "ab8b2d8a49eee624572968a7f955101a0d3cc97dfa85d42cb3675bb683ce7505",
-      "first_frame_dhash": "1d090c1509170d06",
+      "content_sha256": "ad9b6506b334740058d270930e926d370ad208900ef357160b8615e384366c0e",
+      "first_frame_dhash": "1d05050d090a0400",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'text', motion=fast, phase0=0.55, viewpoint variant 11, 256x192, 16 frames"
+      "notes": "procedural research clip 'text', motion=fast, phase0=0.55, viewpoint variant 11, 256x192, 16 frames",
+      "source_id": "synthetic:text-v11",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_illumination_slow_v0",
@@ -340,7 +448,13 @@
       "first_frame_dhash": "9fa2a2a2a2a2a2ff",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'illumination', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames"
+      "notes": "procedural research clip 'illumination', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames",
+      "source_id": "synthetic:illumination-v0",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_smooth_slow_v0",
@@ -358,7 +472,13 @@
       "first_frame_dhash": "8787878787878787",
       "license": "generated-in-repo",
       "split": "test",
-      "notes": "procedural research clip 'smooth', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames"
+      "notes": "procedural research clip 'smooth', motion=slow, phase0=0.0, viewpoint variant 0, 256x192, 16 frames",
+      "source_id": "synthetic:smooth-v0",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_horizon_slow_v13",
@@ -372,11 +492,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "ecea1b897d061402b486fb04f37f59c655ba4cd1e3f72cf739776c86484bb6e4",
+      "content_sha256": "8c56c8175ffa213f8f69aac296336299b2508a049f8dc8ddce06bf7b2d3e22d4",
       "first_frame_dhash": "b775b771736373e3",
       "license": "generated-in-repo",
       "split": "calibration",
-      "notes": "procedural research clip 'horizon', motion=slow, phase0=0.21, viewpoint variant 13, 256x192, 16 frames"
+      "notes": "procedural research clip 'horizon', motion=slow, phase0=0.21, viewpoint variant 13, 256x192, 16 frames",
+      "source_id": "synthetic:horizon-v13",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_road_slow_v15",
@@ -390,11 +516,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "baa9628aa1f919760614cd83af24dcdf01a8572975acd7050793373b6a455ff1",
+      "content_sha256": "1ff28d90e7e60019ae2eb8816748c9f84e5af5d629f2701ae27457f2a22eeabb",
       "first_frame_dhash": "d798a82f2e242723",
       "license": "generated-in-repo",
       "split": "calibration",
-      "notes": "procedural research clip 'road', motion=slow, phase0=0.33, viewpoint variant 15, 256x192, 16 frames"
+      "notes": "procedural research clip 'road', motion=slow, phase0=0.33, viewpoint variant 15, 256x192, 16 frames",
+      "source_id": "synthetic:road-v15",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_targets_slow_v17",
@@ -408,11 +540,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "1aa3443d2f4e2683a82c412b67f6cce81dc88e51a5e2a4389d454495e112610f",
+      "content_sha256": "b26d7d2400b9976c21f48826acc2667843483e4ee34881806ac44a48650f7bfa",
       "first_frame_dhash": "474f0f8f17178d0e",
       "license": "generated-in-repo",
       "split": "calibration",
-      "notes": "procedural research clip 'targets', motion=slow, phase0=0.47, viewpoint variant 17, 256x192, 16 frames"
+      "notes": "procedural research clip 'targets', motion=slow, phase0=0.47, viewpoint variant 17, 256x192, 16 frames",
+      "source_id": "synthetic:targets-v17",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_texture_slow_v19",
@@ -426,11 +564,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "b6725b35104df49b0920cb908d6cd18aa6cf478e0f59b9123bc0db2a6c451f31",
+      "content_sha256": "3635344006884b47b581e07e5b0ae8582ffa15e5ca7223b214d328321c48e8d1",
       "first_frame_dhash": "924d9264d2244ba6",
       "license": "generated-in-repo",
       "split": "calibration",
-      "notes": "procedural research clip 'texture', motion=slow, phase0=0.09, viewpoint variant 19, 256x192, 16 frames"
+      "notes": "procedural research clip 'texture', motion=slow, phase0=0.09, viewpoint variant 19, 256x192, 16 frames",
+      "source_id": "synthetic:texture-v19",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_edges_slow_v21",
@@ -444,11 +588,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "e142ef0a5f706d1ea37227fbb977090d17c50918da5616fa752852fb06c5d7e4",
+      "content_sha256": "bba03b32be5ee1d441c35eb7a867c10d0caa9c5f3640808af76216ba935b3e02",
       "first_frame_dhash": "bfa5273491959190",
       "license": "generated-in-repo",
       "split": "calibration",
-      "notes": "procedural research clip 'edges', motion=slow, phase0=0.66, viewpoint variant 21, 256x192, 16 frames"
+      "notes": "procedural research clip 'edges', motion=slow, phase0=0.66, viewpoint variant 21, 256x192, 16 frames",
+      "source_id": "synthetic:edges-v21",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_clouds_slow_v23",
@@ -462,11 +612,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "91427db07086d8c9c1cfb0bfa39c295940e222456d3f0caa1af819d8300c2015",
+      "content_sha256": "3db636ed0750f366a872548eecab12a8a59671073e8dd74e0df81eb10da2fbb1",
       "first_frame_dhash": "70515a8747c595b7",
       "license": "generated-in-repo",
       "split": "calibration",
-      "notes": "procedural research clip 'clouds', motion=slow, phase0=0.28, viewpoint variant 23, 256x192, 16 frames"
+      "notes": "procedural research clip 'clouds', motion=slow, phase0=0.28, viewpoint variant 23, 256x192, 16 frames",
+      "source_id": "synthetic:clouds-v23",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_text_slow_v25",
@@ -480,11 +636,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "9d23f8e6265fb0e1429acb2ba9ab8a8ef29c91d99dab083d53293e505f1c6545",
-      "first_frame_dhash": "0b39090503050f00",
+      "content_sha256": "ebe260b51d21f07fb989b6b3fd134af5adeff4618d0852a9f8bd52ad994f3516",
+      "first_frame_dhash": "03190d0703010700",
       "license": "generated-in-repo",
       "split": "calibration",
-      "notes": "procedural research clip 'text', motion=slow, phase0=0.81, viewpoint variant 25, 256x192, 16 frames"
+      "notes": "procedural research clip 'text', motion=slow, phase0=0.81, viewpoint variant 25, 256x192, 16 frames",
+      "source_id": "synthetic:text-v25",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_lowlight_slow_v27",
@@ -498,11 +660,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "1661a13a6baec03a6fbc5ce08ab7092b56e1493eea67be1d97e8789cb4e11d65",
+      "content_sha256": "01801f0f3a31c6912097df0503edb38f1abac33ca92c83e465ea5d36f1fc0baa",
       "first_frame_dhash": "0ccc8c8cc06062a0",
       "license": "generated-in-repo",
       "split": "calibration",
-      "notes": "procedural research clip 'lowlight', motion=slow, phase0=0.05, viewpoint variant 27, 256x192, 16 frames"
+      "notes": "procedural research clip 'lowlight', motion=slow, phase0=0.05, viewpoint variant 27, 256x192, 16 frames",
+      "source_id": "synthetic:lowlight-v27",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_horizon_fast_v29",
@@ -516,11 +684,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "311385e6c334dd27f52c73c24ed83d91be5b20d8358063675509482d8059b4b6",
+      "content_sha256": "f869169794e1d033b13453027892ecb7caf298e47025b8f69f4c25d61ba3aca1",
       "first_frame_dhash": "0000008e8e8ecece",
       "license": "generated-in-repo",
       "split": "validation",
-      "notes": "procedural research clip 'horizon', motion=fast, phase0=0.74, viewpoint variant 29, 256x192, 16 frames"
+      "notes": "procedural research clip 'horizon', motion=fast, phase0=0.74, viewpoint variant 29, 256x192, 16 frames",
+      "source_id": "synthetic:horizon-v29",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_road_fast_v31",
@@ -534,11 +708,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "402e7f92f7ed61469c862c9f2d4f1f6ef80e6af2b1a09a22e308db2cb26b9282",
+      "content_sha256": "4d10a281d8db1e81eea4a41238d1c38de7c340d4d15b48f2e5af00d1d58e8e99",
       "first_frame_dhash": "cb282c2524262323",
       "license": "generated-in-repo",
       "split": "validation",
-      "notes": "procedural research clip 'road', motion=fast, phase0=0.12, viewpoint variant 31, 256x192, 16 frames"
+      "notes": "procedural research clip 'road', motion=fast, phase0=0.12, viewpoint variant 31, 256x192, 16 frames",
+      "source_id": "synthetic:road-v31",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_targets_fast_v33",
@@ -552,11 +732,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "c93ee3d9d1b598427ee4309610b7b4d5237fdab19a0807d00c0be444eb00e454",
+      "content_sha256": "8810adb34e3ddbf1d15eed65bf66ed71de81c3255e3447787b6369329fbcfc6e",
       "first_frame_dhash": "0b0f8f0f0f270387",
       "license": "generated-in-repo",
       "split": "validation",
-      "notes": "procedural research clip 'targets', motion=fast, phase0=0.58, viewpoint variant 33, 256x192, 16 frames"
+      "notes": "procedural research clip 'targets', motion=fast, phase0=0.58, viewpoint variant 33, 256x192, 16 frames",
+      "source_id": "synthetic:targets-v33",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_texture_fast_v35",
@@ -570,11 +756,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "9df3e78e248ac1975b8fff54ff327a9f7aad8a695c0d1ce5fe10ee7817fe394f",
+      "content_sha256": "f83813fe7930cb702bcba0ea5768f52ee2c3457927a79bac50750dd1ba4e09f6",
       "first_frame_dhash": "dba4d22d936d932d",
       "license": "generated-in-repo",
       "split": "validation",
-      "notes": "procedural research clip 'texture', motion=fast, phase0=0.86, viewpoint variant 35, 256x192, 16 frames"
+      "notes": "procedural research clip 'texture', motion=fast, phase0=0.86, viewpoint variant 35, 256x192, 16 frames",
+      "source_id": "synthetic:texture-v35",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_grid_slow_v37",
@@ -588,11 +780,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "9978384b293ff3a4636b8d20367253113f9f55c7b0eee9ccd1fdcf518e6e59ed",
+      "content_sha256": "c453c46d1a498630d10904e4c346181174e646a269cb1923ffdd20a8f7409a7f",
       "first_frame_dhash": "3b151e8f4543c1e0",
       "license": "generated-in-repo",
       "split": "validation",
-      "notes": "procedural research clip 'grid', motion=slow, phase0=0.41, viewpoint variant 37, 256x192, 16 frames"
+      "notes": "procedural research clip 'grid', motion=slow, phase0=0.41, viewpoint variant 37, 256x192, 16 frames",
+      "source_id": "synthetic:grid-v37",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     },
     {
       "clip_id": "clip_clouds_fast_v39",
@@ -606,11 +804,17 @@
       "fps": 8.333,
       "t_start_s": 0.0,
       "t_end_s": 1.9201,
-      "content_sha256": "944577375bafd710c3dbdd4c7e8777e0cf40ca76f7848c2a543b08fd43bf407e",
+      "content_sha256": "b13e90d7e76b517bbf7530660af7da0dcb760f3e645a47d7e48b2f687a1f1877",
       "first_frame_dhash": "e5c3349a8e8b6b2e",
       "license": "generated-in-repo",
       "split": "validation",
-      "notes": "procedural research clip 'clouds', motion=fast, phase0=0.63, viewpoint variant 39, 256x192, 16 frames"
+      "notes": "procedural research clip 'clouds', motion=fast, phase0=0.63, viewpoint variant 39, 256x192, 16 frames",
+      "source_id": "synthetic:clouds-v39",
+      "derivation": "",
+      "crop": "",
+      "source_sha256": "",
+      "source_license": "",
+      "source_credit": ""
     }
   ],
   "validation": {
@@ -621,6 +825,12 @@
     ],
     "n_clips": 34,
     "n_scenes": 34,
+    "n_sources": 34,
+    "sources_per_split": {
+      "calibration": 8,
+      "validation": 6,
+      "test": 20
+    },
     "scenes_per_split": {
       "calibration": 8,
       "validation": 6,
@@ -632,6 +842,8 @@
       "test": 20
     },
     "duplicates": [],
+    "crop_overlaps": [],
+    "n_crop_pairs_overlapping": 0,
     "categories": [
       "high-detail",
       "low-detail",
@@ -640,6 +852,7 @@
     ],
     "provenances": [
       "synthetic"
-    ]
+    ],
+    "independence_note": "одиниця незалежності для узагальнення на НОВІ записи - source_id (34 шт.), а не сцена (34 шт.)"
   }
 }

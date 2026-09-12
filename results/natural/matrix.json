@@ -1,0 +1,107 @@
+{
+  "kind": "matrix",
+  "spec": {
+    "name": "E14-natural",
+    "methods": [
+      "B0a",
+      "B0a-R",
+      "B0d",
+      "B1",
+      "B2",
+      "B3",
+      "B4",
+      "B4t",
+      "P"
+    ],
+    "channels": [
+      {
+        "base": "clean",
+        "overrides": {},
+        "axis": "",
+        "value": NaN,
+        "label": "clean"
+      },
+      {
+        "base": "mild",
+        "overrides": {},
+        "axis": "",
+        "value": NaN,
+        "label": "mild"
+      },
+      {
+        "base": "moderate",
+        "overrides": {},
+        "axis": "",
+        "value": NaN,
+        "label": "moderate"
+      },
+      {
+        "base": "bursty",
+        "overrides": {},
+        "axis": "",
+        "value": NaN,
+        "label": "bursty"
+      },
+      {
+        "base": "harsh",
+        "overrides": {},
+        "axis": "",
+        "value": NaN,
+        "label": "harsh"
+      }
+    ],
+    "repetitions": 5,
+    "splits": [
+      "test"
+    ],
+    "max_frames": 16,
+    "max_clips": 0,
+    "schedule": [],
+    "workers": 12
+  },
+  "config_id": "ce437da4856845a9",
+  "n_jobs_this_call": 3150,
+  "n_jobs_total": 3150,
+  "n_frames": 50400,
+  "wall_s_this_call": 816.95,
+  "failures": [],
+  "completeness": {
+    "n_planned": 3150,
+    "n_done": 3150,
+    "n_missing": 0,
+    "n_failed": 0,
+    "complete": true,
+    "missing": [],
+    "failed": [],
+    "truncated": false
+  },
+  "channel_axes": [],
+  "wall_s_measured": 819.4,
+  "estimate_before_run": {
+    "n_jobs": 3150,
+    "n_frames_total": 50400,
+    "estimated_wall_s": 1023.2,
+    "estimated_wall_human": "0h17m03s",
+    "estimated_output_bytes": 21168000,
+    "estimated_output_mb": 21.17,
+    "jobs_per_method": {
+      "B0a": 350,
+      "B0a-R": 350,
+      "B0d": 350,
+      "B1": 350,
+      "B2": 350,
+      "B3": 350,
+      "B4": 350,
+      "B4t": 350,
+      "P": 350
+    },
+    "jobs_per_channel": {
+      "clean": 630,
+      "mild": 630,
+      "moderate": 630,
+      "bursty": 630,
+      "harsh": 630
+    },
+    "cost_model": "measured one frame per method (B0a=142ms, B0a-R=39ms, B0d=166ms, B1=16ms, B2=16ms, B3=155ms, B4=170ms, B4t=189ms, P=277ms); parallel speedup 6.4x assumed for 16 process workers (measured efficiency 0.40, not the worker count)"
+  }
+}

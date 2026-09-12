@@ -1,0 +1,18 @@
+{
+  "clip": "nat_074983792",
+  "channel": "bursty",
+  "selection": "median PSNR case",
+  "source_table": "frames.csv",
+  "figure": "K07",
+  "lang": "uk",
+  "run_dir": "runs/natural",
+  "title_uk": "Наскрізний приклад",
+  "title_en": "End-to-end example",
+  "experiment": "E02",
+  "formats": [
+    "png",
+    "svg",
+    "pdf"
+  ],
+  "dpi": 140
+}
