@@ -93,7 +93,8 @@
 Третій набір — єдиний, інтервали якого мають право стосуватися нового запису:
 24 автори, 9 моделей камер DJI, різні місця, вільні ліцензії. Реєстр із URL,
 ліцензією, автором і sha256 — [`data/real/sources.json`](data/real/sources.json);
-завантаження — `run.bat sources`.
+завантаження — `run.bat sources`. Паспорт усіх трьох наборів із повним
+переліком джерел: [docs/datasets.md](docs/datasets.md).
 
 ---
 
@@ -238,6 +239,7 @@ avsec verify --input results/natural
 | --- | --- |
 | зрозуміти, що це і як запустити | [README.md](README.md) |
 | побачити висновки й аналіз | [docs/conclusions.md](docs/conclusions.md) |
+| зрозуміти, на яких даних це виміряно | [docs/datasets.md](docs/datasets.md) |
 | перевірити конкретне твердження | [docs/claims.md](docs/claims.md) |
 | подивитися таблиці | [docs/results.md](docs/results.md) |
 | зрозуміти протокол | [docs/protocol.md](docs/protocol.md) |

@@ -582,6 +582,9 @@ python scripts/fetch_natural_sources.py   # завантажити й звіри
 avsec dataset validate --config configs/research_natural.yaml
 ```
 
+Повний перелік усіх 24 знімків — автор, апарат, ліцензія, роздільність,
+split і sha256 — у [паспорті наборів даних](docs/datasets.md).
+
 ### Синтетичний набір
 
 34 процедурні сцени (20 тестових, 8 калібрувальних, 6 валідаційних) — горизонт,
@@ -844,6 +847,7 @@ avsec/
 | [docs/threat_model.md](docs/threat_model.md) | модель загроз і межі гарантій |
 | [docs/defects_fixed.md](docs/defects_fixed.md) | журнал дефектів, перший раунд (F01–F18) |
 | [docs/defects_r01_r12.md](docs/defects_r01_r12.md) | журнал дефектів, **другий раунд (R01–R12)** і що вони змінили в результатах |
+| [docs/datasets.md](docs/datasets.md) | **паспорт трьох наборів даних**: походження, ліцензії, межі узагальнення |
 | [docs/experiments.md](docs/experiments.md) | протокол експериментів і статистика |
 | [docs/hardware.md](docs/hardware.md) | вимоги до стенда і що лишилось неперевіреним |
 | [docs/reconstruction_2021.md](docs/reconstruction_2021.md) | як саме відтворено схему зі статті |
