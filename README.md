@@ -671,7 +671,7 @@ PYTHONPATH=src python -m pytest tests -q
 
 Кожна регресія **падає на коді до виправлення** — це не тести-заглушки.
 Журнал усіх виправлених дефектів із відтвореними експлойтами:
-[docs/defects_fixed.md](docs/defects_fixed.md).
+[docs/defects_fixed.md](docs/defects_fixed.md) і [docs/defects_r01_r12.md](docs/defects_r01_r12.md).
 
 Окремо — **35 перевірок протоколу** (мутація кожного семантичного поля, межі
 парсера, повтори, зрив стану). Поле, мутація якого не змінює AAD, вважається
@@ -781,17 +781,19 @@ avsec/
 | Документ | Про що |
 | --- | --- |
 | [docs/conclusions.md](docs/conclusions.md) | **підсумкові висновки й аналіз результатів** |
+| [docs/claims.md](docs/claims.md) | **кожне твердження і те, що його підтримує** — з поділом на вимірювання, перевірки й гіпотези |
 | [docs/results.md](docs/results.md) | усі таблиці, згенеровані з одного `run_id` |
-| [docs/figures.md](docs/figures.md) | каталог G01–G43 + K01–K10 зі статусом кожного |
-| [docs/programme.md](docs/programme.md) | програма E01–E12 і що НЕ виконано |
-| [docs/protocol.md](docs/protocol.md) | формат кадру, AEAD, епохи, стан сеансу |
+| [docs/figures.md](docs/figures.md) | вісім основних рисунків + повний каталог зі статусом кожного |
+| [docs/programme.md](docs/programme.md) | програма E01–E15 і що НЕ виконано |
+| [docs/protocol.md](docs/protocol.md) | формат кадру, AEAD, епохи, реєстр сеансів |
 | [docs/architecture.md](docs/architecture.md) | рівні моделі, зіставлення A↔B, бюджет |
 | [docs/threat_model.md](docs/threat_model.md) | модель загроз і межі гарантій |
-| [docs/defects_fixed.md](docs/defects_fixed.md) | журнал 18 виправлених дефектів |
+| [docs/defects_fixed.md](docs/defects_fixed.md) | журнал дефектів, перший раунд (F01–F18) |
+| [docs/defects_r01_r12.md](docs/defects_r01_r12.md) | журнал дефектів, **другий раунд (R01–R12)** і що вони змінили в результатах |
 | [docs/experiments.md](docs/experiments.md) | протокол експериментів і статистика |
 | [docs/hardware.md](docs/hardware.md) | вимоги до стенда і що лишилось неперевіреним |
 | [docs/reconstruction_2021.md](docs/reconstruction_2021.md) | як саме відтворено схему зі статті |
-| [docs/related_work.md](docs/related_work.md) | суміжні роботи |
+| [docs/related_work.md](docs/related_work.md) | чотири суміжні напрями і що саме тут нове |
 
 ---
 
