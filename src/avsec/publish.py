@@ -837,6 +837,44 @@ def build_readme_block(view: RunView, figures_dir: str) -> str:
     return "\n".join(lines)
 
 
+#: The same navigation block the hand-written documents carry, so a reader who
+#: lands on a generated file knows what it is and where its neighbours are.
+DOC_NAV = {
+    "results": (
+        "Усі таблиці дослідження, згенеровані з ОДНОГО прогону. Цей файл "
+        "переписується командою `python scripts/publish.py`; правити його "
+        "вручну немає сенсу.",
+        "тому, хто шукає конкретне число",
+        [("conclusions.md", "що ці числа означають"),
+         ("claims.md", "яке твердження на чому стоїть"),
+         ("../results/README.md", "як перевірити число командою")]),
+    "figures": (
+        "Вісім основних рисунків і повний каталог, кожен зі статусом "
+        "`ready` або `pending` з причиною. Генерується автоматично.",
+        "тому, хто шукає потрібний рисунок",
+        [("results.md", "таблиці, з яких вони побудовані"),
+         ("conclusions.md", "висновки"),
+         ("../ROADMAP.md", "стан роботи цілком")]),
+    "programme": (
+        "Статус кожного дослідження програми, включно з тим, що НЕ виконано "
+        "і чому. Генерується автоматично.",
+        "тому, хто перевіряє повноту роботи",
+        [("../ROADMAP.md", "road map з планами"),
+         ("hardware.md", "що потрібно для E11"),
+         ("results.md", "результати виконаних")]),
+}
+
+
+def doc_nav(kind: str) -> str:
+    what, who, links = DOC_NAV[kind]
+    nav = " · ".join(f"[{text}]({href})" for href, text in links)
+    return ("<!-- DOCNAV -->\n"
+            f"> **Що це.** {what}\n>\n"
+            f"> **Кому.** Перш за все — {who}.\n>\n"
+            f"> **Поруч:** {nav} · [README](../README.md)\n"
+            "<!-- /DOCNAV -->\n\n")
+
+
 def publish(run_dir: str, docs_dir: str = "docs", readme: str = "README.md",
             figures_dir: Optional[str] = None,
             compare_dir: Optional[str] = None) -> Dict[str, Any]:
@@ -846,15 +884,18 @@ def publish(run_dir: str, docs_dir: str = "docs", readme: str = "README.md",
     ensure_dir(docs_dir)
 
     results = build_results_doc(view, figures_dir, compare_dir)
+    head, _, body = results.partition("\n")
     with open(os.path.join(docs_dir, "results.md"), "w", encoding="utf-8") as fh:
-        fh.write(results)
+        fh.write(head + "\n\n" + doc_nav("results") + body.lstrip("\n"))
 
     with open(os.path.join(docs_dir, "figures.md"), "w", encoding="utf-8") as fh:
-        fh.write("# Рисунки: вісім основних і повний каталог\n\n" + view.stamp() + "\n\n"
+        fh.write("# Рисунки: вісім основних і повний каталог\n\n"
+                 + doc_nav("figures") + view.stamp() + "\n\n"
                  + figures_section(view, figures_dir) + "\n")
 
     with open(os.path.join(docs_dir, "programme.md"), "w", encoding="utf-8") as fh:
-        fh.write("# Програма досліджень E01–E13\n\n" + view.stamp() + "\n\n"
+        fh.write("# Програма досліджень E01–E15\n\n"
+                 + doc_nav("programme") + view.stamp() + "\n\n"
                  + programme_section(figures_dir, _evidence(compare_dir)) + "\n\n"
                  + "## E11 — апаратна перевірка\n\n"
                  + EXPERIMENTS["E11"].reason + "\n\n"

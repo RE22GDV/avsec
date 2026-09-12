@@ -1,5 +1,13 @@
 # Реконструкція алгоритму зі статті 2021 року
 
+<!-- DOCNAV -->
+> **Що це.** Як саме відтворено алгоритм зі статті ISITIA 2021: що стаття повідомляє, чого не повідомляє, і які рішення ухвалено за неї.
+>
+> **Кому.** Перш за все — тому, хто звіряє реалізацію з першоджерелом.
+>
+> **Поруч:** [місце серед інших робіт](related_work.md) · [чому перестановки недостатньо](threat_model.md) · [твердження про схему 2021 року](claims.md) · [README](../README.md)
+<!-- /DOCNAV -->
+
 Джерело: Mardiyanto R., Suryoatmojo H., Setiawan F., Irfansyah A. N.
 *Low Cost Analog Video Transmission Security of Unmanned Aerial Vehicle (UAV)
 based on Linear Feedback Shift Register (LFSR)*.
