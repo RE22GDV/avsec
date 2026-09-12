@@ -1,9 +1,26 @@
-"""Real UAV imagery: scene clips cut out of an actual drone photograph.
+"""One natural photograph, seventeen window-motion sequences cut from it.
 
-Everything else in this testbed is procedurally generated, and every report says
-so.  This module is the exception: it builds clips from a real photograph taken
-by a real drone camera, so the source-coding and burst results can be checked
-against content that was not designed by us.
+What this module is, and what it is not
+---------------------------------------
+It builds clips from a real photograph taken by a real drone camera, so the
+source-coding and burst results can be checked against content nobody in this
+project designed.  It is a **demonstration set on one photograph**, not a
+sample of drone imagery, and it is labelled that way everywhere:
+
+* every clip is a *window-motion sequence over a natural image* - a crop window
+  panned across a still photograph.  There is no parallax, no rolling-shutter
+  skew, no exposure adaptation and no motion in the scene;
+* all seventeen clips share one ``source_id``, because they share one sensor,
+  one lens, one hour of one day and one landscape.  A bootstrap over them
+  measures uncertainty **within this photograph** and does not generalise to a
+  new recording (defect R07);
+* the crop rectangles are **not** claimed to be disjoint.  Whether two of them
+  overlap is measured by :meth:`avsec.dataset.DatasetManifest.measure_crop_overlap`
+  and reported in the manifest, rather than asserted in prose.
+
+For a set that *does* generalise across recordings, see
+:mod:`avsec.sources.natural`: twenty-four photographs by twenty-four
+photographers, one clip each.
 
 The photograph
 --------------
@@ -21,16 +38,15 @@ report that uses it therefore says "camera original", never "uncompressed".
 
 How clips are made
 ------------------
-A drone downlink is a *moving* view, so a still would be the wrong test.  Each
-clip pans and zooms a crop window across the photograph between a declared start
-and end rectangle, the way a camera pans while the aircraft flies.  The window is
-then area-averaged down to the working resolution - which is what a real sensor
-and lens do - and converted to luma with the BT.601 weights the rest of the
-pipeline assumes.
+Each clip pans and zooms a crop window across the photograph between a declared
+start and end rectangle.  The window is then area-averaged down to the working
+resolution - which is what a real sensor and lens do - and converted to luma
+with the BT.601 weights the rest of the pipeline assumes.
 
-The scenes are cut from **disjoint** regions with different content classes, and
-the duplicate detector in :mod:`avsec.dataset` is run over them like any other
-material; it must find nothing.
+The scenes cover different content classes, and the duplicate detector in
+:mod:`avsec.dataset` is run over them like any other material; it must find
+nothing.  Finding no duplicate is not the same as the crops being independent,
+which is why they share a source id.
 """
 from __future__ import annotations
 
@@ -59,13 +75,25 @@ PHOTO_CREDIT = {
     "encoding": "camera original JPEG, not re-encoded in this repository",
 }
 
+#: The one independent origin every clip in this module comes from (R07).
+SOURCE_ID = "photo:curonian_spit_epha_dune"
+
+#: Every clip is held out.  A single photograph cannot be divided into
+#: calibration, validation and test: all three would share the same sensor,
+#: light and landscape, which is precisely the leak the split exists to
+#: prevent.  Nothing in this repository is tuned on this photograph - the
+#: configurations come from the synthetic set - so holding all of it out is
+#: both honest and accurate.
+DECLARED_SPLIT = "test"
+
 #: Scene definitions: ``(name, category, (x0, y0, x1, y1) start, end, motion)``.
 #:
-#: Rectangles are in the photograph's own pixel coordinates.  They are chosen to
-#: be disjoint and to cover genuinely different content classes: open water and
-#: sky are almost flat, the pine canopy is the hardest texture in the frame, the
-#: shoreline and the dune edge are long high-contrast boundaries, and the village
-#: is a field of small bright objects.
+#: Rectangles are in the photograph's own pixel coordinates and cover different
+#: content classes: open water and sky are almost flat, the pine canopy is the
+#: hardest texture in the frame, the shoreline and the dune edge are long
+#: high-contrast boundaries, and the village is a field of small bright objects.
+#: Whether two windows overlap is measured in the dataset manifest, not
+#: asserted here.
 #:
 #: ``motion`` scales how far the window travels; "static" still drifts a little,
 #: because a hovering drone never holds perfectly still.
@@ -91,22 +119,26 @@ DRONE_SCENES: Tuple[Tuple[str, str, Tuple[int, int, int, int],
      (2000, 1700, 3280, 2660), (2240, 1660, 3520, 2620), "slow", "test"),
     ("spit_far", "low-detail",
      (1150, 300, 2430, 1260), (1390, 360, 2670, 1320), "slow", "test"),
-    # ---- calibration: the same photograph, different regions ----------------
+    # ---- further regions of the same photograph -----------------------------
+    # These were once labelled calibration/validation.  That was meaningless:
+    # all of them are the same photograph, so a "calibration" crop shares its
+    # sensor, light and terrain with every "test" crop (R07).  Nothing was ever
+    # tuned on them - the configurations come from the synthetic set - so the
+    # honest label is that the whole photograph is held out.
     ("cal_sea_edge", "low-detail",
-     (0, 1100, 1280, 2060), (240, 1160, 1520, 2120), "slow", "calibration"),
+     (0, 1100, 1280, 2060), (240, 1160, 1520, 2120), "slow", "test"),
     ("cal_canopy_mix", "high-detail",
-     (1400, 1800, 2680, 2620), (1640, 1760, 2920, 2580), "slow", "calibration"),
+     (1400, 1800, 2680, 2620), (1640, 1760, 2920, 2580), "slow", "test"),
     ("cal_dune_flat", "structure",
-     (3200, 1800, 4200, 2560), (3000, 1860, 4000, 2620), "slow", "calibration"),
+     (3200, 1800, 4200, 2560), (3000, 1860, 4000, 2620), "slow", "test"),
     ("cal_water_east", "low-detail",
-     (3100, 600, 4180, 1410), (2980, 660, 4060, 1470), "slow", "calibration"),
-    # ---- validation --------------------------------------------------------
+     (3100, 600, 4180, 1410), (2980, 660, 4060, 1470), "slow", "test"),
     ("val_treeline", "structure",
-     (700, 1150, 1980, 2110), (940, 1210, 2220, 2170), "slow", "validation"),
+     (700, 1150, 1980, 2110), (940, 1210, 2220, 2170), "slow", "test"),
     ("val_sand_texture", "high-detail",
-     (2600, 2000, 3880, 2630), (2840, 1980, 4120, 2610), "fast", "validation"),
+     (2600, 2000, 3880, 2630), (2840, 1980, 4120, 2610), "fast", "test"),
     ("val_coast_curve", "structure",
-     (200, 500, 1480, 1460), (440, 560, 1720, 1520), "slow", "validation"),
+     (200, 500, 1480, 1460), (440, 560, 1720, 1520), "slow", "test"),
 )
 
 _MOTION = {"static": 0.15, "slow": 1.0, "fast": 2.6}
@@ -172,13 +204,20 @@ def drone_suite(h: int = 192, w: int = 256, n_frames: int = 16,
             name=f"uav_{name}",
             frames=frames,
             provenance=PROV_LOCAL_FILE,
-            description=(f"real UAV footage: pan across '{name}' in the Epha Dune "
-                         f"photograph, motion={motion}, {w}x{h}, {n_frames} frames"),
+            description=(f"window-motion sequence over a natural image: pan across "
+                         f"'{name}' in the Epha Dune photograph, motion={motion}, "
+                         f"{w}x{h}, {n_frames} frames"),
             meta={
                 "scene_id": f"uav:{name}",
+                # Every clip here comes from ONE photograph, and says so (R07).
+                "source_id": SOURCE_ID,
+                "derivation": ("послідовність зі штучним рухом вікна по "
+                               "природному зображенні: одна фотографія, "
+                               "вирізка панорамується між двома прямокутниками"),
                 "category": category,
                 "split": split,
-                "motion": motion,
+                "motion": f"synthetic window pan ({motion}); no parallax, "
+                          "no scene motion",
                 "suite": "drone",
                 "crop_start": list(start),
                 "crop_end": list(end),
@@ -198,5 +237,5 @@ def showcase_frame(h: int = 288, w: int = 384, path: Optional[str] = None,
     return _to_luma(_crop_resize(photo, r, h, w))
 
 
-__all__ = ["DRONE_PHOTO", "PHOTO_CREDIT", "DRONE_SCENES", "drone_suite",
+__all__ = ["DRONE_PHOTO", "PHOTO_CREDIT", "SOURCE_ID", "DRONE_SCENES", "drone_suite",
            "load_photo", "showcase_frame", "_to_luma"]

@@ -19,7 +19,13 @@ from avsec.optimization import SharedBudget
 from avsec.source_coding import SourceCodingConfig
 from avsec.transmitter import TransportConfig
 
-ALL_METHODS = ("B0a", "B0a-R", "B0d", "B0d-W", "B1", "B2", "B3", "B4", "P")
+#: ``B4t`` is the **retuned** single-description baseline: B4 given exactly the
+#: transport parameters of P (unit size, FEC strength, source quality) but
+#: neither of the two proposed mechanisms - no multiple descriptions and no
+#: burst-aware placement.  It is not an optional extra.  Without it, "P beats
+#: B4" cannot distinguish the contribution of the mechanisms from the
+#: contribution of parameters any scheme could have used (defect R08).
+ALL_METHODS = ("B0a", "B0a-R", "B0d", "B0d-W", "B1", "B2", "B3", "B4", "B4t", "P")
 
 
 @dataclass
@@ -91,10 +97,24 @@ _TUNED_MDC = dict(stripe_height=24, n_descriptions=2, codec="dct", quality=8,
                   max_unit_payload=320, fec_nsym=128, fec_header_nsym=48,
                   modulation=(4, 8, 2), interleaver=("bawp", 0, 8))
 
+#: ``B4t`` - the retuned baseline (R08).  Every transport parameter is copied
+#: from ``_TUNED_MDC``; the only differences from ``P`` are the two things the
+#: work proposes:
+#:
+#:   * ``n_descriptions = 1``          (no multiple-description coding)
+#:   * ``interleaver = block``         (no burst-aware placement)
+#:
+#: So the comparison ``P - B4t`` measures exactly those two mechanisms, and
+#: ``B4t - B4`` measures the parameters that were available to the old scheme
+#: all along.  The block depth is the one the single-description family was
+#: tuned to, so B4t is not handicapped by a placement nobody would choose.
+_RETUNED_SINGLE = dict(_TUNED_MDC, n_descriptions=1, interleaver=("block", 278, 0))
+
 DEFAULT_PROFILES: Dict[str, MethodProfile] = {
     "B0d": MethodProfile(**_TUNED_SINGLE),
     "B3": MethodProfile(**_TUNED_SINGLE),
     "B4": MethodProfile(**_TUNED_SINGLE),
+    "B4t": MethodProfile(**_RETUNED_SINGLE),
     "P": MethodProfile(**_TUNED_MDC),
 }
 

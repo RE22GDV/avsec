@@ -1,4 +1,4 @@
-"""Run the research programme E01-E10 into one run directory.
+"""Run the research programme E01-E15 into one run directory.
 
 Usage::
 
@@ -82,6 +82,8 @@ def main(argv: list) -> int:
     def _e10(): return research.run_e10(cfg, out)
     def _e13(): return research.run_e13(cfg, out, workers, repetitions=3,
                                         max_frames=8)
+    def _e15(): return research.run_e15(cfg, out, workers, repetitions=3,
+                                        max_frames=6, n_clips=6)
 
     def _e08():
         att = run_attacks(cfg, out)
@@ -96,7 +98,7 @@ def main(argv: list) -> int:
 
     steps = [("E01", _e01), ("E03", _e03), ("E04", _e04), ("E05", _e05),
              ("E06", _e06), ("E07", _e07), ("E08", _e08), ("E09", _e09),
-             ("E10", _e10), ("E13", _e13)]
+             ("E10", _e10), ("E13", _e13), ("E15", _e15)]
     status = {}
     for name, fn in steps:
         if only and name not in only:

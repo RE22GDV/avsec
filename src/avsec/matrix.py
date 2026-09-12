@@ -159,6 +159,19 @@ class Job:
                 "clip_hash": self.clip_hash, "config_id": self.config_id}
 
 
+#: What is shown when a scheduled frame produces no picture.  Declared before
+#: the run, never chosen per method (R05): the display holds the last frame it
+#: successfully showed, and a neutral mid-grey field until there is one.
+GAP_POLICY = "hold-last, neutral 128 until the first success"
+NEUTRAL_LEVEL = 128
+
+#: Why a scheduled display instant produced no current picture.  These are
+#: different failures with different fixes and are never merged into one
+#: "did not run" bucket.
+INSTANT_STATUSES = ("ok", "capacity", "no_sync", "deadline_miss", "exception",
+                    "not_reached")
+
+
 @dataclass
 class JobResult:
     job: Job
@@ -576,8 +589,10 @@ class MatrixRunner:
                     row = json.loads(line)
                 except json.JSONDecodeError:
                     continue
-                key = (row.get("job_id"), row.get("frame_id"), row.get("status"),
-                       row.get("method"))
+                # Identity is where the row came from, not what it says: a job
+                # re-run after a crash must *replace* its rows, including when
+                # a frame's status changed between the two runs.
+                key = (row.get("job_id"), row.get("frame_id"), row.get("method"))
                 if key not in keyed:
                     order.append(key)
                 keyed[key] = row
@@ -613,6 +628,14 @@ class MatrixRunner:
         t0 = time.perf_counter()
         method.reset()                       # once per clip: state stays continuous
         current_label = job.channel.label
+
+        # R05: a row is written for **every scheduled display instant**, not
+        # only for the frames the method managed to process.  Stopping the clip
+        # at the first capacity failure used to delete the hard frames from the
+        # record entirely, which let a configuration raise its average by not
+        # attempting the scenes it could not carry.
+        held: Optional[np.ndarray] = None    # last picture actually displayed
+        aborted = ""
         for fi in range(job.n_frames):
             frame = src.frames[fi]
             if job.schedule:
@@ -621,26 +644,62 @@ class MatrixRunner:
                     # swap the impairment model, keep every bit of session state
                     method.channel.cfg = point.config()
                     current_label = point.label
+            channel_label = current_label if job.schedule else job.channel.label
+
+            if aborted:
+                res.frames.append(_gap_row(
+                    job, src, fi, frame, held, "not_reached", aborted,
+                    channel_label, trace.trace_id))
+                continue
+
+            out = None
+            status = "ok"
+            detail = ""
             try:
                 out = method.process(frame, fi, trace)
             except CapacityExceeded as exc:
+                status, detail = "capacity", str(exc)
                 res.status, res.detail = "capacity", str(exc)
-                break
             except Exception as exc:
-                res.status = "exception"
-                res.detail = f"{type(exc).__name__}: {exc}"
+                status = "exception"
+                detail = f"{type(exc).__name__}: {exc}"
+                res.status, res.detail = "exception", detail
                 res.traceback = traceback.format_exc()   # type: ignore[attr-defined]
-                break
-            row = out.metrics.to_row()
+                aborted = detail            # a program error ends the session
+
+            if out is None:
+                res.frames.append(_gap_row(job, src, fi, frame, held, status,
+                                           detail, channel_label, trace.trace_id))
+                continue
+
+            # A frame that was processed can still have produced no current
+            # picture.  Those are not successes and are not silently averaged
+            # in as if they were.
+            met = out.metrics
+            if met.coverage <= 0.0:
+                status = "no_sync" if not met.sync_found else "deadline_miss"
+                detail = ("no current, authenticated sample reached the display "
+                          "instant")
+            row = met.to_row()
+            displayed = out.reconstructed
             row.update({
                 "job_id": job.job_id, "clip": job.clip, "scene": job.scene,
                 "repetition": job.repetition,
-                "channel": current_label if job.schedule else job.channel.label,
+                "channel": channel_label,
                 "channel_plan": job.channel.label,
                 "channel_axis": job.channel.axis, "channel_value": job.channel.value,
                 "trace_id": trace.trace_id, "provenance": src.provenance,
+                "status": status, "detail": detail,
+                "availability": 1.0 if status == "ok" else 0.0,
+                "displayed_source": "current" if status == "ok" else "held",
+                "psnr_displayed": _psnr(frame, displayed if status == "ok" else
+                                        (held if held is not None else
+                                         _neutral(frame))),
+                "gap_policy": GAP_POLICY,
             })
             res.frames.append(row)
+            if status == "ok":
+                held = displayed
             if store_units:
                 res.units.extend(_unit_rows(out, job, fi))
         res.wall_s = time.perf_counter() - t0
@@ -665,18 +724,31 @@ class MatrixRunner:
         if failures:
             write_csv(os.path.join(self.output_dir, "failures.csv"), failures)
 
+        sources = self.manifest.source_of()
         table = ResultTable()
+        # A job that produced no rows at all (a build error, a missing clip) is
+        # still an observation; a job that produced rows is represented by them,
+        # because each of those rows now carries its own status (R05).
+        produced = {str(r.get("job_id")) for r in frames}
         for row in failures:
+            if str(row.get("job_id")) in produced:
+                continue
             table.add(Observation(
                 method=str(row.get("method", "")), scene=str(row.get("scene", "")),
                 clip=str(row.get("clip", "")), repetition=int(row.get("repetition", 0)),
                 frame=-1, status=_status_kind(str(row.get("status", "exception"))),
-                detail=str(row.get("detail", ""))))
+                detail=str(row.get("detail", "")),
+                channel=str(row.get("channel", "")),
+                source_id=sources.get(str(row.get("clip", "")), "")))
         for row in frames:
+            clip = str(row.get("clip", ""))
             table.add(Observation(
                 method=str(row.get("method", "")), scene=str(row.get("scene", "")),
-                clip=str(row.get("clip", "")), repetition=int(row.get("repetition", 0)),
-                frame=int(row.get("frame_id", 0)), status="ok",
+                clip=clip, repetition=int(row.get("repetition", 0)),
+                frame=int(row.get("frame_id", 0)),
+                status=str(row.get("status", "ok")),
+                channel=str(row.get("channel", "")),
+                source_id=sources.get(clip, "") or str(row.get("scene", "")),
                 metrics={k: float(v) for k, v in row.items()
                          if isinstance(v, (int, float, np.floating))
                          and not isinstance(v, bool)}))
@@ -786,6 +858,44 @@ def _pool_run_job(job: Job) -> JobResult:  # pragma: no cover
 def _status_kind(status: str) -> str:
     return {"capacity": "capacity", "exception": "exception",
             "skipped": "skipped"}.get(status, status)
+
+
+def _neutral(frame: np.ndarray) -> np.ndarray:
+    return np.full(frame.shape, NEUTRAL_LEVEL, dtype=np.uint8)
+
+
+def _psnr(reference: np.ndarray, shown: np.ndarray) -> float:
+    from avsec.evaluation import psnr
+
+    value = psnr(reference, shown)
+    return float(value) if np.isfinite(value) else float("nan")
+
+
+def _gap_row(job: Job, src: FrameSource, frame_id: int, frame: np.ndarray,
+             held: Optional[np.ndarray], status: str, detail: str,
+             channel_label: str, trace_id: str) -> Dict[str, Any]:
+    """The record of a scheduled instant that produced no current picture.
+
+    It is a full row, not an absence: availability counts it, the displayed
+    quality is measured against whatever the declared gap policy actually put
+    on the screen, and the per-transmission quality columns stay empty so that
+    a failure can never improve them.
+    """
+    shown = held if held is not None else _neutral(frame)
+    return {
+        "frame_id": frame_id, "method": job.method,
+        "job_id": job.job_id, "clip": job.clip, "scene": job.scene,
+        "repetition": job.repetition, "channel": channel_label,
+        "channel_plan": job.channel.label, "channel_axis": job.channel.axis,
+        "channel_value": job.channel.value, "trace_id": trace_id,
+        "provenance": src.provenance,
+        "status": status, "detail": detail,
+        "availability": 0.0,
+        "coverage": 0.0,
+        "displayed_source": "held" if held is not None else "neutral",
+        "psnr_displayed": _psnr(frame, shown),
+        "gap_policy": GAP_POLICY,
+    }
 
 
 def _unit_rows(result: Any, job: Job, frame_id: int) -> List[Dict[str, Any]]:

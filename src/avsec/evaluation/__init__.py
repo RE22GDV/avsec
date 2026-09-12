@@ -144,6 +144,101 @@ def adjacent_correlation(img: np.ndarray, direction: str = "horizontal",
     return correlation(a, b)
 
 
+# --------------------------------------------- descriptions: three questions
+#: "Damaged" and "lost" are not the same thing, and a single joint-loss count
+#: conflates them (defect R04).  A description can be hit by a burst and come
+#: back perfectly, because that is what the FEC is for.  Three separate
+#: questions are asked of every description of every stripe:
+#:
+#: 1. ``touched``      - distortion reached at least one of its symbols;
+#: 2. ``fec_failed``   - the FEC could not reconstruct data it needed;
+#: 3. ``unusable``     - after authentication and decoding, the reconstruction
+#:                       cannot use it (a required segment never verified).
+#:
+#: Only the third is a loss.  Band ("stripe") loss is then split the same way,
+#: because "the band is gone" can mean three different things.
+BAND_OUTCOMES = ("complete", "partial_segments", "reduced_descriptions",
+                 "no_usable_description")
+
+
+@dataclass
+class DescriptionOutcome:
+    """What happened to one description of one stripe."""
+
+    stripe_id: int
+    desc_id: int
+    n_segs: int = 0
+    n_touched: int = 0
+    n_fec_failed: int = 0
+    n_verified: int = 0
+
+    @property
+    def touched(self) -> bool:
+        return self.n_touched > 0
+
+    @property
+    def fec_failed(self) -> bool:
+        return self.n_fec_failed > 0
+
+    @property
+    def usable(self) -> bool:
+        """Every segment it needs verified, so the decoder may use it."""
+        return self.n_segs > 0 and self.n_verified >= self.n_segs
+
+    @property
+    def partial(self) -> bool:
+        return 0 < self.n_verified < self.n_segs
+
+
+def description_accounting(outcomes: Iterable[DescriptionOutcome],
+                           n_descriptions: int) -> Dict[str, float]:
+    """Turn per-description outcomes into the three metrics and band states.
+
+    The old ``joint_loss`` counted a band as lost when *both* descriptions were
+    touched by a burst.  That is the wrong event: two touched descriptions that
+    the FEC repaired lose nothing at all.  What the plot must count is the band
+    being unusable for reconstruction, which is the last row here.
+    """
+    per_stripe: Dict[int, List[DescriptionOutcome]] = {}
+    for o in outcomes:
+        per_stripe.setdefault(o.stripe_id, []).append(o)
+
+    n_desc_total = n_touched = n_fec = n_unusable = n_partial = 0
+    bands = {k: 0 for k in BAND_OUTCOMES}
+    for _stripe, descs in sorted(per_stripe.items()):
+        usable = [d for d in descs if d.usable]
+        n_desc_total += len(descs)
+        n_touched += sum(1 for d in descs if d.touched)
+        n_fec += sum(1 for d in descs if d.fec_failed)
+        n_unusable += sum(1 for d in descs if not d.usable)
+        n_partial += sum(1 for d in descs if d.partial)
+        if not usable:
+            bands["no_usable_description"] += 1
+        elif any(d.partial for d in descs):
+            bands["partial_segments"] += 1
+        elif len(usable) < max(1, min(n_descriptions, len(descs))):
+            bands["reduced_descriptions"] += 1
+        else:
+            bands["complete"] += 1
+
+    n_bands = max(1, len(per_stripe))
+    return {
+        "desc_total": n_desc_total,
+        "desc_touched": n_touched,
+        "desc_fec_failed": n_fec,
+        "desc_unusable": n_unusable,
+        "desc_partial": n_partial,
+        "desc_touched_frac": n_touched / max(1, n_desc_total),
+        "desc_fec_failed_frac": n_fec / max(1, n_desc_total),
+        "desc_unusable_frac": n_unusable / max(1, n_desc_total),
+        "bands_total": len(per_stripe),
+        **{f"band_{k}": v for k, v in bands.items()},
+        "band_lost_frac": bands["no_usable_description"] / n_bands,
+        "band_degraded_frac": (bands["partial_segments"]
+                               + bands["reduced_descriptions"]) / n_bands,
+    }
+
+
 # ------------------------------------------------------------------ containers
 @dataclass
 class FrameMetrics:
@@ -329,7 +424,8 @@ def availability_overlay(image: np.ndarray, available: np.ndarray,
 
 __all__ = [
     "mse", "psnr", "ssim", "correlation", "signal_statistics",
-    "entropy_bits", "npcr_uaci",
+    "entropy_bits", "npcr_uaci", "BAND_OUTCOMES", "DescriptionOutcome",
+    "description_accounting",
     "adjacent_correlation", "FrameMetrics", "quality_pair", "aggregate",
     "paired_difference", "save_line_plot", "save_bar_plot", "save_image",
     "availability_overlay",

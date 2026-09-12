@@ -20,6 +20,10 @@ session_state*.json
 runs/
 reports/
 data/generated/
+# Natural source photographs: fetched with scripts/fetch_natural_sources.py,
+# pinned by data/real/sources.json (URL + licence + sha256). 63 MB of images
+# do not belong in a source repository; the registry that identifies them does.
+data/real/natural/
 
 # Editors / OS
 .vscode/

@@ -110,19 +110,25 @@ def build_methods(cfg: ExperimentConfig, timer: Optional[StageTimer] = None
             out[name] = make_b2_cryptoperm(ref_transport, chan, H, W, cfg.b2_grid[0],
                                            cfg.b2_grid[1], master, timer=timer,
                                            session_ids=sids)
-        elif name in ("B0d", "B0d-W", "B4", "P"):
+        elif name in ("B0d", "B0d-W", "B4", "B4t", "P"):
             prof = cfg.profile("B0d" if name == "B0d-W" else name)
             transport = prof.transport_config(cfg.budget)
             secure = name not in ("B0d", "B0d-W")
             if name == "B0d-W":
                 transport = dataclasses.replace(transport, public_whitening=True)
+            notes = ""
+            if not secure:
+                notes = ("diagnostic transport without cryptography - authenticates "
+                         "nothing" + (", public bit whitening only"
+                                      if name == "B0d-W" else ""))
+            elif name == "B4t":
+                notes = ("retuned baseline: B4 with P's transport parameters "
+                         "(unit size, FEC, quality) and neither proposed "
+                         "mechanism - one description, block placement")
             out[name] = DigitalMethod(
                 name, prof.source_config(), transport, chan,
                 master, H, W, cfg.crypto, secure=secure, fill=cfg.fill,
-                timer=timer, session_ids=sids,
-                notes=("diagnostic transport without cryptography - authenticates "
-                       "nothing" + (", public bit whitening only" if name == "B0d-W"
-                                    else "") if not secure else ""))
+                timer=timer, session_ids=sids, notes=notes)
         elif name == "B3":
             prof = cfg.profile("B3")
             out[name] = WholeFrameAEADMethod(
@@ -943,6 +949,9 @@ SECURITY_PROPERTIES = {
               "integrity": "128-bit tag", "notes": "one unit per frame"},
     "B4":    {"confidentiality": "AEAD", "authentication": "AEAD, per unit",
               "integrity": "128-bit tag per unit", "notes": "segmented"},
+    "B4t":   {"confidentiality": "AEAD", "authentication": "AEAD, per unit",
+              "integrity": "128-bit tag per unit",
+              "notes": "segmented, retuned to P's transport, no MDC, no BAWP"},
     "P":     {"confidentiality": "AEAD", "authentication": "AEAD, per unit",
               "integrity": "128-bit tag per unit",
               "notes": "segmented + MDC + burst-aware placement"},
@@ -1005,7 +1014,7 @@ def run_budget(cfg: ExperimentConfig) -> Dict[str, Any]:
     }
 
     peak_bytes, peak_method = process_peak_bytes()
-    for name in ("B0d", "B3", "B4", "P"):
+    for name in ("B0d", "B3", "B4", "B4t", "P"):
         prof = cfg.profile(name)
         tr = prof.transport_config(cfg.budget)
         b = compute_budget(tr.modem, tr.fec_payload, tr.fec_header,

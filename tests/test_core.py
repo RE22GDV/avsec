@@ -454,13 +454,15 @@ def test_unauthenticated_sessions_never_enter_the_cache():
         ctx = (new_session_id(), 0, 0)
         assert rx._lookup_opener(ctx) is None      # read-only lookup
         assert rx._provisional_opener(ctx) is not None
-    assert len(rx._openers) == 0                   # nothing was cached
+    assert len(rx.sessions) == 0                   # no context was admitted
 
-    # only a commit installs, and eviction stays bounded
+    # only a commit admits, and the active table stays bounded
     for _ in range(10):
         ctx = (new_session_id(), 0, 0)
         rx._commit_session(ctx, rx._provisional_opener(ctx))
-    assert len(rx._openers) <= 3
+    assert len(rx.sessions) <= 3
+    # what left the active table was *closed*, not forgotten (F19)
+    assert len(rx.sessions.closed) == 7
 
 
 def test_source_coding_budget_failure_is_explicit():

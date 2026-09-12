@@ -88,8 +88,8 @@ def test_f01_forged_headers_cannot_evict_a_session_and_reopen_a_replay():
     for i in range(rx.max_sessions * 3):
         rx.receive_raster(_forged_raster(tx, rx, tr, bytes([i + 1]) * 8))
 
-    assert len(rx._openers) <= rx.max_sessions
-    assert any(ctx[0] == tx.session_id for ctx in rx._openers), \
+    assert len(rx.sessions) <= rx.max_sessions
+    assert any(ctx[0] == tx.session_id for ctx in rx.sessions.active), \
         "the genuine session was evicted by unauthenticated traffic"
     counts = rx.receive_raster(raster).counts()
     assert counts.get("verified", 0) == 0
@@ -100,14 +100,14 @@ def test_f01_unrecoverable_units_do_not_disturb_state():
     _, tr, tx, rx = _pipeline()
     raster = tx.encode_frame(S.pattern_edges(H, W), 0).rasters[0]
     rx.receive_raster(raster)
-    before_sessions = dict(rx._openers)
-    before_frames = dict(rx._newest_frame)
+    before_sessions = dict(rx.sessions.active)
+    before_frames = {c: r.newest_frame for c, r in rx.sessions.active.items()}
 
     rng = np.random.default_rng(0)
     noise = rng.integers(0, 256, raster.shape).astype(np.uint8)
     rx.receive_raster(noise)
-    assert dict(rx._openers) == before_sessions
-    assert dict(rx._newest_frame) == before_frames
+    assert dict(rx.sessions.active) == before_sessions
+    assert {c: r.newest_frame for c, r in rx.sessions.active.items()} == before_frames
 
 
 # ------------------------------------------------------------------------ F02
@@ -144,7 +144,10 @@ def test_f02_a_retired_epoch_cannot_be_reopened():
         for k, v in rx.receive_raster(r).counts().items():
             counts[k] = counts.get(k, 0) + v
     assert counts.get("verified", 0) == 0
-    assert counts.get("stale_epoch", 0) + counts.get("replay", 0) > 0
+    # F19 closes the superseded epoch outright, which is a stronger rejection
+    # than "stale": the context can never be reopened at all.
+    assert (counts.get("stale_epoch", 0) + counts.get("replay", 0)
+            + counts.get("session_closed", 0)) > 0
 
 
 # ------------------------------------------------------------------------ F03

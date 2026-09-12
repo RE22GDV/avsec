@@ -89,7 +89,17 @@ PROGRAM: Tuple[Experiment, ...] = (
         "E13", "Розклад переваги по кроках", "Decomposition of the advantage",
         "Яку частину різниці B4 -> P дають параметри транспорту, доступні будь-"
         "якій схемі, а яку - два запропоновані механізми?",
-        ("chain.csv", "K05")),
+        ("chain.csv", "chain_scenes.csv", "K05", "K11")),
+    Experiment(
+        "E14", "Незалежні природні джерела", "Independent natural sources",
+        "Чи зберігаються висновки, коли одиниця незалежності - окрема "
+        "фотографія з БпЛА, а не вирізка з однієї?",
+        ("frames.csv", "paired_effects.csv", "dataset_manifest.csv", "K12")),
+    Experiment(
+        "E15", "Карта області працездатності", "Operating region map",
+        "За яких довжин і частот пакетних спотворень запропонована схема "
+        "перевершує переналаштовану базу, і де різниця не встановлена?",
+        ("operating_map.csv", "operating_map_scenes.csv", "K13")),
     Experiment(
         "E11", "Апаратна перевірка", "Hardware validation",
         "Які реальні місткість, затримка, споживання і вартість фізичного тракту?",
@@ -259,12 +269,21 @@ KEY: Tuple[Figure, ...] = (
     Figure("K10", "Схема 2021 року зламана", "The 2021 scheme is broken",
            "оригінал / передане / відновлене атакою + успіх атак", "E08",
            ("attacks.json",), panels=3),
+    Figure("K11", "Порядок кроків вирішує", "The order of the steps decides",
+           "прямий і зворотний розклад B4 → P, з парними інтервалами", "E13",
+           ("chain.csv",), panels=2),
+    Figure("K12", "24 незалежні джерела", "Twenty-four independent sources",
+           "ефект по сценах і по вихідних фотографіях, з інтервалами", "E14",
+           ("paired_effects.csv",), panels=2),
+    Figure("K13", "Карта області працездатності", "Operating region map",
+           "довжина × частота пакетів: де P кращий за переналаштований B4", "E15",
+           ("operating_map.csv",), panels=2),
 )
 
 FIGURES: Dict[str, Figure] = {f.gid: f for f in CATALOGUE + KEY}
 
 assert len(CATALOGUE) == 43, "the catalogue is defined as 43 figures"
-assert len(KEY) == 10, "there are ten key figures"
+assert len(KEY) == 13, "there are thirteen key figures"
 
 
 # ---------------------------------------------------------------- readiness

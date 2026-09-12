@@ -392,6 +392,20 @@ def cmd_analyze(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_verify(args: argparse.Namespace) -> int:
+    """Recompute every published claim from the published tables (R11).
+
+    Runs no experiment and reads nothing but the directory it is given, so a
+    reader with the results and no simulator can check each number.
+    """
+    from avsec.verify import render, verify
+
+    res = verify(args.input, output=args.output or
+                 os.path.join(args.input, "verification.json"))
+    print(render(res))
+    return 0 if res["ok"] else 1
+
+
 def cmd_plots(args: argparse.Namespace) -> int:
     """Build the G01-G43 catalogue from a finished run.  Reads only."""
     from avsec.figures import FigureContext, build
@@ -530,6 +544,12 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--output", help="where to write the tables (default: --input)")
     sp.add_argument("--plan", help="statistics plan YAML")
     sp.set_defaults(func=cmd_analyze)
+
+    sp = sub.add_parser("verify",
+                        help="recompute every published claim from the tables")
+    sp.add_argument("--input", required=True, help="results directory")
+    sp.add_argument("--output", help="where to write verification.json")
+    sp.set_defaults(func=cmd_verify)
 
     sp = sub.add_parser("plots", help="build the G01-G43 figure catalogue")
     sp.add_argument("--input", required=True, help="run directory")

@@ -116,6 +116,10 @@ class TxFrame:
     unit_headers: List[UnitHeader] = field(default_factory=list)
     symbols: List[np.ndarray] = field(default_factory=list)   # evaluator-only reference
     occupied_slots: List[int] = field(default_factory=list)
+    #: ``(raster_index, slot_index)`` of each entry of ``unit_headers``, so the
+    #: evaluator can say which received slot carried which description and
+    #: segment without guessing the ordering (R04).
+    unit_slots: List[Tuple[int, int]] = field(default_factory=list)
 
     def summary(self) -> Dict[str, object]:
         return {
@@ -316,7 +320,8 @@ class Transmitter:
 
         symbol_frames: List[np.ndarray] = []
         occupied: List[int] = []
-        for _ in range(n_rasters):
+        unit_slots: List[Tuple[int, int]] = []
+        for ri in range(n_rasters):
             sym = np.zeros(self.cfg.modem.capacity_symbols, dtype=np.uint8)
             n_occ = 0
             for slot in range(u):
@@ -337,6 +342,7 @@ class Transmitter:
                         payload_bytes += len(seg.payload)
                 wire_bytes += len(wire)
                 headers.append(hdr)
+                unit_slots.append((ri, slot))
                 with t("tx.modulation"):
                     s = bytes_to_symbols(wire, self.cfg.modem.bits_per_symbol)
                     cells = self._placement[slot]
@@ -355,6 +361,7 @@ class Transmitter:
             frame_id=frame_id, rasters=rasters, n_units=n_units, n_filler=n_filler,
             n_segments=len(segments), payload_bytes=payload_bytes, wire_bytes=wire_bytes,
             unit_headers=headers, symbols=symbol_frames, occupied_slots=occupied,
+            unit_slots=unit_slots,
         )
 
     # -- reporting ---------------------------------------------------------

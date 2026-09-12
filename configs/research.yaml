@@ -26,7 +26,7 @@ budget:
   active_y1: 568
   level_low: 40
   level_high: 216
-methods: [B0a, B0d, B1, B2, B3, B4, P]
+methods: [B0a, B0d, B1, B2, B3, B4, B4t, P]
 profiles:
   B0d:
     stripe_height: 24
@@ -55,6 +55,18 @@ profiles:
     quality: 12
     max_unit_payload: 640
     fec_nsym: 96
+    fec_header_nsym: 48
+    modulation: [4, 8, 2]
+    interleaver: [block, 278, 0]
+  B4t:
+    # Retuned baseline (R08): B4 with P's transport parameters and neither
+    # proposed mechanism.  Differs from P only in n_descriptions and placement.
+    stripe_height: 24
+    n_descriptions: 1
+    codec: dct
+    quality: 8
+    max_unit_payload: 320
+    fec_nsym: 128
     fec_header_nsym: 48
     modulation: [4, 8, 2]
     interleaver: [block, 278, 0]

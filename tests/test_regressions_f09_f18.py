@@ -155,10 +155,16 @@ def test_f14_failures_are_kept_apart_by_category():
 def test_f14_holm_is_monotone_and_never_below_the_raw_p():
     from avsec.statistics import holm_adjust
 
-    comps = [{"n_scenes": 10, "mean": 3.0, "lo": 2.0, "hi": 4.0},
-             {"n_scenes": 10, "mean": 0.2, "lo": -0.1, "hi": 0.5},
-             {"n_scenes": 10, "mean": 1.0, "lo": 0.4, "hi": 1.6}]
-    holm_adjust(comps)
+    # R06: the p-value comes from the paired differences themselves, so a
+    # comparison must carry them; an interval's width is not a substitute.
+    rng = np.random.default_rng(3)
+    comps = [{"n_scenes": 10, "mean": 3.0, "lo": 2.0, "hi": 4.0,
+              "diffs": list(3.0 + rng.normal(0, 0.5, 10))},
+             {"n_scenes": 10, "mean": 0.2, "lo": -0.1, "hi": 0.5,
+              "diffs": list(0.2 + rng.normal(0, 0.5, 10))},
+             {"n_scenes": 10, "mean": 1.0, "lo": 0.4, "hi": 1.6,
+              "diffs": list(1.0 + rng.normal(0, 0.5, 10))}]
+    holm_adjust(comps, n_boot=2000)
     for c in comps:
         assert c["p_holm"] >= c["p_raw"] - 1e-12
     ordered = sorted(comps, key=lambda c: c["p_raw"])
@@ -449,7 +455,7 @@ def test_f18_pending_figures_carry_a_reason(tmp_path):
     from avsec.program import CATALOGUE, KEY, catalogue_status
 
     rows = catalogue_status(str(tmp_path))
-    assert len(rows) == len(KEY) + len(CATALOGUE) == 53
+    assert len(rows) == len(KEY) + len(CATALOGUE) == 56
     # the ten key figures come first: a reader who stops after one screen
     # should have seen the ones that carry the argument
     assert [r["figure"] for r in rows[:len(KEY)]] == [f.gid for f in KEY]

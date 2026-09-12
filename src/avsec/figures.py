@@ -877,10 +877,15 @@ def g28(ctx: FigureContext) -> Dict[str, Any]:
     fig, ax = plt.subplots(figsize=(1.0 * len(lens) + 3.5, 0.45 * len(schemes) + 2.4))
     im = ax.imshow(grid, cmap="magma_r", aspect="auto")
     nsym = _float(rows[0], "rs_nsym")
+    # Whether a unit survives is decided **per RS block**, not by comparing a
+    # whole unit's damage with one block's parity budget (R03), so the verdict
+    # is read from the sweep rather than recomputed from the total here.
+    verdict = {(r["scheme"], _float(r, "burst_lines")):
+               _float(r, "frac_positions_uncorrectable", 0.0) for r in rows}
     for i in range(len(schemes)):
         for j in range(len(lens)):
             if np.isfinite(grid[i, j]):
-                ok = grid[i, j] <= nsym
+                ok = verdict.get((schemes[i], lens[j]), 0.0) <= 0.0
                 ax.text(j, i, f"{int(grid[i, j])}", ha="center", va="center",
                         fontsize=7, color="#1b5e20" if ok else "#ffffff",
                         weight="bold" if ok else "normal")
@@ -893,8 +898,13 @@ def g28(ctx: FigureContext) -> Dict[str, Any]:
     ax.set_title(title_of(ctx, "G28"))
     ax.grid(False)
     fig.colorbar(im, ax=ax, label=ctx.t("damaged"))
-    footnote(ctx, fig, f"зелений жирний = вміщується у здатність RS до стирань "
-                       f"(nsym={int(nsym)}); два описи, вичерпний перебір початків burst")
+    spb = rows[0].get("symbols_per_byte", "?")
+    nblk = rows[0].get("n_rs_blocks_per_unit", "?")
+    footnote(ctx, fig, f"числа - пошкоджені БАЙТИ RS-слова ({spb} клітинки модема "
+                       f"= 1 байт), розкладені по {nblk} RS-словах одиниці; "
+                       f"зелений жирний = жодна позиція burst не робить одиницю "
+                       f"невідновною (nsym={int(nsym)} на слово); два описи, "
+                       f"вичерпний перебір початків burst")
     return export(ctx, "G28", fig, out, {"source_table": "codewords.csv"})
 
 
@@ -938,29 +948,50 @@ def g29(ctx: FigureContext) -> Dict[str, Any]:
 
 @figure("G30")
 def g30(ctx: FigureContext) -> Dict[str, Any]:
+    """Touched versus actually lost, as two curves.
+
+    The old figure plotted "both descriptions hit by the burst" and called it
+    loss.  A description the FEC repaired was never lost, so the two are drawn
+    separately here and the gap between them *is* the FEC doing its job (R04).
+    """
     plt = _plt()
     rows = [r for r in ctx.table("joint_loss.csv") if r.get("n_descriptions") == "2"
             and r.get("column_twist") == "1"]
     if not rows:
         raise FigurePending("немає joint_loss.csv для двох описів")
+    has_outcome = any(r.get("outcome") for r in rows)
     schemes = sorted({r["scheme"] for r in rows})
     lens = sorted({_float(r, "burst_lines") for r in rows})
-    fig, ax = plt.subplots(figsize=(7.6, 4.4))
+    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(11.4, 4.4), sharey=True)
     out: List[Dict[str, Any]] = []
+    colours = {sch: f"C{i % 10}" for i, sch in enumerate(schemes)}
     for sch in schemes:
-        ys = []
+        lost_ys, touched_ys = [], []
         for bl in lens:
             sel = [r for r in rows if r["scheme"] == sch
-                   and _float(r, "burst_lines") == bl and r["stripe_lost"] == "True"]
-            frac = sum(_float(r, "fraction", 0.0) for r in sel)
-            ys.append(frac)
+                   and _float(r, "burst_lines") == bl]
+            lost = sum(_float(r, "fraction", 0.0) for r in sel
+                       if r.get("stripe_lost") == "True")
+            touched = sum(
+                _float(r, "fraction", 0.0) for r in sel
+                if r.get("outcome") == "touched"
+                and _float(r, "descriptions_in_one_stripe", 0.0) >= 2)
+            lost_ys.append(lost)
+            touched_ys.append(touched)
             out.append({"scheme": sch, "burst_lines": bl,
-                        "p_both_descriptions_lost": frac})
-        ax.plot(lens, ys, "o-", ms=4, label=sch)
-    ax.set_xlabel(ctx.t("burst_len"))
-    ax.set_ylabel("частка позицій burst, де втрачено обидва описи смуги")
-    ax.set_title(title_of(ctx, "G30"))
-    ax.legend(fontsize=7, ncol=2)
+                        "p_both_descriptions_touched": touched,
+                        "p_both_descriptions_lost": lost})
+        ax.plot(lens, touched_ys, "o--", ms=4, color=colours[sch], alpha=0.8,
+                label=sch)
+        ax2.plot(lens, lost_ys, "o-", ms=4, color=colours[sch], label=sch)
+    ax.set_title("зачеплено обидва описи смуги")
+    ax2.set_title("ВТРАЧЕНО обидва описи смуги")
+    for a in (ax, ax2):
+        a.set_xlabel(ctx.t("burst_len"))
+        a.set_ylim(-0.03, 1.03)
+    ax.set_ylabel("частка позицій burst")
+    ax2.legend(fontsize=7, ncol=2)
+    fig.suptitle(title_of(ctx, "G30"))
     # Several curves coincide exactly; saying so is the finding, not clutter.
     coincident: Dict[Tuple[float, ...], List[str]] = {}
     for sch in schemes:
@@ -968,10 +999,14 @@ def g30(ctx: FigureContext) -> Dict[str, Any]:
                     if r["scheme"] == sch)
         coincident.setdefault(key, []).append(sch)
     groups = ["=".join(v) for v in coincident.values() if len(v) > 1]
-    extra = ("; збіжні криві: " + "; ".join(groups)) if groups else ""
-    footnote(ctx, fig, "за двох описів «зачеплено не більше двох класів» не означає "
-                       "виживання смуги - тут рахується саме втрата обох описів"
-                       + extra)
+    extra = ("; збіжні криві справа: " + "; ".join(groups)) if groups else ""
+    note = ("ліворуч - буря дістала обидва описи; праворуч - жоден опис не "
+            "вдалося використати після FEC. Різниця між панелями і є робота FEC"
+            + extra)
+    if not has_outcome:
+        note = ("таблиця зі старого прогону не розрізняє «зачеплено» і "
+                "«втрачено»; перерахуйте E05" + extra)
+    footnote(ctx, fig, note)
     return export(ctx, "G30", fig, out, {"source_table": "joint_loss.csv"})
 
 
@@ -1093,7 +1128,10 @@ def g37(ctx: FigureContext) -> Dict[str, Any]:
         space = 2 ** w - 1
         secs = space / rate
         measured = w <= measured_width
-        ax.bar(str(w), secs, color="#2e7d32" if measured else "#f9a825")
+        # hatched, not only coloured: a projection must still read as a
+        # projection in greyscale or in print (R11)
+        ax.bar(str(w), secs, color="#2e7d32" if measured else "#f9a825",
+               hatch="" if measured else "//", edgecolor="#37474f", lw=0.7)
         out.append({"seed_width_bits": w, "key_space": space,
                     "seconds": secs if measured else float("nan"),
                     "projected_seconds": secs,

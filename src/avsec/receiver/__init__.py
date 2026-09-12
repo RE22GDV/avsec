@@ -10,20 +10,24 @@ Hard rules enforced here
 * The anti-replay window advances only after a successful authentication.
 * Every rejection is reported with a structured status, never as a bare
   ``None`` or empty array.
-* Queues, allocations and waiting times are bounded.
+* Queues, allocations and waiting times are bounded - but a bound is never met
+  by *forgetting freshness*.  The key cache and the session admissibility state
+  are two different objects (:mod:`avsec.receiver.sessions`): evicting a key
+  costs one HKDF derivation, while displacing a session **closes** it, and a
+  closed session can never be reopened from a recording.
 """
 from __future__ import annotations
 
-from collections import OrderedDict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
 from avsec import budget as budget_mod
 from avsec.crypto import (
     TAG_LEN,
+    SessionKeys,
     AuthenticationFailed,
     CryptoProfile,
     MasterSecret,
@@ -46,6 +50,13 @@ from avsec.framing import (
 )
 from avsec.interleaving import Interleaver
 from avsec.modem import DemodResult, RasterModem
+from avsec.receiver.sessions import (
+    Admission,
+    KeyCache,
+    SessionContext,
+    SessionLedger,
+    SessionState,
+)
 from avsec.source_coding import CODEC_FILLER, SourceCodingConfig, StripeCoder
 from avsec.transmitter import TransportConfig
 from avsec.utils import StageTimer, public_whiten, symbols_to_bytes
@@ -67,16 +78,22 @@ class UnitStatus(str, Enum):
     DECODE_FAILED = "decode_failed"
     NO_SYNC = "no_sync"
     SESSION_LIMIT = "session_limit"
+    SESSION_CLOSED = "session_closed"
 
 
 TERMINAL_REJECTIONS = {
     UnitStatus.HEADER_UNRECOVERABLE, UnitStatus.HEADER_INVALID, UnitStatus.UNKNOWN_VERSION,
     UnitStatus.UNKNOWN_PROFILE, UnitStatus.PAYLOAD_UNRECOVERABLE, UnitStatus.AUTH_FAILED,
     UnitStatus.REPLAY, UnitStatus.STALE, UnitStatus.STALE_EPOCH, UnitStatus.DECODE_FAILED,
+    UnitStatus.SESSION_CLOSED,
 }
 
-# (session_id, epoch, stream_id) - the key context a unit belongs to
-SessionContext = Tuple[bytes, int, int]
+#: How an admissibility verdict becomes a unit status.
+_ADMISSION_STATUS = {
+    Admission.CLOSED: UnitStatus.SESSION_CLOSED,
+    Admission.STALE_EPOCH: UnitStatus.STALE_EPOCH,
+    Admission.STALE_FRAME: UnitStatus.STALE,
+}
 
 
 @dataclass(frozen=True)
@@ -165,6 +182,10 @@ class Receiver:
         search_y: int = 8,
         timer: Optional[StageTimer] = None,
         secure: bool = True,
+        retired_sessions: int = 256,
+        key_cache_size: int = 32,
+        cold_start: str = "tofu",
+        session_state: Optional[Dict[str, Any]] = None,
     ) -> None:
         source_cfg.validate()
         self.source_cfg = source_cfg
@@ -202,25 +223,37 @@ class Receiver:
         self._placement = self.interleaver.place(
             [self.budget.unit_symbols] * u, [i % d for i in range(u)], d
         )
-        self._openers: "OrderedDict[SessionContext, Opener]" = OrderedDict()
-        # freshness watermarks, keyed by the *authenticated* context
-        self._newest_frame: Dict[SessionContext, int] = {}
-        self._highest_epoch: Dict[Tuple[bytes, int], int] = {}
+        # Two objects, two jobs (see avsec.receiver.sessions):
+        #   * the key cache is a performance optimisation and may be evicted
+        #     freely - a miss costs one HKDF derivation;
+        #   * the ledger is the authoritative freshness state - displacing a
+        #     session *closes* it, so an old recording stays rejected.
+        self._keys = KeyCache(key_cache_size)
+        self.sessions = SessionLedger(
+            active_capacity=max_sessions, retired_capacity=retired_sessions,
+            replay_window=self.crypto_profile.replay_window,
+            max_frame_age=max_frame_age, cold_start=cold_start,
+        )
+        if session_state:
+            self.sessions.import_state(session_state)
         self._had_sync = False
         self.stats: Dict[str, int] = {}
         self.clock: float = 0.0        # raster index; advanced by receive_raster
 
     # -- sessions ---------------------------------------------------------
-    # Defect F01: nothing about the session cache may change before a unit has
-    # authenticated.  Lookup is read-only; an unknown context gets a throwaway
-    # opener that is never cached; eviction and LRU ordering happen only in
-    # _commit_session, which runs after a successful AEAD open.
-    def _lookup_opener(self, ctx: SessionContext) -> Optional[Opener]:
-        """Read-only lookup.  Does not insert, evict or reorder anything."""
-        return self._openers.get(ctx)
-
-    def _provisional_opener(self, ctx: SessionContext) -> Optional[Opener]:
-        """A fresh, uncached opener used to *attempt* verification."""
+    # Defect F01: nothing about session state may change before a unit has
+    # authenticated.  Every method here is read-only except _commit_session,
+    # which runs only after a successful AEAD open.
+    #
+    # Defect F19: the replay window used to live in the opener, which lived in
+    # a bounded LRU cache, so displacing a session silently discarded its
+    # freshness state and a recorded raster authenticated again.  The window now
+    # belongs to the ledger; the cache holds keys only.
+    def _session_keys(self, ctx: SessionContext) -> Optional[SessionKeys]:
+        """Derived keys for a context, cached.  Purely a performance path."""
+        keys = self._keys.get(ctx)
+        if keys is not None:
+            return keys
         session_id, epoch, stream_id = ctx
         try:
             keys = derive_session_keys(
@@ -229,17 +262,40 @@ class Receiver:
             )
         except Exception:
             return None
-        return (Opener(keys, self.crypto_profile.replay_window) if self.secure
-                else NullOpener(keys, self.crypto_profile.replay_window))
+        self._keys.put(ctx, keys)
+        return keys
 
-    def _commit_session(self, ctx: SessionContext, opener: Opener) -> None:
-        """Install an opener after a unit under it authenticated successfully."""
-        if ctx not in self._openers:
-            while len(self._openers) >= self.max_sessions:
-                self._openers.popitem(last=False)      # bounded memory
-                self.stats["session_evicted"] = self.stats.get("session_evicted", 0) + 1
-        self._openers[ctx] = opener
-        self._openers.move_to_end(ctx)
+    def _opener_for(self, ctx: SessionContext) -> Optional[Opener]:
+        """An opener bound to the ledger's replay window for this context.
+
+        For an ``ACTIVE`` context the window is the stored one, so a replayed
+        sequence number is rejected.  For an ``UNKNOWN`` context the window is
+        fresh and is installed only if :meth:`_commit_session` is reached.
+        """
+        keys = self._session_keys(ctx)
+        if keys is None:
+            return None
+        window = self.sessions.window_for(ctx)
+        cls = Opener if self.secure else NullOpener
+        return cls(keys, self.crypto_profile.replay_window, window=window)
+
+    def _commit_session(self, ctx: SessionContext, opener: Opener,
+                        frame_id: int = 0) -> None:
+        """Admit a context after a unit under it authenticated successfully."""
+        self.sessions.commit(ctx, opener.replay, frame_id, self.clock)
+
+    # Read-only helpers kept for callers and tests that inspect session state.
+    def _lookup_opener(self, ctx: SessionContext) -> Optional[Opener]:
+        if self.sessions.state_of(ctx) is not SessionState.ACTIVE:
+            return None
+        return self._opener_for(ctx)
+
+    def _provisional_opener(self, ctx: SessionContext) -> Optional[Opener]:
+        return self._opener_for(ctx)
+
+    def export_session_state(self) -> Dict[str, Any]:
+        """Freshness state a restarted receiver can resume from."""
+        return self.sessions.export_state()
 
     # -- one raster -------------------------------------------------------
     def receive_raster(self, raster: np.ndarray) -> RasterOutcome:
@@ -324,24 +380,13 @@ class Receiver:
         # Freshness is tracked per authenticated context, not globally: a new
         # session or a new epoch legitimately restarts frame numbering at zero
         # (defect F02).  These pre-authentication checks may only *reject*; they
-        # never advance any watermark.
+        # never advance any watermark, admit a context or close one (F01, F19).
         ctx: SessionContext = (header.session_id, header.session_epoch, header.stream_id)
-        epoch_key = (header.session_id, header.stream_id)
-        seen_epoch = self._highest_epoch.get(epoch_key)
-        if seen_epoch is not None and header.session_epoch < seen_epoch:
-            return UnitOutcome(slot, UnitStatus.STALE_EPOCH,
-                               f"epoch {header.session_epoch} retired "
-                               f"(current {seen_epoch})", header)
-        watermark = self._newest_frame.get(ctx)
-        if watermark is not None and header.frame_id < watermark - self.max_frame_age:
-            return UnitOutcome(slot, UnitStatus.STALE,
-                               f"frame {header.frame_id} older than the display deadline "
-                               f"(newest {watermark} in this session/epoch)", header)
+        verdict, why = self.sessions.classify(ctx, header.frame_id)
+        if verdict is not Admission.ADMIT:
+            return UnitOutcome(slot, _ADMISSION_STATUS[verdict], why, header)
 
-        opener = self._lookup_opener(ctx)
-        provisional = opener is None
-        if provisional:
-            opener = self._provisional_opener(ctx)
+        opener = self._opener_for(ctx)
         if opener is None:
             return UnitOutcome(slot, UnitStatus.SESSION_LIMIT,
                                "no key material for this session context", header)
@@ -370,14 +415,9 @@ class Receiver:
                 return UnitOutcome(slot, UnitStatus.AUTH_FAILED, str(exc), header)
 
         # ---- authenticated from here on; only now may state advance ----
-        self._commit_session(ctx, opener)
-        if seen_epoch is None or header.session_epoch > seen_epoch:
-            self._highest_epoch[epoch_key] = header.session_epoch
-        if header.frame_id > self._newest_frame.get(ctx, -1):
-            self._newest_frame[ctx] = header.frame_id
-        if len(self._newest_frame) > 8 * max(self.max_sessions, 1):
-            live = set(self._openers)
-            self._newest_frame = {k: v for k, v in self._newest_frame.items() if k in live}
+        # One call: admission, the epoch watermark, the frame watermark and the
+        # replay window all live in the ledger and move together.
+        self._commit_session(ctx, opener, header.frame_id)
 
         if header.codec_id == CODEC_FILLER or (header.flags & 0x04):
             return UnitOutcome(slot, UnitStatus.FILLER, "authenticated filler unit", header)
@@ -418,6 +458,11 @@ class Receiver:
         """
         self._had_sync = False
 
+    def session_report(self) -> Dict[str, Any]:
+        """What the receiver's session state is, and on what assumptions."""
+        return {"ledger": self.sessions.describe(), "key_cache": self._keys.describe()}
+
 
 __all__ = ["UnitStatus", "UnitOutcome", "RasterOutcome", "Receiver",
-           "TERMINAL_REJECTIONS", "VerifiedUnit", "SessionContext"]
+           "TERMINAL_REJECTIONS", "VerifiedUnit", "SessionContext",
+           "SessionLedger", "KeyCache", "Admission", "SessionState"]

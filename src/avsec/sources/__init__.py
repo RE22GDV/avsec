@@ -589,6 +589,13 @@ def build_sources(spec: Dict[str, object]) -> List[FrameSource]:
         picked = ([s for s in DRONE_SCENES if s[0] == str(want)] or None) if want else None
         return drone_suite(h, w, int(spec.get("n_frames", 16)),
                            path=spec.get("path"), scenes=picked)
+    if kind == "natural":
+        # Independent source photographs, one window-motion sequence each (R07).
+        from avsec.sources.natural import natural_suite
+
+        return natural_suite(h, w, int(spec.get("n_frames", 16)),
+                             registry=spec.get("registry"),
+                             limit=int(spec.get("limit", 0)))
     if kind == "synthetic":
         n = int(spec.get("n_frames", 6))
         names = spec.get("patterns")

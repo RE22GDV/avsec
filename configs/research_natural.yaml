@@ -1,13 +1,17 @@
-# E12: te same porivniannia, shcho i E02, ale na REALNYKH kadrakh z drona.
+# E14: te same porivniannia, shcho i E02, ale na 24 NEZALEZHNYKH fotografiiakh
+# z BpLA - po odnii poslidovnosti z rukhom vikna na kozhnu fotografiiu.
 #
-# Dzherelo: fotografiia Curonian Spit NP (Epha Dune), avtor A.Savin,
-# kamera DJI FC6310 (Phantom 4 Pro), 4213x2633, Free Art License 1.3.
-# Kliпy - panoramuvannia vikna kadruvannia po tsii fotografii, tobto realnyi
-# vmist i realnyi rukh, a ne protsedurnyi patern.
+# Kozhna fotografiia - inshyi avtor, insha kamera DJI, inshe mistse, vilna
+# litsenziia. Reiestr: data/real/sources.json (URL, litsenziia, avtor, sha256).
+# Otrymaty odyn raz:  python scripts/fetch_natural_sources.py
 #
-# Plan zafiksovano do zapusku; konfiguratsii metodiv NE pereпidbyraiutsia pid
+# ODYNYTSIA NEZALEZHNOSTI - VYKHIDNA FOTOGRAFIIA (source_id), a ne stsena:
+# same tomu tsei nabir, na vidminu vid research_drone.yaml, dozvoliaie
+# uzahalnennia na NOVYI zapys.
+#
+# Plan zafiksovano do zapusku; konfiguratsii metodiv NE pereobyraiutsia pid
 # tsi dani - vony ti sami, shcho i v E02.
-name: research_drone
+name: research_natural
 seed: 20240909
 channel_seed: 20240909
 crypto_seed: 20240909
@@ -17,7 +21,7 @@ frame:
   height: 192
   n_frames: 16
 sources:
-  kind: drone             # REAL UAV imagery: 17 stsen z fotografii DJI FC6310
+  kind: natural           # 24 nezalezhni fotografii, po 1 klipu z kozhnoi
   n_frames: 16
 channel:
   preset: moderate        # bazovyi profil; matrytsia zadaie svii nabir
@@ -117,7 +121,7 @@ save_images: false
 
 # --- plan matrytsi (chytaie `avsec matrix`) ---------------------------------
 matrix:
-  name: E12-drone
+  name: E14-natural
   splits: [test]
   repetitions: 5
   max_frames: 16
@@ -130,7 +134,8 @@ matrix:
     - {base: harsh}
 
 notes: >
-  E12. Ti sami visim metodiv i ti sami profili kanalu, shcho i v E02, ale na
-  10 testovykh stsenakh, vyrizanykh z realnoi fotografii z drona. Konfiguratsii
-  ne pereпidbyralysia. Tse perevirka perenesennia z protsedurnogo materialu na
-  realnyi, a ne novyi pidbir.
+  E14. Ti sami metody i ti sami profili kanalu, shcho i v E02, ale na
+  14 testovykh DZHERELAKH - kozhne z nykh okrema fotografiia inshoho avtora,
+  zniata inshoiu kameroiu v inshomu mistsi. Rozpodil calibration/validation/
+  test zrobleno ZA DZHERELOM. Konfiguratsii ne pereobyralysia: tse perevirka
+  perenesennia, a ne novyi pidbir.

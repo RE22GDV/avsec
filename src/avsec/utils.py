@@ -10,7 +10,7 @@ import sys
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Sequence
 
 import numpy as np
 
@@ -184,20 +184,62 @@ def environment_record() -> Dict[str, Any]:
         "avsec_version": __import__("avsec").__version__,
     }
     rec["git_commit"] = _git_commit()
+    rec.update(_git_worktree())
+    rec["pip_freeze"] = _pip_freeze()
     return rec
 
 
-def _git_commit() -> Optional[str]:
+def _git(args: Sequence[str], timeout: int = 10) -> Optional[str]:
     try:
         root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        out = subprocess.run(
-            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=5, cwd=root
-        )
+        out = subprocess.run(["git", *args], capture_output=True, text=True,
+                             timeout=timeout, cwd=root)
         if out.returncode == 0:
             return out.stdout.strip()
     except Exception:
         pass
     return None
+
+
+def _git_commit() -> Optional[str]:
+    return _git(["rev-parse", "HEAD"])
+
+
+def _git_worktree() -> Dict[str, Any]:
+    """Whether the code that produced a result was actually the committed code.
+
+    A commit hash alone does not pin a run: if the working tree had uncommitted
+    edits, the run used code that exists nowhere else.  The status is recorded
+    so a reader can tell the difference (defect R11).
+    """
+    status = _git(["status", "--porcelain"])
+    if status is None:
+        return {"git_worktree": "unknown (no git)", "git_dirty": None,
+                "git_dirty_files": []}
+    files = [line[3:].strip() for line in status.splitlines() if line.strip()]
+    return {
+        "git_worktree": "clean" if not files else "DIRTY",
+        "git_dirty": bool(files),
+        "git_dirty_files": files[:100],
+        "git_branch": _git(["rev-parse", "--abbrev-ref", "HEAD"]),
+        "git_describe": _git(["describe", "--tags", "--always", "--dirty"]),
+        "git_dirty_note": ("" if not files else
+                           "УВАГА: робоче дерево змінене; результат отримано "
+                           "кодом, якого немає в жодному коміті"),
+    }
+
+
+def _pip_freeze() -> List[str]:
+    """Exact versions of everything installed, not only what we import."""
+    out = None
+    try:
+        res = subprocess.run([sys.executable, "-m", "pip", "freeze", "--local"],
+                             capture_output=True, text=True, timeout=60)
+        if res.returncode == 0:
+            out = res.stdout
+    except Exception:
+        pass
+    return sorted(l.strip() for l in (out or "").splitlines() if l.strip())
 
 
 # --------------------------------------------------------------------------- io

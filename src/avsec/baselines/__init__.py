@@ -64,6 +64,7 @@ from avsec.lfsr import BlockScrambler, ScramblerConfig, invert_permutation
 from avsec.modem import RasterModem, prbs_symbols
 from avsec.receiver import Receiver, UnitStatus, VerifiedUnit
 from avsec.source_coding import (
+    CODEC_FILLER,
     FILL_INTERPOLATE,
     AssembledFrame,
     FrameAssembler,
@@ -601,6 +602,19 @@ class DigitalMethod(Method):
         corrected = 0
         sym_err = 0
         sym_den = 0
+        # (raster, slot) -> the header actually transmitted there, so every
+        # received slot can be attributed to a description and segment (R04).
+        sent_at: Dict[Tuple[int, int], Any] = {
+            rs: hdr for rs, hdr in zip(txf.unit_slots, txf.unit_headers)}
+        desc_state: Dict[Tuple[int, int], ev.DescriptionOutcome] = {}
+
+        def _desc(hdr) -> ev.DescriptionOutcome:
+            key = (int(hdr.stripe_id), int(hdr.desc_id))
+            rec = desc_state.get(key)
+            if rec is None:
+                rec = ev.DescriptionOutcome(stripe_id=key[0], desc_id=key[1])
+                desc_state[key] = rec
+            return rec
         first_tx = txf.rasters[0]
         first_rx: Optional[np.ndarray] = None
         truth0: Optional[ChannelTruth] = None
@@ -643,6 +657,22 @@ class DigitalMethod(Method):
                         pass
                     else:
                         n_rej += 1
+                    # Description accounting uses the *transmitted* identity,
+                    # not the received header: a unit whose header did not come
+                    # back still belongs to the description that was sent (R04).
+                    sent = sent_at.get((ri, o.slot))
+                    if sent is None or sent.codec_id == CODEC_FILLER:
+                        continue
+                    rec = _desc(sent)
+                    rec.n_segs = max(rec.n_segs, int(sent.n_segs))
+                    cells = self.tx.placement[o.slot]
+                    if bool((out.demod.symbols[cells] != ref[cells]).any()):
+                        rec.n_touched += 1
+                    if o.status in (UnitStatus.PAYLOAD_UNRECOVERABLE,
+                                    UnitStatus.HEADER_UNRECOVERABLE):
+                        rec.n_fec_failed += 1
+                    if o.ok:
+                        rec.n_verified += 1
 
         with self.timer(f"{self.name}.assembly"):
             # Assembly is keyed by the authenticated identity, so a late frame
@@ -672,6 +702,8 @@ class DigitalMethod(Method):
             "channel_trace": tr.trace_id,
             "units_from_other_frames": len(units) - n_ok,
         })
+        met.extra.update(ev.description_accounting(
+            desc_state.values(), self.source_cfg.n_descriptions))
         return MethodResult(self.name, frame_id, frame, first_tx,
                             first_rx if first_rx is not None else first_tx,
                             asm.image, asm.available, asm.from_previous, met, truth0,

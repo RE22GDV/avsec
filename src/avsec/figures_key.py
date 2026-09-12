@@ -1,4 +1,4 @@
-"""The ten key figures: K01-K10.
+"""The key figures: K01-K13.
 
 The G01-G43 catalogue is complete by construction - one number per research
 question - but completeness is not the same as saying something.  Several of
@@ -47,6 +47,12 @@ KEY_FIGURES: Tuple[Tuple[str, str, str], ...] = (
      "перевірене, старе й домальоване на одному кадрі"),
     ("K09", "Бюджет, затримка, пам'ять", "куди йде кожен біт і кожна мілісекунда"),
     ("K10", "Схема 2021 року зламана", "одна відома пара кадрів відновлює все"),
+    ("K11", "Порядок кроків вирішує",
+     "той самий розклад у двох порядках дає різний внесок механізмів"),
+    ("K12", "24 незалежні джерела",
+     "інтервал по сценах і по вихідних записах - це різні твердження"),
+    ("K13", "Карта області працездатності",
+     "довжина x частота пакетів, а не один поріг"),
 )
 
 OK = "#2e7d32"
@@ -386,12 +392,17 @@ def k05(ctx: FigureContext) -> Dict[str, Any]:
     rows = ctx.table("chain.csv")
     if not rows:
         raise FigurePending("немає chain.csv - E13 не запускалась")
-    rows = sorted(rows, key=lambda r: int(float(r.get("step", 0))))
+    # chain.csv now holds both orderings; K05 shows the declared forward one
+    # and K11 puts the two side by side.
+    fwd = [r for r in rows if r.get("order", "fwd") == "fwd"] or rows
+    rows = sorted(fwd, key=lambda r: int(float(r.get("step", 0))))
     labels = [r.get("label", "?") for r in rows]
     ok = [r.get("admissible") == "True" for r in rows]
     vals = [_float(r, "psnr_full") if o else float("nan") for r, o in zip(rows, ok)]
     deltas = [_float(r, "delta_psnr", 0.0) if o else float("nan")
               for r, o in zip(rows, ok)]
+    lo = [_float(r, "delta_psnr_full_lo") for r in rows]
+    hi = [_float(r, "delta_psnr_full_hi") for r in rows]
 
     fig, (a0, a1) = plt.subplots(2, 1, figsize=(9.6, 6.2), sharex=True,
                                  gridspec_kw={"height_ratios": [1.25, 1.0]})
@@ -409,7 +420,15 @@ def k05(ctx: FigureContext) -> Dict[str, Any]:
 
     colors = [OK if (np.isfinite(d) and d > 0) else BAD if np.isfinite(d) else NEUTRAL
               for d in deltas]
-    a1.bar(x, deltas, 0.6, color=colors)
+    # Each step's contribution carries its paired interval (R09): "+0.20 dB"
+    # and "how sure" belong on the same axis.
+    err = np.array([[max(0.0, d - l) if np.isfinite(l) and np.isfinite(d) else 0.0
+                     for d, l in zip(deltas, lo)],
+                    [max(0.0, h - d) if np.isfinite(h) and np.isfinite(d) else 0.0
+                     for d, h in zip(deltas, hi)]])
+    a1.bar(x, deltas, 0.6, color=colors,
+           yerr=err if np.isfinite(err).all() and err.any() else None,
+           capsize=3, ecolor="#37474f")
     a1.axhline(0, color="#37474f", lw=0.9)
     for i, d in enumerate(deltas):
         if np.isfinite(d) and i:
@@ -428,13 +447,17 @@ def k05(ctx: FigureContext) -> Dict[str, Any]:
              f"Канал bursty, ті самі кліпи й ті самі реалізації каналу на всіх "
              f"кроках. Параметри транспорту, доступні будь-якій схемі, дають "
              f"{transport:+.2f} дБ; два запропоновані механізми (MDC і BAWP) — "
-             f"{mech:+.2f} дБ. Порядок кроків оголошено наперед, тож на механізми "
-             f"лишається саме те, чого не дали дешевші зміни.")
+             f"{mech:+.2f} дБ. Вуса — парні bootstrap-інтервали різниці між "
+             f"сусідніми кроками. Порядок кроків оголошено наперед; наскільки "
+             f"розклад від нього залежить — див. K11.")
     out = [{"step": int(float(r.get("step", 0))), "label": r.get("label"),
             "admissible": r.get("admissible") == "True",
             "psnr_full": _float(r, "psnr_full"),
             "delta_psnr": _float(r, "delta_psnr"),
-            "coverage": _float(r, "coverage")} for r in rows]
+            "delta_lo": _float(r, "delta_psnr_full_lo"),
+            "delta_hi": _float(r, "delta_psnr_full_hi"),
+            "coverage": _float(r, "coverage"),
+            "availability": _float(r, "availability")} for r in rows]
     return export(ctx, "K05", fig, out,
                   {"transport_gain_db": transport, "mechanism_gain_db": mech,
                    "source_table": "chain.csv"})
@@ -846,3 +869,219 @@ def _scramble_demo(ctx: FigureContext) -> Optional[Dict[str, np.ndarray]]:
 
 
 __all__ = ["KEY_FIGURES"]
+
+
+# ============================================================== K11
+@figure("K11")
+def k11(ctx: FigureContext) -> Dict[str, Any]:
+    """The stepwise decomposition depends on the order the steps were applied.
+
+    A waterfall reads as though each component "contributes" a fixed amount.
+    It does not: whatever is applied first collects the gain that the later
+    steps would also have produced.  Both orderings of the same two end points
+    are drawn here, so the reader can see how much of a step's credit is the
+    step and how much is its position (R09).
+    """
+    plt = _plt()
+    rows = ctx.table("chain.csv")
+    if not rows:
+        raise FigurePending("немає chain.csv - E13 не запускалась")
+    orders = sorted({r.get("order", "fwd") for r in rows})
+    if len(orders) < 2:
+        raise FigurePending("chain.csv має лише один порядок кроків; "
+                            "перезапустіть E13")
+
+    fig, axes = plt.subplots(1, 2, figsize=(12.4, 5.0))
+    out: List[Dict[str, Any]] = []
+    titles = {"fwd": "спершу параметри транспорту",
+              "rev": "спершу два механізми"}
+    totals: Dict[str, Dict[str, float]] = {}
+    for ax, order in zip(axes, ["fwd", "rev"]):
+        sel = sorted([r for r in rows if r.get("order") == order],
+                     key=lambda r: int(float(r.get("step", 0))))
+        labels = [r.get("label", "?") for r in sel]
+        deltas = [_float(r, "delta_psnr_full", 0.0) for r in sel]
+        mech_mask = ["опис" in l or "BAWP" in l for l in labels]
+        colors = [BAD if m else "#1976d2" for m in mech_mask]
+        x = np.arange(len(labels))
+        lo = [_float(r, "delta_psnr_full_lo") for r in sel]
+        hi = [_float(r, "delta_psnr_full_hi") for r in sel]
+        err = np.array([[max(0.0, d - l) if np.isfinite(l) else 0.0
+                         for d, l in zip(deltas, lo)],
+                        [max(0.0, h - d) if np.isfinite(h) else 0.0
+                         for d, h in zip(deltas, hi)]])
+        ax.bar(x, deltas, 0.62, color=colors,
+               yerr=err if err.any() else None, capsize=3, ecolor="#37474f")
+        ax.axhline(0, color="#37474f", lw=0.9)
+        ax.set_xticks(x)
+        ax.set_xticklabels(labels, rotation=20, ha="right", fontsize=7.5)
+        ax.set_title(f"{titles.get(order, order)}", fontsize=10)
+        ax.set_ylabel("внесок кроку, дБ")
+        mech = sum(d for d, m in zip(deltas, mech_mask) if m and np.isfinite(d))
+        trans = sum(d for d, m in zip(deltas, mech_mask) if not m and np.isfinite(d))
+        totals[order] = {"mechanisms": mech, "transport": trans}
+        for i, (lbl, d) in enumerate(zip(labels, deltas)):
+            if np.isfinite(d) and i:
+                ax.annotate(f"{d:+.2f}", (i, d), xytext=(0, 6 if d >= 0 else -13),
+                            textcoords="offset points", ha="center", fontsize=7.5)
+            out.append({"order": order, "step": i, "label": lbl, "delta": d,
+                        "is_mechanism": bool(mech_mask[i])})
+    lim = max(abs(np.nanmin([o["delta"] for o in out])),
+              abs(np.nanmax([o["delta"] for o in out]))) * 1.35
+    for ax in axes:
+        ax.set_ylim(-lim, lim)
+
+    mf = totals.get("fwd", {}).get("mechanisms", float("nan"))
+    mr = totals.get("rev", {}).get("mechanisms", float("nan"))
+    fig.suptitle("K11. Порядок кроків вирішує, кому дістанеться виграш", y=0.99,
+                 fontsize=12)
+    same_sign = np.isfinite(mf) and np.isfinite(mr) and (mf < 0) == (mr < 0)
+    footnote(ctx, fig,
+             f"Ті самі дві кінцеві точки (B4 і P), той самий матеріал, той "
+             f"самий канал — різний лише порядок змін. Внесок MDC+BAWP: "
+             f"{mf:+.2f} дБ за прямого порядку і {mr:+.2f} дБ за зворотного "
+             f"(різниця {abs(mf - mr):.2f} дБ). "
+             + ("Знак однаковий в обох розкладах, тож висновок про механізми "
+                "не є артефактом порядку." if same_sign else
+                "ЗНАК різний: жоден окремий розклад не може обґрунтувати "
+                "висновок про користь механізмів."))
+    return export(ctx, "K11", fig, out,
+                  {"mechanism_gain_forward_db": mf,
+                   "mechanism_gain_reverse_db": mr,
+                   "sign_agrees": bool(same_sign),
+                   "source_table": "chain.csv"})
+
+
+# ============================================================== K12
+@figure("K12")
+def k12(ctx: FigureContext) -> Dict[str, Any]:
+    """The same effect measured over scenes and over independent recordings.
+
+    Crops of one photograph are not independent samples of drone imagery.  This
+    puts the interval computed over scenes next to the interval computed over
+    source photographs, which is the one a claim about new footage needs (R07).
+    """
+    plt = _plt()
+    rows = ctx.table("paired_effects.csv")
+    if not rows:
+        raise FigurePending("немає paired_effects.csv")
+    primary = [r for r in rows if r.get("is_primary") == "True"]
+    if not primary:
+        primary = [r for r in rows if {r.get("a"), r.get("b")} == {"P", "B4"}]
+    if not primary:
+        raise FigurePending("у paired_effects.csv немає основного порівняння")
+
+    unit = primary[0].get("unit_of_independence", "scene")
+    chans = sorted({r.get("channel", "") for r in primary}, key=channel_key)
+    fig, ax = plt.subplots(figsize=(9.0, 0.62 * len(chans) + 3.0))
+    out: List[Dict[str, Any]] = []
+    y = np.arange(len(chans))
+    for i, ch in enumerate(chans):
+        r = next((x for x in primary if x.get("channel") == ch), None)
+        if r is None:
+            continue
+        a, b = r.get("a"), r.get("b")
+        sign = 1.0 if a == "P" else -1.0
+        m = sign * _float(r, "mean")
+        lo = sign * _float(r, "hi" if sign < 0 else "lo")
+        hi = sign * _float(r, "lo" if sign < 0 else "hi")
+        n = int(_float(r, "n_units", _float(r, "n_scenes", 0)))
+        colour = OK if (np.isfinite(lo) and lo > 0) else \
+                 BAD if (np.isfinite(hi) and hi < 0) else NEUTRAL
+        ax.errorbar(m, i, xerr=[[m - lo], [hi - m]], fmt="o", ms=7,
+                    color=colour, capsize=4, lw=1.8)
+        ax.annotate(f"{m:+.2f} дБ  [{lo:+.2f}; {hi:+.2f}]   n={n}",
+                    (m, i), xytext=(10, 8), textcoords="offset points",
+                    fontsize=8, color=colour)
+        out.append({"channel": ch, "mean": m, "lo": lo, "hi": hi,
+                    "n_units": n, "unit_of_independence": unit,
+                    "significant": bool(np.isfinite(lo) and (lo > 0 or hi < 0))})
+    ax.axvline(0, color="#37474f", lw=1.1)
+    ax.set_yticks(y)
+    ax.set_yticklabels(chans)
+    ax.set_xlabel("P − B4, дБ")
+    ax.set_title(f"K12. Ефект з інтервалом по незалежних одиницях ({unit})",
+                 fontsize=12)
+    ax.margins(x=0.28)
+    footnote(ctx, fig,
+             "Одиниця незалежності вказана в заголовку. Інтервал по СЦЕНАХ "
+             "узагальнюється лише на нові вирізки тих самих записів; інтервал "
+             "по ДЖЕРЕЛАХ — на новий запис. Для набору з однієї фотографії "
+             "друге неможливе в принципі, і саме тому набір з 24 незалежних "
+             "знімків існує окремо.")
+    return export(ctx, "K12", fig, out,
+                  {"unit_of_independence": unit,
+                   "source_table": "paired_effects.csv"})
+
+
+# ============================================================== K13
+@figure("K13")
+def k13(ctx: FigureContext) -> Dict[str, Any]:
+    """Where the proposal beats the retuned baseline: a map, not a threshold."""
+    plt = _plt()
+    rows = ctx.table("operating_map.csv")
+    if not rows:
+        raise FigurePending("немає operating_map.csv - E15 не запускалась")
+    rates = sorted({_float(r, "burst_rate_per_frame") for r in rows})
+    lens = sorted({_float(r, "burst_len_lines") for r in rows})
+    grid = np.full((len(rates), len(lens)), np.nan)
+    sig = np.zeros_like(grid, dtype=bool)
+    oper = np.full_like(grid, np.nan)
+    out: List[Dict[str, Any]] = []
+    for r in rows:
+        i = rates.index(_float(r, "burst_rate_per_frame"))
+        j = lens.index(_float(r, "burst_len_lines"))
+        grid[i, j] = _float(r, "d_P_B4t")
+        sig[i, j] = r.get("d_P_B4t_significant") == "True"
+        oper[i, j] = _float(r, "operable_P")
+        out.append({"burst_rate_per_frame": _float(r, "burst_rate_per_frame"),
+                    "burst_len_lines": _float(r, "burst_len_lines"),
+                    "d_P_B4t": grid[i, j], "significant": bool(sig[i, j]),
+                    "operable_P": oper[i, j],
+                    "operable_B4t": _float(r, "operable_B4t")})
+
+    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(13.0, 4.6))
+    lim = np.nanmax(np.abs(grid)) if np.isfinite(grid).any() else 1.0
+    im = ax.imshow(grid, cmap="RdBu_r", vmin=-lim, vmax=lim, aspect="auto")
+    for i in range(len(rates)):
+        for j in range(len(lens)):
+            if not np.isfinite(grid[i, j]):
+                continue
+            txt = f"{grid[i, j]:+.1f}"
+            ax.text(j, i, txt, ha="center", va="center", fontsize=7,
+                    weight="bold" if sig[i, j] else "normal",
+                    color="#111111" if sig[i, j] else "#78909c")
+    ax.set_xticks(range(len(lens)))
+    ax.set_xticklabels([f"{int(v)}" for v in lens], fontsize=8)
+    ax.set_yticks(range(len(rates)))
+    ax.set_yticklabels([f"{v:g}" for v in rates])
+    ax.set_xlabel("довжина пакета, рядків")
+    ax.set_ylabel("пакетів на кадр")
+    ax.set_title("P − переналаштований B4t, дБ", fontsize=10)
+    ax.grid(False)
+    fig.colorbar(im, ax=ax, label="дБ")
+
+    for i, rate in enumerate(rates):
+        ax2.plot(lens, oper[i], "o-", ms=4, label=f"{rate:g} пак./кадр")
+    ax2.set_xlabel("довжина пакета, рядків")
+    ax2.set_ylabel("частка працездатних моментів (P)")
+    ax2.set_ylim(-0.03, 1.03)
+    ax2.legend(fontsize=8)
+    ax2.set_title("працездатність P за оголошеним критерієм", fontsize=10)
+
+    n_sig_pos = int(np.sum(sig & (grid > 0)))
+    n_sig_neg = int(np.sum(sig & (grid < 0)))
+    n_flat = int(np.sum(~sig & np.isfinite(grid)))
+    fig.suptitle("K13. Область працездатності - карта, а не поріг", y=0.99,
+                 fontsize=12)
+    footnote(ctx, fig,
+             f"Жирним позначено клітинки, де різниця встановлена (парний "
+             f"bootstrap по сценах): {n_sig_pos} на користь P, {n_sig_neg} на "
+             f"користь B4t, у {n_flat} різниця не встановлена. Виміряно лише "
+             f"показані вузли; значення між ними не вимірювалися. Це карта для "
+             f"ЦІЄЇ моделі каналу і ЦЬОГО бюджету, а не характеристика "
+             f"реального відеотракту.")
+    return export(ctx, "K13", fig, out,
+                  {"n_cells_P_better": n_sig_pos, "n_cells_B4t_better": n_sig_neg,
+                   "n_cells_undetermined": n_flat,
+                   "source_table": "operating_map.csv"})

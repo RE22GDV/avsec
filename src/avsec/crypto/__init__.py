@@ -476,17 +476,35 @@ class ReplayWindow:
         if cut > 0 and len(self._seen) > 4 * self.size:
             self._seen = {s for s in self._seen if s > cut}
 
+    # The window is freshness state, so it has to survive being moved between
+    # owners and being written to disk; see :mod:`avsec.receiver.sessions`.
+    def to_dict(self) -> Dict[str, object]:
+        return {"size": self.size, "highest": self.highest,
+                "seen": sorted(self._seen)}
+
+    @staticmethod
+    def from_dict(d: Dict[str, object]) -> "ReplayWindow":
+        win = ReplayWindow(int(d.get("size", 4096) or 4096))
+        win.highest = int(d.get("highest", -1))
+        win._seen = {int(s) for s in (d.get("seen") or [])}
+        return win
+
 
 class Opener:
     """Verify-and-decrypt with replay protection.
 
     The caller must not touch the plaintext unless :meth:`open` returns it.
+
+    ``window`` lets an owner outside this module hold the replay state - the
+    receiver's session ledger does, so that evicting a *key* cache entry can
+    never discard the freshness state that goes with it.
     """
 
-    def __init__(self, keys: SessionKeys, replay_window: int = 4096) -> None:
+    def __init__(self, keys: SessionKeys, replay_window: int = 4096,
+                 window: Optional[ReplayWindow] = None) -> None:
         self.keys = keys
         self._aead = keys.aead()
-        self.replay = ReplayWindow(replay_window)
+        self.replay = window if window is not None else ReplayWindow(replay_window)
 
     def open(self, counter: int, ciphertext: bytes, aad: bytes) -> bytes:
         status = self.replay.check(counter)
@@ -534,9 +552,10 @@ class NullSealer(Sealer):
 class NullOpener(Opener):
     """DIAGNOSTIC ONLY counterpart of :class:`NullSealer` (no authentication)."""
 
-    def __init__(self, keys: SessionKeys, replay_window: int = 4096) -> None:
+    def __init__(self, keys: SessionKeys, replay_window: int = 4096,
+                 window: Optional[ReplayWindow] = None) -> None:
         self.keys = keys
-        self.replay = ReplayWindow(replay_window)
+        self.replay = window if window is not None else ReplayWindow(replay_window)
 
     def open(self, counter: int, ciphertext: bytes, aad: bytes) -> bytes:
         import hashlib
