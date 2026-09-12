@@ -42,3 +42,16 @@ jobs:
 
       - name: Smoke run
         run: avsec demo --config configs/smoke.yaml --output runs/_ci_demo
+
+      # Documentation rots quietly: a renamed file, a reworded heading, a
+      # number quoted in two places.  Cheap to check, expensive to notice late.
+      - name: Documentation links
+        run: python scripts/check_links.py
+
+      # The evidence directory exists so that a published number can be
+      # rechecked without re-running anything.  If that stops working, the
+      # directory is just files.
+      - name: Recompute every published claim
+        run: |
+          avsec verify --input results/main
+          avsec verify --input results/natural
