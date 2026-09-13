@@ -63,38 +63,38 @@
     {
       "scene": "sky_horizon",
       "known_pair_permutation_accuracy": 1.0,
-      "known_pair_seconds": 0.0764,
+      "known_pair_seconds": 0.0757,
       "boundary_direct_accuracy": 0.0365,
       "boundary_neighbour_accuracy": 0.4551,
       "boundary_psnr_db": 15.989,
-      "boundary_seconds": 0.1058
+      "boundary_seconds": 0.1002
     },
     {
       "scene": "village",
       "known_pair_permutation_accuracy": 1.0,
-      "known_pair_seconds": 0.0793,
+      "known_pair_seconds": 0.0787,
       "boundary_direct_accuracy": 0.0052,
       "boundary_neighbour_accuracy": 0.4522,
       "boundary_psnr_db": 14.783,
-      "boundary_seconds": 0.1111
+      "boundary_seconds": 0.1136
     },
     {
       "scene": "shoreline",
       "known_pair_permutation_accuracy": 1.0,
-      "known_pair_seconds": 0.0801,
+      "known_pair_seconds": 0.0768,
       "boundary_direct_accuracy": 0.0,
       "boundary_neighbour_accuracy": 0.4045,
       "boundary_psnr_db": 12.625,
-      "boundary_seconds": 0.1088
+      "boundary_seconds": 0.1077
     },
     {
       "scene": "forest_canopy",
       "known_pair_permutation_accuracy": 1.0,
-      "known_pair_seconds": 0.0812,
+      "known_pair_seconds": 0.0792,
       "boundary_direct_accuracy": 0.0,
       "boundary_neighbour_accuracy": 0.6264,
       "boundary_psnr_db": 11.827,
-      "boundary_seconds": 0.1248
+      "boundary_seconds": 0.1225
     }
   ],
   "figures": {
@@ -103,8 +103,8 @@
     "pdf": "results/lab\\lab_isitia.pdf"
   },
   "run_id": "fe45d509310b99d4",
-  "commit": "a84b2c7d79f64325e4c2ad8185bc4e11e9b8f22b",
-  "git_worktree": "DIRTY",
+  "commit": "2ed7a9efca8f63cc9d37c4a9c59b07e60723a0d6",
+  "git_worktree": "clean",
   "environment": {
     "python": "3.12.10",
     "platform": "Windows-11-10.0.26200-SP0",
