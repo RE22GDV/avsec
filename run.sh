@@ -11,6 +11,7 @@
 #    ./run.sh demo         one frame through every method
 #    ./run.sh check        dataset + protocol checks
 #    ./run.sh research     the full research programme (long)
+#    ./run.sh lab          ISITIA 2021: reproduce the scheme + repeat on photos
 #    ./run.sh verify       recheck every published number, runs nothing
 #    ./run.sh sources      download the natural UAV photographs
 #    ./run.sh shell        a shell with the environment active
@@ -99,6 +100,11 @@ case "$CMD" in
     "$PY" -m avsec.cli plots --input runs/main
     "$PY" -m avsec.cli verify --input runs/main
     "$PY" scripts/publish.py runs/main
+    ;;
+  lab)
+    echo "[avsec] ISITIA 2021: reproducing the scheme and repeating it on photos."
+    "$PY" -m avsec.cli lab --config configs/research_main.yaml --output results/lab
+    echo "[avsec] figure and tables written to results/lab"
     ;;
   verify)
     echo "[avsec] rechecking every published number from the published tables."

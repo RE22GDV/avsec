@@ -1,0 +1,123 @@
+{
+  "kind": "lab",
+  "title": "ISITIA 2021: відтворення і повтор на природних знімках",
+  "grid": "12x16",
+  "frame": "384x288",
+  "lfsr": {
+    "grid_rows": 12,
+    "grid_cols": 16,
+    "n_blocks": 192,
+    "variant": "fisher_yates",
+    "size_policy": "pad",
+    "per_frame": false,
+    "frame_seed_mode": null,
+    "block_order": "row-major (raster) over the block grid",
+    "lfsr": {
+      "width": 16,
+      "taps": [
+        16,
+        15,
+        13,
+        4
+      ],
+      "polynomial": "x^16 + x^15 + x^13 + x^4 + 1",
+      "form": "fibonacci",
+      "seed": 44257,
+      "zero_state_policy": "force_one",
+      "state_space": 65535,
+      "note": "reconstruction: the 2021 paper does not specify these parameters"
+    }
+  },
+  "part1_replica": {
+    "n_cells": 9,
+    "seeds": [
+      44257,
+      1234,
+      1111
+    ],
+    "images": [
+      "smooth",
+      "edges",
+      "texture"
+    ],
+    "mean_similarity_scrambled_pct": 3.7021,
+    "mean_similarity_decrypted_pct": 100.0,
+    "max_similarity_scrambled_pct": 7.2319,
+    "min_similarity_scrambled_pct": 0.0097,
+    "paper_mean_similarity_scrambled_pct": 3.94,
+    "paper_mean_similarity_decrypted_pct": 98.24,
+    "all_exact_recovery": true
+  },
+  "part2_natural": {
+    "n_scenes": 4,
+    "note": "",
+    "seed": 44257,
+    "mean_similarity_scrambled_pct": 3.1416,
+    "min_similarity_scrambled_pct": 0.5287,
+    "max_similarity_scrambled_pct": 7.0794,
+    "spread_pct": 6.5507,
+    "all_exact_recovery": true,
+    "source_photo": "data/real/curonian_spit_epha_dune.jpg"
+  },
+  "part3_attacks_on_photographs": [
+    {
+      "scene": "sky_horizon",
+      "known_pair_permutation_accuracy": 1.0,
+      "known_pair_seconds": 0.0862,
+      "boundary_direct_accuracy": 0.0365,
+      "boundary_neighbour_accuracy": 0.4551,
+      "boundary_psnr_db": 15.989,
+      "boundary_seconds": 0.1108
+    },
+    {
+      "scene": "village",
+      "known_pair_permutation_accuracy": 1.0,
+      "known_pair_seconds": 0.0792,
+      "boundary_direct_accuracy": 0.0052,
+      "boundary_neighbour_accuracy": 0.4522,
+      "boundary_psnr_db": 14.783,
+      "boundary_seconds": 0.1163
+    },
+    {
+      "scene": "shoreline",
+      "known_pair_permutation_accuracy": 1.0,
+      "known_pair_seconds": 0.0867,
+      "boundary_direct_accuracy": 0.0,
+      "boundary_neighbour_accuracy": 0.4045,
+      "boundary_psnr_db": 12.625,
+      "boundary_seconds": 0.106
+    },
+    {
+      "scene": "forest_canopy",
+      "known_pair_permutation_accuracy": 1.0,
+      "known_pair_seconds": 0.08,
+      "boundary_direct_accuracy": 0.0,
+      "boundary_neighbour_accuracy": 0.6264,
+      "boundary_psnr_db": 11.827,
+      "boundary_seconds": 0.128
+    }
+  ],
+  "figures": {
+    "png": "results/lab\\lab_isitia.png",
+    "svg": "results/lab\\lab_isitia.svg",
+    "pdf": "results/lab\\lab_isitia.pdf"
+  },
+  "run_id": "fe45d509310b99d4",
+  "commit": "75d0f6ccdad1c1e10603529764355b82d53b06d2",
+  "git_worktree": "DIRTY",
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "cv2": "5.0.0",
+      "cryptography": "50.0.1",
+      "reedsolo": "unknown",
+      "PIL": "12.3.0",
+      "matplotlib": "3.11.2",
+      "yaml": "6.0.3"
+    }
+  },
+  "similarity_definition": "«подібність» статті = |r|·100, де r — коефіцієнт кореляції Пірсона між оригіналом і перемішаним зображенням. Це статистична міра схожості, а НЕ показник конфіденційності: перестановка не змінює жодного пікселя, тож гістограма й локальні статистики лишаються недоторканими"
+}

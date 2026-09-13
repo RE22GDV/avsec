@@ -1,0 +1,10 @@
+corr_original_vs_decrypted,corr_original_vs_scrambled,exact_recovery,image,seed,similarity_decrypted_pct,similarity_scrambled_pct
+1.0,-0.057275,True,smooth,44257,100.0,5.7275
+1.0,-0.040499,True,edges,44257,100.0,4.0499
+1.0,-9.7e-05,True,texture,44257,100.0,0.0097
+1.0,0.062688,True,smooth,1234,100.0,6.2688
+1.0,-0.043435,True,edges,1234,100.0,4.3435
+1.0,-0.005834,True,texture,1234,100.0,0.5834
+1.0,0.03542,True,smooth,1111,100.0,3.542
+1.0,0.072319,True,edges,1111,100.0,7.2319
+1.0,0.015623,True,texture,1111,100.0,1.5623

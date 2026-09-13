@@ -392,6 +392,29 @@ def cmd_analyze(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_lab(args: argparse.Namespace) -> int:
+    """Reproduce the ISITIA 2021 scheme and repeat it on real photographs.
+
+    One command, one picture, one directory: the replica of the article's own
+    tables and the same measurement on crops of a UAV photograph.
+    """
+    from avsec.lab import run_lab
+
+    cfg = _cfg(args)
+    res = run_lab(cfg, _out(args, "results/lab"), progress=_progress)
+    p1, p2 = res["part1_replica"], res["part2_natural"]
+    print(json.dumps({
+        "grid": res["grid"], "frame": res["frame"],
+        "replica_mean_pct": p1["mean_similarity_scrambled_pct"],
+        "paper_mean_pct": p1["paper_mean_similarity_scrambled_pct"],
+        "replica_exact_recovery": p1["all_exact_recovery"],
+        "natural_scenes": p2.get("n_scenes"),
+        "natural_spread_pct": p2.get("spread_pct"),
+        "figure": res["figures"].get("png"),
+    }, indent=2, ensure_ascii=False))
+    return 0
+
+
 def cmd_verify(args: argparse.Namespace) -> int:
     """Recompute every published claim from the published tables (R11).
 
@@ -544,6 +567,12 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--output", help="where to write the tables (default: --input)")
     sp.add_argument("--plan", help="statistics plan YAML")
     sp.set_defaults(func=cmd_analyze)
+
+    sp = sub.add_parser("lab",
+                        help="ISITIA 2021: reproduce the scheme and repeat it "
+                             "on real photographs")
+    _common(sp)
+    sp.set_defaults(func=cmd_lab)
 
     sp = sub.add_parser("verify",
                         help="recompute every published claim from the tables")

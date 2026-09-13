@@ -1,0 +1,5 @@
+corr_original_vs_decrypted,corr_original_vs_scrambled,exact_recovery,gradient_energy,label,scene,seed,similarity_decrypted_pct,similarity_scrambled_pct
+1.0,-0.070794,True,75.984,море й небо над косою — найплоскіший вміст набору,sky_horizon,44257,100.0,7.0794
+1.0,-0.008403,True,114.046,село — поле дрібних яскравих об'єктів,village,44257,100.0,0.8403
+1.0,0.041181,True,115.296,берегова лінія — довга контрастна межа,shoreline,44257,100.0,4.1181
+1.0,-0.005287,True,137.207,крона сосон — найважча текстура кадру,forest_canopy,44257,100.0,0.5287
