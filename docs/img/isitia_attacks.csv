@@ -1,0 +1,6 @@
+case,synthetic,neighbour_accuracy_pct,direct_accuracy_pct,psnr_db,seconds,grid,frame,seed
+smooth (синтетичний градієнт),True,94.94,0.0,24.68,0.0843,12x16,256x192,44257
+sky_horizon (знімок з БпЛА),False,35.67,1.04,15.4,0.0884,12x16,256x192,44257
+village (знімок з БпЛА),False,28.09,0.0,15.35,0.1026,12x16,256x192,44257
+shoreline (знімок з БпЛА),False,27.53,0.0,12.27,0.0999,12x16,256x192,44257
+forest_canopy (знімок з БпЛА),False,23.88,1.56,13.54,0.1078,12x16,256x192,44257

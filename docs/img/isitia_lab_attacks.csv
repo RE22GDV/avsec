@@ -1,5 +1,5 @@
 boundary_direct_accuracy,boundary_neighbour_accuracy,boundary_psnr_db,boundary_seconds,known_pair_permutation_accuracy,known_pair_seconds,scene
-0.0365,0.4551,15.989,0.1045,1.0,0.0849,sky_horizon
-0.0052,0.4522,14.783,0.1078,1.0,0.0804,village
-0.0,0.4045,12.625,0.1103,1.0,0.078,shoreline
-0.0,0.6264,11.827,0.1221,1.0,0.0886,forest_canopy
+0.0365,0.4551,15.989,0.1002,1.0,0.0757,sky_horizon
+0.0052,0.4522,14.783,0.1136,1.0,0.0787,village
+0.0,0.4045,12.625,0.1077,1.0,0.0768,shoreline
+0.0,0.6264,11.827,0.1225,1.0,0.0792,forest_canopy

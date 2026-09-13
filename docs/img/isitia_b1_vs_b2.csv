@@ -1,0 +1,3 @@
+target,known_pair_accuracy,boundary_neighbour_pct,boundary_psnr_db,multi_frame_accuracy,seed_search_key_space,seed_search_found,seed_search_seconds,chance_level,commit
+"B1 (LFSR, стала перестановка)",1.0,94.94,24.68,0.5104,65535,44257,5.133,0.005208,3e5f488277c0f3b638b6d5ed0367f52a79c5972d
+"B2 (CSPRNG, щокадрово)",1.0,94.94,24.68,0.0,115792089237316195423570985008687907853269984665640564039457584007913129639936,-1,-1.0,0.005208,3e5f488277c0f3b638b6d5ed0367f52a79c5972d
