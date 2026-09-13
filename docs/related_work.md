@@ -5,7 +5,7 @@
 >
 > **Кому.** Перш за все — рецензентові й тому, хто шукає, де тут новизна.
 >
-> **Поруч:** [деталі відтворення](reconstruction_2021.md) · [реєстр тверджень](claims.md) · [висновки](conclusions.md) · [README](../README.md)
+> **Поруч:** [завдання ISITIA 2021 одним документом](reconstruction_2021.md) · [реєстр тверджень](claims.md) · [висновки](conclusions.md) · [README](../README.md)
 <!-- /DOCNAV -->
 
 <!-- TOC -->
