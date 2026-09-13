@@ -130,6 +130,10 @@ def run_lab(cfg: ExperimentConfig, output_dir: str = "results/lab",
     """Reproduce the ISITIA 2021 scheme and repeat it on real photographs."""
     from avsec import sources as src_mod
 
+    # Read the code's provenance BEFORE writing anything: this directory is
+    # tracked, so the run would otherwise report the working tree as dirty
+    # because of its own output.
+    env = environment_record()
     out = ensure_dir(output_dir)
     img_dir = ensure_dir(os.path.join(out, "images"))
     rows, cols = cfg.lfsr.grid_rows, cfg.lfsr.grid_cols
@@ -254,7 +258,6 @@ def run_lab(cfg: ExperimentConfig, output_dir: str = "results/lab",
     if attacked:
         write_csv(os.path.join(out, "attacks_natural.csv"), attacked)
 
-    env = environment_record()
     result = {
         "kind": "lab",
         "title": "ISITIA 2021: відтворення і повтор на природних знімках",

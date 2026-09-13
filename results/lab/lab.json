@@ -63,38 +63,38 @@
     {
       "scene": "sky_horizon",
       "known_pair_permutation_accuracy": 1.0,
-      "known_pair_seconds": 0.0862,
+      "known_pair_seconds": 0.0764,
       "boundary_direct_accuracy": 0.0365,
       "boundary_neighbour_accuracy": 0.4551,
       "boundary_psnr_db": 15.989,
-      "boundary_seconds": 0.1108
+      "boundary_seconds": 0.1058
     },
     {
       "scene": "village",
       "known_pair_permutation_accuracy": 1.0,
-      "known_pair_seconds": 0.0792,
+      "known_pair_seconds": 0.0793,
       "boundary_direct_accuracy": 0.0052,
       "boundary_neighbour_accuracy": 0.4522,
       "boundary_psnr_db": 14.783,
-      "boundary_seconds": 0.1163
+      "boundary_seconds": 0.1111
     },
     {
       "scene": "shoreline",
       "known_pair_permutation_accuracy": 1.0,
-      "known_pair_seconds": 0.0867,
+      "known_pair_seconds": 0.0801,
       "boundary_direct_accuracy": 0.0,
       "boundary_neighbour_accuracy": 0.4045,
       "boundary_psnr_db": 12.625,
-      "boundary_seconds": 0.106
+      "boundary_seconds": 0.1088
     },
     {
       "scene": "forest_canopy",
       "known_pair_permutation_accuracy": 1.0,
-      "known_pair_seconds": 0.08,
+      "known_pair_seconds": 0.0812,
       "boundary_direct_accuracy": 0.0,
       "boundary_neighbour_accuracy": 0.6264,
       "boundary_psnr_db": 11.827,
-      "boundary_seconds": 0.128
+      "boundary_seconds": 0.1248
     }
   ],
   "figures": {
@@ -103,7 +103,7 @@
     "pdf": "results/lab\\lab_isitia.pdf"
   },
   "run_id": "fe45d509310b99d4",
-  "commit": "75d0f6ccdad1c1e10603529764355b82d53b06d2",
+  "commit": "a84b2c7d79f64325e4c2ad8185bc4e11e9b8f22b",
   "git_worktree": "DIRTY",
   "environment": {
     "python": "3.12.10",
