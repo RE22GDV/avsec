@@ -292,7 +292,8 @@ def run_attacks(cfg: ExperimentConfig, output_dir: str,
 
     _emit(progress, "chosen plaintext", 0.05)
     r = attack_chosen_plaintext(scr, 0, H, W)
-    results.append(r.to_dict())
+    d = r.to_dict(); d["target"] = "B1"
+    results.append(d)
 
     _emit(progress, "known pair / boundary", 0.2)
     for name in ("smooth", "edges", "text", "texture"):
@@ -301,10 +302,10 @@ def run_attacks(cfg: ExperimentConfig, output_dir: str,
         kp = attack_known_pair(scr._fit(img), s, rows, cols)
         kp.metrics["permutation_accuracy"] = float(
             (kp.recovered_permutation == scr.permutation(0)).mean())
-        d = kp.to_dict(); d["content"] = name
+        d = kp.to_dict(); d["content"] = name; d["target"] = "B1"
         results.append(d)
         ba = attack_boundary_reassembly(s, rows, cols, scr.permutation(0), scr._fit(img))
-        d = ba.to_dict(); d["content"] = name
+        d = ba.to_dict(); d["content"] = name; d["target"] = "B1"
         results.append(d)
         if cfg.save_images and ba.reconstructed is not None:
             dd = ensure_dir(os.path.join(output_dir, "images"))
@@ -315,13 +316,70 @@ def run_attacks(cfg: ExperimentConfig, output_dir: str,
 
     _emit(progress, "multi frame reuse", 0.5)
     frames = [src_mod.pattern_edges(H, W, i * 0.05) for i in range(12)]
-    results.append(attack_multi_frame_reuse(frames, scr, rows, cols).to_dict())
+    d = attack_multi_frame_reuse(frames, scr, rows, cols).to_dict()
+    d["target"] = "B1"
+    results.append(d)
+
+    # ---- the same attacks against B2 ------------------------------------
+    # B2 keeps the permutation idea and replaces the generator with a keyed
+    # CSPRNG, per frame.  Two of these attacks never look at the generator, so
+    # they must be run against B2 as well - otherwise "the weakness is the
+    # permutation, not the LFSR" is an assertion rather than a measurement.
+    _emit(progress, "attacks against B2", 0.55)
+    from avsec.baselines import CryptoPermutationScrambler
+
+    from avsec.crypto import derive_session_keys
+
+    b2_sid = cfg.session_id_source().next("B2-attack")
+    b2_keys = derive_session_keys(cfg.master_secret(), b2_sid)
+    b2 = CryptoPermutationScrambler(rows, cols, b2_keys.key, b2_sid,
+                                    per_frame=True)
+    for name in ("smooth", "texture"):
+        img = src_mod.PATTERNS[name](H, W)
+        s2 = b2.scramble(img, 0)
+        kp = attack_known_pair(img, s2, rows, cols)
+        kp.metrics["permutation_accuracy"] = float(
+            (kp.recovered_permutation == b2.permutation(0)).mean())
+        d = kp.to_dict()
+        d.update({"content": name, "target": "B2",
+                  "assumptions": kp.assumptions + "; keyed CSPRNG generator"})
+        results.append(d)
+        ba = attack_boundary_reassembly(s2, rows, cols, b2.permutation(0), img)
+        d = ba.to_dict()
+        d.update({"content": name, "target": "B2"})
+        results.append(d)
+
+    # and the two attacks B2 is meant to stop
+    class _B2Adapter:
+        """Enough of the BlockScrambler surface for the multi-frame attack."""
+
+        def __init__(self, inner):
+            self._inner = inner
+            self.cfg = cfg.lfsr
+
+        def scramble(self, img, i):
+            return self._inner.scramble(img, i)
+
+        def permutation(self, i=0):
+            return self._inner.permutation(i)
+
+        def _fit(self, img):
+            return img
+
+    mf = attack_multi_frame_reuse(frames, _B2Adapter(b2), rows, cols)
+    d = mf.to_dict()
+    d.update({"target": "B2",
+              "notes": "B2 regenerates the permutation every frame, so the "
+                       "temporal variance map is no longer a permuted copy of "
+                       "one fixed map"})
+    results.append(d)
 
     _emit(progress, "lfsr brute force", 0.6)
     img = src_mod.pattern_texture(H, W)
     bf = attack_lfsr_bruteforce(scr._fit(img), scr.scramble(img, 0), cfg.lfsr,
                                 max_states=min((1 << cfg.lfsr.lfsr.width) - 1, 70000))
-    results.append(bf.to_dict())
+    d = bf.to_dict(); d["target"] = "B1"
+    results.append(d)
 
     _emit(progress, "similarity table", 0.75)
     similarity: List[Dict[str, Any]] = []

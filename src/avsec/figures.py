@@ -1158,10 +1158,17 @@ def g37(ctx: FigureContext) -> Dict[str, Any]:
                    "note": "проєкції позначені окремо і не називаються зламом"})
 
 
-def _attack_results(ctx: FigureContext, name: str, required: bool = True
-                    ) -> List[Dict[str, Any]]:
+def _attack_results(ctx: FigureContext, name: str, required: bool = True,
+                    target: str = "B1") -> List[Dict[str, Any]]:
+    """Attack rows for one attack against one target.
+
+    Since B2 is attacked as well, a row now names its ``target``; the catalogue
+    figures are about the 2021 scheme itself, so they keep to ``B1``.  Older
+    runs have no ``target`` field and are treated as B1, which is what they were.
+    """
     data = ctx.json("attacks.json")
-    res = [r for r in data.get("results", []) if r.get("name") == name]
+    res = [r for r in data.get("results", [])
+           if r.get("name") == name and r.get("target", "B1") == target]
     if not res and required:
         raise FigurePending(f"у attacks.json немає результатів '{name}'")
     return res
