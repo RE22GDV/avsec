@@ -134,10 +134,24 @@ c = S(v),\qquad v = S^{-1}(c),\qquad S^{-1}\circ S = \mathrm{id}_{\{0,\dots,255\
 
 ### 2.3 Порядок перетворень
 
-```text
-   передавач:   кадр  ──заміна S──►  ──перестановка π──►  растр у канал
-
-   приймач:     растр ──π⁻¹──►  ──S⁻¹──►  відновлений кадр
+```mermaid
+flowchart LR
+    K["Ключ сеансу"] --> TAB["Таблиці замін<br/>за режимом: 1 або 192"]
+    K --> PT["Таблиця перестановки<br/>щокадрово"]
+    F["Кадр"] --> SUB["Заміна значень S<br/>у вихідній геометрії блоків"]
+    TAB --> SUB
+    SUB --> PERM["Перестановка блоків"]
+    PT --> PERM
+    PERM --> CH(["Растр у канал"])
+    CH --> IPERM["Обернена перестановка<br/>блоки повертаються на свої позиції"]
+    IPERM --> ISUB["Обернені таблиці<br/>саме тому порядок такий"]
+    ISUB --> V["Відновлений кадр"]
+    style CH fill:#ffe0b2,stroke:#e65100,stroke-width:3px
+    style SUB fill:#b2dfdb,stroke:#00695c,stroke-width:2px
+    style ISUB fill:#b2dfdb,stroke:#00695c,stroke-width:2px
+    style PERM fill:#e1bee7,stroke:#6a1b9a
+    style IPERM fill:#e1bee7,stroke:#6a1b9a
+    style K fill:#ffcdd2,stroke:#b71c1c
 ```
 
 Заміна застосовується **до** перестановки, у вихідній геометрії блоків. Тому
