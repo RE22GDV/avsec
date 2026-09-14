@@ -1257,17 +1257,24 @@ def _geometry_figure(out_dir, geometry, spacing, level=BEST_LEVEL):
     mix = [r for r in geometry if r["mechanism"] == "змішування"]
     x = np.arange(len(mix))
     w = 0.27
-    ax.bar(x - w, [r["flat_window_pct"] for r in mix], w,
-           color="#90a4ae", label="вікно з одного значення")
-    ax.bar(x, [r["exact_within_flat_pct"] for r in mix], w,
-           color="#2e7d32", label="відновлено в таких вікнах")
-    ax.bar(x + w, [r["exact_within_varying_pct"] for r in mix], w,
-           color="#c62828", label="відновлено в решті")
+    series = (("flat_window_pct", -w, "#90a4ae", "вікно з одного значення"),
+              ("exact_within_flat_pct", 0.0, "#2e7d32",
+               "відновлено в таких вікнах"),
+              ("exact_within_varying_pct", w, "#c62828", "відновлено в решті"))
+    for field, off, colour, label in series:
+        vals = [r[field] for r in mix]
+        ax.bar(x + off, vals, w, color=colour, label=label)
+        # the two small series are the point of the panel, so label them:
+        # at half a percent a bar is invisible next to a full one
+        for xi, v in zip(x + off, vals):
+            ax.text(xi, v + 2.5, f"{v:.2f}", ha="center", fontsize=7.5,
+                    color=colour, rotation=90)
     ax.set_xticks(x)
     ax.set_xticklabels([r["case"] for r in mix], fontsize=9)
+    ax.set_ylim(0, 122)
     ax.set_ylabel("%")
     ax.set_title("Згладжування: виживає лише однорідне вікно", fontsize=11)
-    ax.legend(fontsize=8.5)
+    ax.legend(fontsize=8.5, loc="upper center", framealpha=0.95)
     ax.grid(alpha=0.3, axis="y")
 
     fig.suptitle("Чому спотворення діють саме так: геометрія кодової книги",
