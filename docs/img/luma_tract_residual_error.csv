@@ -1,0 +1,6 @@
+channel,max_error_levels,median_error_levels,p95_error_levels,rms_error_levels
+clean,1.0,0.0,1.0,0.56
+mild,71.0,5.0,15.0,7.77
+moderate,217.0,9.0,31.0,17.77
+bursty,251.0,22.0,181.0,89.3
+harsh,235.0,20.0,77.0,36.9

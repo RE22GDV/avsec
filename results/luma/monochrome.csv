@@ -1,4 +1,4 @@
 bit_exact_recovery,cipher_luma_entropy_bits,cipher_luma_levels_used,cipher_luma_max,cipher_luma_min,cipher_luma_std,frame,source_luma_entropy_bits
-True,-0.0,1,130.492,129.5,0.284271,0,6.8507
-True,-0.0,1,130.492,129.5,0.256218,1,6.9637
-True,-0.0,1,130.492,129.5,0.277269,2,7.0516
+True,-0.0,1,130.492,129.5,0.269259,0,6.8507
+True,-0.0,1,130.492,129.5,0.294071,1,6.9637
+True,-0.0,1,130.488,129.5,0.285481,2,7.0516

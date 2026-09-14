@@ -1,7 +1,7 @@
 exact_pixels_pct,psnr_db,sigma_levels,usable_at_20db
 100.0,99.0,0.0,True
-99.56,34.13,0.5,True
-98.32,26.46,1.0,True
-93.64,20.65,2.0,True
-77.05,15.54,4.0,False
-45.31,12.1,8.0,False
+99.64,38.77,0.5,True
+98.57,30.35,1.0,True
+93.82,22.63,2.0,True
+76.55,16.41,4.0,False
+44.29,12.3,8.0,False
