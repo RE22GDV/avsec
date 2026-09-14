@@ -496,6 +496,44 @@ def tract_residual_error(cfg: ExperimentConfig, frames, scene: str
     return out
 
 
+def tract_example(cfg: ExperimentConfig, master, img: np.ndarray, scene: str,
+                  level: int = BEST_LEVEL, source_bits: int = 8
+                  ) -> Tuple[Dict[str, np.ndarray], List[Dict[str, Any]]]:
+    """The four stages of one frame, for every channel profile.
+
+    Source, the ciphertext as it enters the tract, the same ciphertext as the
+    receiver got it, and the frame the codebook produced from that.
+    """
+    from avsec.channel import ChannelTrace, preset
+    from avsec.luma_channel import make_b2l
+
+    H, W = cfg.frame_height, cfg.frame_width
+    transport = cfg.profile("B4").transport_config(cfg.budget)
+    images: Dict[str, np.ndarray] = {"example_source": img}
+    rows: List[Dict[str, Any]] = []
+    for ch in ANALOG_CHANNELS:
+        m = make_b2l(transport, preset(ch), H, W, master,
+                     session_id=b"B2LBNCH0", level=level,
+                     source_bits=source_bits)
+        m.reset()
+        tr = ChannelTrace(seed=cfg.channel_seed_value, scene=scene,
+                          repetition=0, profile=ch)
+        res = m.process(img, 0, tr)
+        images[f"example_{ch}_tx"] = np.asarray(m.last_tx_rgb, dtype=np.uint8)
+        images[f"example_{ch}_rx"] = np.asarray(m.last_rx_rgb, dtype=np.uint8)
+        images[f"example_{ch}_out"] = np.asarray(res.reconstructed, dtype=np.uint8)
+        diff = np.abs(np.asarray(m.last_rx_rgb, dtype=np.float64)
+                      - np.asarray(m.last_tx_rgb, dtype=np.float64)).mean(axis=2)
+        images[f"example_{ch}_damage"] = _to_grey(diff)
+        rows.append({
+            "channel": ch,
+            "psnr_db": round(_psnr(res.reconstructed, img), 2),
+            "exact_pixels_pct": round(float((res.reconstructed == img).mean() * 100), 2),
+            "mean_channel_damage_levels": round(float(diff.mean()), 2),
+        })
+    return images, rows
+
+
 def tract_ablation(cfg: ExperimentConfig, master, img: np.ndarray,
                    scene: str, level: int = BEST_LEVEL) -> List[Dict[str, Any]]:
     """One impairment at a time, at the strength of the ``mild`` profile.
@@ -670,6 +708,10 @@ def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
     tract = analog_sweep(cfg, cfg.master_secret(), list(frames[:n_frames]),
                          "village", progress=progress)
 
+    say("наскрізний приклад за профілями", 0.87)
+    ex_images, ex_rows = tract_example(cfg, cfg.master_secret(), frames[0],
+                                       "village")
+
     say("розклад профілю за спотвореннями", 0.88)
     ablation = tract_ablation(cfg, cfg.master_secret(), frames[0], "village")
 
@@ -677,11 +719,13 @@ def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
     images = dict(mono_images)
     images.update(colour_images)
     images.update(strip_images)
+    images.update(ex_images)
     _save(img_dir, images)
     figures = _figures(out, images, sweep, mono_rows, colour_rows, attacks, noise)
     figures["noise_strip"] = _noise_strip_figure(out, images, strip_rows)
     figures["noise_deep"] = _noise_deep_figure(out, deep, natt, spacing)
     figures["analog_tract"] = _tract_figure(out, tract, residual)
+    figures["tract_example"] = _example_figure(out, images, ex_rows)
 
     summary = {
         "kind": "luma_balance",
@@ -701,6 +745,7 @@ def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
         "tract_residual_error": residual,
         "analog_tract": tract,
         "tract_ablation": ablation,
+        "tract_example": ex_rows,
         "figures": figures,
         "run_id": cfg.run_identity(),
         "commit": env.get("git_commit"),
@@ -720,6 +765,7 @@ def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
     write_csv(os.path.join(out, "tract_residual_error.csv"), residual)
     write_csv(os.path.join(out, "analog_tract.csv"), tract)
     write_csv(os.path.join(out, "tract_ablation.csv"), ablation)
+    write_csv(os.path.join(out, "tract_example.csv"), ex_rows)
     say("готово", 1.0)
     return summary
 
@@ -964,6 +1010,56 @@ def _noise_deep_figure(out_dir, deep, natt, spacing):
 
 
 
+def _example_figure(out_dir, images, rows):
+    """Source, what enters the tract, the damage, and what came out."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    n = len(rows)
+    fig, axes = plt.subplots(n, 4, figsize=(10.4, 2.35 * n))
+    titles = ("1. Оригінал", "2. Що йде в тракт",
+              "3. Що прийнято з тракту", "4. Що отримали")
+    for r, row in enumerate(rows):
+        ch = row["channel"]
+        panels = [images["example_source"], images[f"example_{ch}_tx"],
+                  images[f"example_{ch}_rx"], images[f"example_{ch}_out"]]
+        for c, arr in enumerate(panels):
+            ax = axes[r, c]
+            a = np.asarray(arr, dtype=np.uint8)
+            if a.ndim == 3:
+                ax.imshow(a)
+            else:
+                ax.imshow(a, cmap="gray", vmin=0, vmax=255)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            if r == 0:
+                ax.set_title(titles[c], fontsize=10)
+        axes[r, 0].set_ylabel(ch, fontsize=10)
+        note = ("точно" if row["psnr_db"] >= 98 else f"{row['psnr_db']:.2f} дБ")
+        axes[r, 3].set_xlabel(f"{note}, {row['exact_pixels_pct']:.1f} % точно",
+                              fontsize=8.5)
+        axes[r, 2].set_xlabel(
+            f"середнє пошкодження {row['mean_channel_damage_levels']:.1f} рівня",
+            fontsize=8.5)
+    fig.suptitle("Один кадр крізь тракт: що надіслано, що прийнято, що вийшло",
+                 fontsize=12.5)
+    fig.text(0.012, 0.008,
+             "Стовпець 2 — шифротекст зі сталою яскравістю, що передається "
+             "трьома площинами у трьох слотах растру. Стовпець 3 — ті самі "
+             "площини після тракту. Стовпець 4 — результат декодування за "
+             "найближчим кодовим словом.",
+             fontsize=8, color="#37474f", wrap=True)
+    fig.tight_layout(rect=(0, 0.035, 1, 0.965))
+    path = os.path.join(out_dir, "tract_example.png")
+    fig.savefig(path, dpi=140)
+    fig.savefig(path.replace(".png", ".svg"))
+    plt.close(fig)
+    return path
+
+
 def _tract_figure(out_dir, tract, residual):
     """Residual error against codeword spacing, and the resulting quality."""
     import matplotlib
@@ -1042,7 +1138,7 @@ def _tract_figure(out_dir, tract, residual):
 
 __all__ = ["NOISE_SIGMAS", "FINE_SIGMAS", "IMPAIRMENTS", "STRIP_SIGMAS",
            "ANALOG_BITS", "ANALOG_CHANNELS", "tract_residual_error",
-           "analog_sweep", "tract_ablation",
+           "analog_sweep", "tract_ablation", "tract_example",
            "capacity_sweep", "monochrome_path", "colour_path",
            "luma_only_observer", "plane_attacks", "noise_tolerance",
            "codeword_spacing", "noise_deep", "noise_attacks", "noise_strip",

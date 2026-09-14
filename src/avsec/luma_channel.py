@@ -55,6 +55,8 @@ class AnalogColourPlanesMethod(AnalogPictureMethod):
                          transform=transform, inverse=inverse,
                          authenticated=False, timer=timer, notes=notes,
                          rasters_per_frame=len(PLANE_SLOTS))
+        self.last_tx_rgb = None
+        self.last_rx_rgb = None
 
     def describe(self) -> Dict[str, Any]:
         d = super().describe()
@@ -122,6 +124,10 @@ class AnalogColourPlanesMethod(AnalogPictureMethod):
                                 self.notes)
 
         rx_rgb = np.stack([np.asarray(p, dtype=np.uint8) for p in planes], axis=2)
+        # kept for the illustration in docs/luma_balance.md: the three planes
+        # as the receiver reassembled them, before the codebook is applied
+        self.last_tx_rgb = np.asarray(payload, dtype=np.uint8)
+        self.last_rx_rgb = rx_rgb
         with t(f"{self.name}.inverse"):
             recon = self._inverse(rx_rgb, frame_id)
         recon = np.asarray(recon)[: self.frame_h, : self.frame_w]
