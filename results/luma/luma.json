@@ -362,7 +362,7 @@
       "direct_accuracy_pct": 0.0,
       "reconstruction_psnr_db": 15.35,
       "plane_std": 31.0898,
-      "seconds": 0.1023
+      "seconds": 0.1016
     },
     {
       "view": "B2l ключова: яскравість",
@@ -372,7 +372,7 @@
       "direct_accuracy_pct": 0.0,
       "reconstruction_psnr_db": 15.19,
       "plane_std": 0.0,
-      "seconds": 0.088
+      "seconds": 0.0846
     },
     {
       "view": "B2l ключова: Cb",
@@ -382,7 +382,7 @@
       "direct_accuracy_pct": 0.52,
       "reconstruction_psnr_db": 9.35,
       "plane_std": 76.4711,
-      "seconds": 0.1123
+      "seconds": 0.1145
     },
     {
       "view": "B2l ключова: Cr",
@@ -392,7 +392,7 @@
       "direct_accuracy_pct": 1.04,
       "reconstruction_psnr_db": 9.71,
       "plane_std": 73.9634,
-      "seconds": 0.1072
+      "seconds": 0.1023
     },
     {
       "view": "B2l впорядкована: яскравість",
@@ -402,7 +402,7 @@
       "direct_accuracy_pct": 0.0,
       "reconstruction_psnr_db": 15.19,
       "plane_std": 0.0,
-      "seconds": 0.081
+      "seconds": 0.0826
     },
     {
       "view": "B2l впорядкована: Cb",
@@ -412,7 +412,7 @@
       "direct_accuracy_pct": 0.52,
       "reconstruction_psnr_db": 8.4,
       "plane_std": 48.1963,
-      "seconds": 0.1061
+      "seconds": 0.1083
     },
     {
       "view": "B2l впорядкована: Cr",
@@ -422,7 +422,7 @@
       "direct_accuracy_pct": 0.0,
       "reconstruction_psnr_db": 11.61,
       "plane_std": 52.6449,
-      "seconds": 0.1009
+      "seconds": 0.1029
     }
   ],
   "noise_tolerance": [
@@ -1970,7 +1970,7 @@
     "failure_geometry": "results/luma\\failure_geometry.png"
   },
   "run_id": "ed61a8d81b2a58c2",
-  "commit": "474cbe9bc651474d6b34832c6019311490e21df7",
+  "commit": "7fd685cf60cd1965b044b0c9397ee93c452bf7ab",
   "git_worktree": "clean",
   "environment": {
     "python": "3.12.10",
@@ -1989,15 +1989,15 @@
       "yaml": "6.0.3"
     },
     "avsec_version": "0.1.0",
-    "git_commit": "474cbe9bc651474d6b34832c6019311490e21df7",
+    "git_commit": "7fd685cf60cd1965b044b0c9397ee93c452bf7ab",
     "git_worktree": "clean",
     "git_dirty": false,
     "git_dirty_files": [],
     "git_branch": "main",
-    "git_describe": "v1.1.0-33-g474cbe9",
+    "git_describe": "v1.1.0-35-g7fd685c",
     "git_dirty_note": "",
     "pip_freeze": [
-      "-e git+https://github.com/RE22GDV/avsec.git@474cbe9bc651474d6b34832c6019311490e21df7#egg=avsec",
+      "-e git+https://github.com/RE22GDV/avsec.git@7fd685cf60cd1965b044b0c9397ee93c452bf7ab#egg=avsec",
       "PyYAML==6.0.3",
       "Pygments==2.21.0",
       "cffi==2.1.1",
