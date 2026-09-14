@@ -1221,8 +1221,11 @@ def _geometry_figure(out_dir, geometry, spacing, level=BEST_LEVEL):
     fig, axes = plt.subplots(1, 3, figsize=(15.0, 4.6))
 
     ax = axes[0]
-    px, py = flat(pal)
-    ax.scatter(px, py, s=1.2, c=np.clip(pal / 255.0, 0, 1), alpha=0.55)
+    # the palette holds 111 749 points; a subsample draws the same region and
+    # keeps the vector version of the figure a reasonable size
+    shown = pal[::max(1, pal.shape[0] // 6000)]
+    px, py = flat(shown)
+    ax.scatter(px, py, s=1.6, c=np.clip(shown / 255.0, 0, 1), alpha=0.55)
     kx, ky = flat(picked)
     ax.scatter(kx, ky, s=9, facecolors="none", edgecolors="#263238",
                linewidths=0.6, label="256 кодових слів")
