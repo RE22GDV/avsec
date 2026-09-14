@@ -1,0 +1,6 @@
+channel,exact_pixels_pct,mean_channel_damage_levels,psnr_db
+clean,100.0,0.33,99.0
+mild,4.47,22.27,9.62
+moderate,2.07,36.77,9.5
+bursty,0.51,66.75,8.43
+harsh,0.77,51.12,9.37

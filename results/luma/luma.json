@@ -362,7 +362,7 @@
       "direct_accuracy_pct": 0.0,
       "reconstruction_psnr_db": 15.35,
       "plane_std": 31.0898,
-      "seconds": 0.0996
+      "seconds": 0.102
     },
     {
       "view": "B2l ключова: яскравість",
@@ -372,7 +372,7 @@
       "direct_accuracy_pct": 0.0,
       "reconstruction_psnr_db": 15.19,
       "plane_std": 0.0,
-      "seconds": 0.0806
+      "seconds": 0.0812
     },
     {
       "view": "B2l ключова: Cb",
@@ -382,7 +382,7 @@
       "direct_accuracy_pct": 0.52,
       "reconstruction_psnr_db": 9.35,
       "plane_std": 76.4711,
-      "seconds": 0.1109
+      "seconds": 0.1088
     },
     {
       "view": "B2l ключова: Cr",
@@ -392,7 +392,7 @@
       "direct_accuracy_pct": 1.04,
       "reconstruction_psnr_db": 9.71,
       "plane_std": 73.9634,
-      "seconds": 0.0997
+      "seconds": 0.0995
     },
     {
       "view": "B2l впорядкована: яскравість",
@@ -402,7 +402,7 @@
       "direct_accuracy_pct": 0.0,
       "reconstruction_psnr_db": 15.19,
       "plane_std": 0.0,
-      "seconds": 0.08
+      "seconds": 0.0802
     },
     {
       "view": "B2l впорядкована: Cb",
@@ -412,7 +412,7 @@
       "direct_accuracy_pct": 0.52,
       "reconstruction_psnr_db": 8.4,
       "plane_std": 48.1963,
-      "seconds": 0.1037
+      "seconds": 0.1082
     },
     {
       "view": "B2l впорядкована: Cr",
@@ -422,7 +422,7 @@
       "direct_accuracy_pct": 0.0,
       "reconstruction_psnr_db": 11.61,
       "plane_std": 52.6449,
-      "seconds": 0.101
+      "seconds": 0.0986
     }
   ],
   "noise_tolerance": [
@@ -1762,8 +1762,8 @@
     "tract_example": "results/luma\\tract_example.png"
   },
   "run_id": "fe45d509310b99d4",
-  "commit": "0573558dd7332706b7fd9267ebc68e527cf4e571",
-  "git_worktree": "DIRTY",
+  "commit": "a3c7bfd42b6fb6d7d7140d72b20fc21faed0d6c0",
+  "git_worktree": "clean",
   "environment": {
     "python": "3.12.10",
     "platform": "Windows-11-10.0.26200-SP0",
@@ -1781,50 +1781,15 @@
       "yaml": "6.0.3"
     },
     "avsec_version": "0.1.0",
-    "git_commit": "0573558dd7332706b7fd9267ebc68e527cf4e571",
-    "git_worktree": "DIRTY",
-    "git_dirty": true,
-    "git_dirty_files": [
-      "docs/img/luma_analog_tract.csv",
-      "docs/img/luma_analog_tract.png",
-      "docs/img/luma_analog_tract.svg",
-      "docs/img/luma_tract_ablation.csv",
-      "docs/img/luma_tract_residual_error.csv",
-      "results/luma/analog_tract.csv",
-      "results/luma/analog_tract.png",
-      "results/luma/analog_tract.svg",
-      "results/luma/images/example_bursty_damage.png",
-      "results/luma/images/example_bursty_out.png",
-      "results/luma/images/example_bursty_rx.png",
-      "results/luma/images/example_bursty_tx.png",
-      "results/luma/images/example_clean_damage.png",
-      "results/luma/images/example_clean_out.png",
-      "results/luma/images/example_clean_rx.png",
-      "results/luma/images/example_clean_tx.png",
-      "results/luma/images/example_harsh_damage.png",
-      "results/luma/images/example_harsh_out.png",
-      "results/luma/images/example_harsh_rx.png",
-      "results/luma/images/example_harsh_tx.png",
-      "results/luma/images/example_mild_damage.png",
-      "results/luma/images/example_mild_out.png",
-      "results/luma/images/example_mild_rx.png",
-      "results/luma/images/example_mild_tx.png",
-      "results/luma/images/example_moderate_damage.png",
-      "results/luma/images/example_moderate_out.png",
-      "results/luma/images/example_moderate_rx.png",
-      "results/luma/images/example_moderate_tx.png",
-      "results/luma/images/example_source.png",
-      "results/luma/tract_ablation.csv",
-      "results/luma/tract_example.csv",
-      "results/luma/tract_example.png",
-      "results/luma/tract_example.svg",
-      "results/luma/tract_residual_error.csv"
-    ],
+    "git_commit": "a3c7bfd42b6fb6d7d7140d72b20fc21faed0d6c0",
+    "git_worktree": "clean",
+    "git_dirty": false,
+    "git_dirty_files": [],
     "git_branch": "main",
-    "git_describe": "v1.1.0-28-g0573558",
-    "git_dirty_note": "УВАГА: робоче дерево змінене; результат отримано кодом, якого немає в жодному коміті",
+    "git_describe": "v1.1.0-29-ga3c7bfd",
+    "git_dirty_note": "",
     "pip_freeze": [
-      "-e git+https://github.com/RE22GDV/avsec.git@0573558dd7332706b7fd9267ebc68e527cf4e571#egg=avsec",
+      "-e git+https://github.com/RE22GDV/avsec.git@a3c7bfd42b6fb6d7d7140d72b20fc21faed0d6c0#egg=avsec",
       "PyYAML==6.0.3",
       "Pygments==2.21.0",
       "cffi==2.1.1",
