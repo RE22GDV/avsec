@@ -18,6 +18,9 @@ Sections, in the order the document uses them:
 5. **Attacks.**  The key-free reassembly attack pointed at the luminance plane
    and at the chroma plane of the same ciphertext.
 6. **Noise tolerance.**  What a perturbed ciphertext decodes to.
+7. **Failure geometry.**  Why each impairment does what it does: the direction
+   of the error relative to the palette plane, what smoothing does to a
+   codebook without order, and the size of one wrong substitution.
 
 Usage::
 
