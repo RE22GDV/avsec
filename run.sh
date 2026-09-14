@@ -12,6 +12,7 @@
 #    ./run.sh check        dataset + protocol checks
 #    ./run.sh research     the full research programme (long)
 #    ./run.sh lab          ISITIA 2021: reproduce the scheme + repeat on photos
+#    ./run.sh subst-lab    B2s: keyed substitution on top of the permutation
 #    ./run.sh verify       recheck every published number, runs nothing
 #    ./run.sh sources      download the natural UAV photographs
 #    ./run.sh shell        a shell with the environment active
@@ -101,6 +102,12 @@ case "$CMD" in
     "$PY" -m avsec.cli verify --input runs/main
     "$PY" scripts/publish.py runs/main
     ;;
+  subst-lab)
+    echo "[avsec] B2s: substitution table, attacks, channel cost ..."
+    "$PY" -m avsec.cli subst-lab --config configs/research_main.yaml --output results/b2s
+    echo "[avsec] tables and figures written to results/b2s"
+    ;;
+
   lab)
     echo "[avsec] ISITIA 2021: reproducing the scheme and repeating it on photos."
     "$PY" -m avsec.cli lab --config configs/research_main.yaml --output results/lab

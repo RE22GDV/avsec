@@ -49,6 +49,7 @@ class AttackResult:
     success: bool
     metrics: Dict[str, float] = field(default_factory=dict)
     recovered_permutation: Optional[np.ndarray] = None
+    recovered_tables: Optional[np.ndarray] = None
     reconstructed: Optional[np.ndarray] = None
     seconds: float = 0.0
     notes: str = ""
@@ -397,8 +398,144 @@ def attack_lfsr_bruteforce(
     )
 
 
+# ------------------------------------- A6: known pair against substitution
+def _sorted_histograms(tiles: np.ndarray) -> np.ndarray:
+    """Per-tile value histogram, sorted.
+
+    A substitution relabels values, so it permutes the *bins* of a histogram
+    and leaves the sorted counts untouched.  The sorted histogram is therefore
+    an invariant of any per-block bijection on values, which is what lets the
+    block permutation be recovered even though tile contents no longer match.
+    """
+    n = tiles.shape[0]
+    out = np.zeros((n, 256), dtype=np.int64)
+    flat = tiles.reshape(n, -1).astype(np.int64)
+    for i in range(n):
+        out[i] = np.bincount(flat[i], minlength=256)
+    return np.sort(out, axis=1)
+
+
+def attack_substitution_known_pair(
+    original: np.ndarray, ciphered: np.ndarray, rows: int, cols: int,
+    true_perm: Optional[np.ndarray] = None,
+) -> AttackResult:
+    """Recover the block permutation **and** the substitution tables from one pair.
+
+    Assumptions: the attacker holds one (original, ciphered) pair produced by
+    substitution followed by block permutation, and knows the grid.  No key.
+
+    The plain tile matching of :func:`attack_known_pair` fails here, because a
+    substituted tile does not resemble its original.  This attack matches tiles
+    on the sorted histogram instead - a statistic the substitution cannot
+    change - and then reads the table off pointwise, since substitution acts on
+    each pixel independently.
+
+    What the result means depends on how often the tables change.  With one
+    table per session the recovered tables decrypt every later frame; with a
+    table per frame or per block they decrypt only the frame they came from.
+    The runner measures that difference directly rather than assuming it.
+    """
+    t0 = time.perf_counter()
+    n = rows * cols
+    a = split_tiles(original, rows, cols)
+    b = split_tiles(ciphered, rows, cols)
+    sig_a = _sorted_histograms(a).astype(np.float64)
+    sig_b = _sorted_histograms(b).astype(np.float64)
+
+    cost = np.abs(sig_b[:, None, :] - sig_a[None, :, :]).sum(axis=2)
+    est = np.full(n, -1, dtype=np.int64)
+    taken = np.zeros(n, dtype=bool)
+    for i in np.argsort(cost.min(axis=1)):
+        for j in np.argsort(cost[i]):
+            if not taken[j]:
+                est[i] = j
+                taken[j] = True
+                break
+
+    # Read the tables off the matched pairs.  Substitution is pointwise, so
+    # cipher tile i and original tile est[i] give one (value -> value) pair per
+    # pixel.  -1 marks an entry this frame does not pin down.
+    tables = np.full((n, 256), -1, dtype=np.int64)
+    per_block_conflicts = 0
+    for i in range(n):
+        src = a[est[i]].ravel().astype(np.int64)
+        dst = b[i].ravel().astype(np.int64)
+        for v, w in zip(src, dst):
+            if tables[est[i], v] < 0:
+                tables[est[i], v] = w
+            elif tables[est[i], v] != w:
+                per_block_conflicts += 1
+
+    # Merging every block into one table is both an improvement and a test.
+    # If one table is in use, merging pins down far more of the alphabet; if
+    # the tables differ per block, merging contradicts itself - which is how
+    # the attacker learns which mode is in use.
+    merged = np.full(256, -1, dtype=np.int64)
+    merge_conflicts = 0
+    for row in tables:
+        for v in np.flatnonzero(row >= 0):
+            if merged[v] < 0:
+                merged[v] = row[v]
+            elif merged[v] != row[v]:
+                merge_conflicts += 1
+    is_global = merge_conflicts == 0
+
+    metrics: Dict[str, float] = {
+        "n_blocks": float(n),
+        "assignment_complete": float(bool((est >= 0).all())),
+        "per_block_alphabet_covered": float((tables >= 0).sum(axis=1).mean() / 256.0),
+        "merged_alphabet_covered": float((merged >= 0).sum() / 256.0),
+        "merge_conflicts": float(merge_conflicts),
+        "substitution_is_global": float(is_global),
+        "per_block_conflicts": float(per_block_conflicts),
+    }
+    if is_global:                      # one table: every block gets the merged one
+        tables = np.tile(merged, (n, 1))
+    success = False
+    if true_perm is not None:
+        acc = permutation_accuracy(est, np.asarray(true_perm))
+        metrics["permutation_accuracy"] = acc
+        success = acc > 0.5
+    return AttackResult(
+        name="substitution_known_pair",
+        assumptions=("one (original, ciphered) pair; public grid; no key. "
+                     "Matching uses the sorted per-tile histogram, which a "
+                     "value substitution leaves invariant"),
+        success=success,
+        metrics=metrics,
+        recovered_permutation=est,
+        recovered_tables=tables,
+        seconds=time.perf_counter() - t0,
+        notes=("recovers the transform of THIS frame; whether that decrypts "
+               "later frames depends on how often the tables change"),
+    )
+
+
+def apply_recovered(ciphered: np.ndarray, est: np.ndarray, tables: np.ndarray,
+                    rows: int, cols: int, fill: int = 128) -> np.ndarray:
+    """Decrypt a frame with a permutation and tables recovered by an attack.
+
+    Entries the attack could not pin down are filled with ``fill``, so the
+    resulting quality is an honest measure of what the attacker actually has.
+    """
+    n = rows * cols
+    b = split_tiles(ciphered, rows, cols)
+    out = np.full_like(b, fill)
+    for i in range(n):
+        j = int(est[i])
+        inv = np.full(256, -1, dtype=np.int64)
+        row = tables[j]
+        known = np.flatnonzero(row >= 0)
+        inv[row[known]] = known
+        got = inv[b[i].astype(np.int64)]
+        tile = np.where(got >= 0, got, fill).astype(np.uint8)
+        out[j] = tile
+    return join_tiles(out, rows, cols)
+
+
 __all__ = [
     "AttackResult", "split_tiles", "join_tiles", "permutation_accuracy",
     "attack_chosen_plaintext", "attack_known_pair", "attack_boundary_reassembly",
     "attack_multi_frame_reuse", "attack_lfsr_bruteforce",
+    "attack_substitution_known_pair", "apply_recovered",
 ]

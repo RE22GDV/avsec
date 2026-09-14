@@ -392,6 +392,33 @@ def cmd_analyze(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_subst_lab(args: argparse.Namespace) -> int:
+    """B2s: the substitution table, the attacks against it, and its channel cost.
+
+    Writes the S-box and its inverse in full, the attack comparison against B2,
+    the reuse matrix over both primitives, and the PSNR of every channel
+    profile for B1, B2 and B2s.
+    """
+    from avsec.subst_lab import run_subst_lab
+
+    cfg = _cfg(args)
+    res = run_subst_lab(cfg, _out(args, "results/b2s"), progress=_progress)
+    boundary = {a["target"]: a["boundary_neighbour_pct"] for a in res["attacks"]}
+    clean = [r["psnr_full_db"] for r in res["channel_sweep"]
+             if r["channel"] == "clean" and r["method"] == "B2s"]
+    print(json.dumps({
+        "grid": res["grid"],
+        "sbox_bijective": res["sbox"]["bijective"],
+        "sbox_inverse_exact": res["sbox"]["inverse_exact"],
+        "bit_exact_recovery": all(c["bit_exact_recovery"]
+                                  for c in res["correctness"]),
+        "boundary_neighbour_pct": boundary,
+        "b2s_clean_psnr_db": clean,
+        "figures": res["figures"],
+    }, ensure_ascii=False, indent=2))
+    return 0
+
+
 def cmd_lab(args: argparse.Namespace) -> int:
     """Reproduce the ISITIA 2021 scheme and repeat it on real photographs.
 
@@ -573,6 +600,12 @@ def build_parser() -> argparse.ArgumentParser:
                              "on real photographs")
     _common(sp)
     sp.set_defaults(func=cmd_lab)
+
+    sp = sub.add_parser("subst-lab",
+                        help="B2s: keyed substitution added to the block "
+                             "permutation - tables, attacks, channel cost")
+    _common(sp)
+    sp.set_defaults(func=cmd_subst_lab)
 
     sp = sub.add_parser("verify",
                         help="recompute every published claim from the tables")
