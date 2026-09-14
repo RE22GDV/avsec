@@ -448,7 +448,9 @@ def test_f18_a_loss_is_reported_not_hidden(tmp_path):
         encoding="utf-8")
     text = primary_section(RunView(str(run)))
     assert "перевага B4" in text
-    assert "Значуща поразка P" in text
+    # the channel where the proposal loses must be named, whatever the wording
+    assert "Значуща перевага B4 над P" in text
+    assert "clean" in text
 
 
 def test_f18_pending_figures_carry_a_reason(tmp_path):

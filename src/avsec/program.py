@@ -240,7 +240,7 @@ CATALOGUE: Tuple[Figure, ...] = (
 #: are the ones a reader should look at first; they are built from exactly the
 #: same tables.
 KEY: Tuple[Figure, ...] = (
-    Figure("K01", "Що кожен метод справді дає", "What each method really provides",
+    Figure("K01", "Захист і якість за методами", "Protection and quality by method",
            "захист × метод, поруч якість і покриття", "E02",
            ("summary.csv",), panels=2),
     Figure("K02", "Точка перелому", "The crossover",
@@ -249,10 +249,10 @@ KEY: Tuple[Figure, ...] = (
     Figure("K03", "Карта режимів", "Operating map",
            "шум × пакет → хто виграє; «≈» там, де різниця не встановлена", "E04",
            ("interaction.csv",)),
-    Figure("K04", "Розміщення: компроміс без переможця", "Placement trade-off",
+    Figure("K04", "Компроміс схем розміщення", "Placement trade-off",
            "пошкодження RS-слова × втрата обох описів", "E05",
            ("codewords.csv", "joint_loss.csv")),
-    Figure("K05", "Звідки береться перевага", "Where the advantage comes from",
+    Figure("K05", "Джерела виміряної переваги", "Where the advantage comes from",
            "кроки B4 → P → внесок кожного, дБ", "E13",
            ("chain.csv",), panels=2),
     Figure("K06", "Ціна стиснення", "The price of compression",
@@ -261,15 +261,17 @@ KEY: Tuple[Figure, ...] = (
     Figure("K07", "Наскрізний приклад", "End-to-end example",
            "кадр → растр → прийнято → реконструкція, B4 і P", "E02",
            ("frames.csv",), panels=8),
-    Figure("K08", "Що саме показано глядачу", "What the viewer is shown",
+    Figure("K08", "Склад показаного зображення", "What the viewer is shown",
            "перевірене / старе / домальоване", "E02", ("frames.csv",), panels=3),
     Figure("K09", "Бюджет, затримка, пам'ять", "Budget, latency, memory",
            "місткість → корисні дані; розклад подій; три величини пам'яті", "E09",
            ("budgets.json",), panels=3),
-    Figure("K10", "Схема 2021 року зламана", "The 2021 scheme is broken",
+    Figure("K10", "Атаки на реконструкцію B1 зі статичною перестановкою",
+           "Attacks on the reconstructed B1 with a static permutation",
            "оригінал / передане / відновлене атакою + успіх атак", "E08",
            ("attacks.json",), panels=3),
-    Figure("K11", "Порядок кроків вирішує", "The order of the steps decides",
+    Figure("K11", "Залежність результату від порядку кроків",
+           "Dependence of the result on the order of steps",
            "прямий і зворотний розклад B4 → P, з парними інтервалами", "E13",
            ("chain.csv",), panels=2),
     Figure("K12", "24 незалежні джерела", "Twenty-four independent sources",
@@ -284,14 +286,14 @@ KEY: Tuple[Figure, ...] = (
 #: and the whole G catalogue - is supplementary material (R12).
 #:
 #: Eight, chosen because each answers a question the others do not:
-#:   K01  what each method actually provides (security and quality together)
+#:   K01  protection and quality of each method, side by side
 #:   K04  what the placement rule buys and what it costs
 #:   K05  where the measured advantage comes from
 #:   K11  how much of that decomposition is an artefact of the step order
 #:   K12  the effect with an interval over independent recordings
 #:   K13  the operating region, as a map rather than a threshold
 #:   K09  the budget: capacity, latency and memory in one place
-#:   K10  the scheme being replaced is broken
+#:   K10  attacks on the reconstructed B1 with a static permutation
 MAIN_FIGURES: Tuple[str, ...] = ("K01", "K04", "K05", "K11", "K12", "K13",
                                  "K09", "K10")
 
