@@ -362,7 +362,7 @@
       "direct_accuracy_pct": 0.0,
       "reconstruction_psnr_db": 15.35,
       "plane_std": 31.0898,
-      "seconds": 0.102
+      "seconds": 0.1012
     },
     {
       "view": "B2l ключова: яскравість",
@@ -372,7 +372,7 @@
       "direct_accuracy_pct": 0.0,
       "reconstruction_psnr_db": 15.19,
       "plane_std": 0.0,
-      "seconds": 0.0812
+      "seconds": 0.0821
     },
     {
       "view": "B2l ключова: Cb",
@@ -382,7 +382,7 @@
       "direct_accuracy_pct": 0.52,
       "reconstruction_psnr_db": 9.35,
       "plane_std": 76.4711,
-      "seconds": 0.1088
+      "seconds": 0.111
     },
     {
       "view": "B2l ключова: Cr",
@@ -402,7 +402,7 @@
       "direct_accuracy_pct": 0.0,
       "reconstruction_psnr_db": 15.19,
       "plane_std": 0.0,
-      "seconds": 0.0802
+      "seconds": 0.0812
     },
     {
       "view": "B2l впорядкована: Cb",
@@ -412,7 +412,7 @@
       "direct_accuracy_pct": 0.52,
       "reconstruction_psnr_db": 8.4,
       "plane_std": 48.1963,
-      "seconds": 0.1082
+      "seconds": 0.1077
     },
     {
       "view": "B2l впорядкована: Cr",
@@ -422,7 +422,7 @@
       "direct_accuracy_pct": 0.0,
       "reconstruction_psnr_db": 11.61,
       "plane_std": 52.6449,
-      "seconds": 0.0986
+      "seconds": 0.1006
     }
   ],
   "noise_tolerance": [
@@ -1049,6 +1049,213 @@
       "nearest_pixels_pct": 54.86,
       "nearest_psnr_db": 12.96,
       "nearest_mean_abs_error": 32.43
+    }
+  ],
+  "failure_geometry": [
+    {
+      "mechanism": "напрям",
+      "case": "ізотропний",
+      "strength": 0.5,
+      "applied_rms_levels": 0.5,
+      "exact_pixels_pct": 99.63,
+      "psnr_db": 37.99
+    },
+    {
+      "mechanism": "напрям",
+      "case": "у площині палітри",
+      "strength": 0.5,
+      "applied_rms_levels": 0.5,
+      "exact_pixels_pct": 99.35,
+      "psnr_db": 35.97
+    },
+    {
+      "mechanism": "напрям",
+      "case": "поперек площини палітри",
+      "strength": 0.5,
+      "applied_rms_levels": 0.5,
+      "exact_pixels_pct": 100.0,
+      "psnr_db": 99.0
+    },
+    {
+      "mechanism": "напрям",
+      "case": "ізотропний",
+      "strength": 1.0,
+      "applied_rms_levels": 0.998,
+      "exact_pixels_pct": 98.54,
+      "psnr_db": 30.21
+    },
+    {
+      "mechanism": "напрям",
+      "case": "у площині палітри",
+      "strength": 1.0,
+      "applied_rms_levels": 0.998,
+      "exact_pixels_pct": 97.84,
+      "psnr_db": 28.48
+    },
+    {
+      "mechanism": "напрям",
+      "case": "поперек площини палітри",
+      "strength": 1.0,
+      "applied_rms_levels": 0.998,
+      "exact_pixels_pct": 99.9,
+      "psnr_db": 43.88
+    },
+    {
+      "mechanism": "напрям",
+      "case": "ізотропний",
+      "strength": 2.0,
+      "applied_rms_levels": 2.001,
+      "exact_pixels_pct": 93.8,
+      "psnr_db": 22.7
+    },
+    {
+      "mechanism": "напрям",
+      "case": "у площині палітри",
+      "strength": 2.0,
+      "applied_rms_levels": 2.001,
+      "exact_pixels_pct": 90.55,
+      "psnr_db": 20.82
+    },
+    {
+      "mechanism": "напрям",
+      "case": "поперек площини палітри",
+      "strength": 2.0,
+      "applied_rms_levels": 2.001,
+      "exact_pixels_pct": 99.26,
+      "psnr_db": 31.63
+    },
+    {
+      "mechanism": "напрям",
+      "case": "ізотропний",
+      "strength": 4.0,
+      "applied_rms_levels": 4.013,
+      "exact_pixels_pct": 76.11,
+      "psnr_db": 16.32
+    },
+    {
+      "mechanism": "напрям",
+      "case": "у площині палітри",
+      "strength": 4.0,
+      "applied_rms_levels": 4.013,
+      "exact_pixels_pct": 67.95,
+      "psnr_db": 14.9
+    },
+    {
+      "mechanism": "напрям",
+      "case": "поперек площини палітри",
+      "strength": 4.0,
+      "applied_rms_levels": 4.013,
+      "exact_pixels_pct": 97.8,
+      "psnr_db": 26.13
+    },
+    {
+      "mechanism": "напрям",
+      "case": "ізотропний",
+      "strength": 8.0,
+      "applied_rms_levels": 7.995,
+      "exact_pixels_pct": 44.05,
+      "psnr_db": 12.29
+    },
+    {
+      "mechanism": "напрям",
+      "case": "у площині палітри",
+      "strength": 8.0,
+      "applied_rms_levels": 7.995,
+      "exact_pixels_pct": 34.6,
+      "psnr_db": 11.55
+    },
+    {
+      "mechanism": "напрям",
+      "case": "поперек площини палітри",
+      "strength": 8.0,
+      "applied_rms_levels": 7.995,
+      "exact_pixels_pct": 95.52,
+      "psnr_db": 23.21
+    },
+    {
+      "mechanism": "змішування",
+      "case": "ядро 2 відліки",
+      "strength": 2.0,
+      "flat_window_pct": 6.14,
+      "exact_pixels_pct": 6.66,
+      "exact_within_flat_pct": 100.0,
+      "exact_within_varying_pct": 0.55,
+      "psnr_db": 9.56
+    },
+    {
+      "mechanism": "змішування",
+      "case": "ядро 3 відліки",
+      "strength": 3.0,
+      "flat_window_pct": 0.86,
+      "exact_pixels_pct": 1.58,
+      "exact_within_flat_pct": 100.0,
+      "exact_within_varying_pct": 0.72,
+      "psnr_db": 9.47
+    },
+    {
+      "mechanism": "змішування",
+      "case": "ядро 4 відліки",
+      "strength": 4.0,
+      "flat_window_pct": 0.21,
+      "exact_pixels_pct": 0.89,
+      "exact_within_flat_pct": 100.0,
+      "exact_within_varying_pct": 0.69,
+      "psnr_db": 9.5
+    },
+    {
+      "mechanism": "величина",
+      "case": "σ = 1",
+      "strength": 1.0,
+      "wrong_pixels_pct": 1.45,
+      "mean_abs_error_all": 0.8,
+      "mean_abs_error_when_wrong": 55.11,
+      "random_value_reference": 71.09,
+      "random_value_reference_when_wrong": 71.73,
+      "distinct_confusions": 53
+    },
+    {
+      "mechanism": "величина",
+      "case": "σ = 2",
+      "strength": 2.0,
+      "wrong_pixels_pct": 6.28,
+      "mean_abs_error_all": 3.87,
+      "mean_abs_error_when_wrong": 61.58,
+      "random_value_reference": 71.09,
+      "random_value_reference_when_wrong": 71.45,
+      "distinct_confusions": 202
+    },
+    {
+      "mechanism": "величина",
+      "case": "σ = 4",
+      "strength": 4.0,
+      "wrong_pixels_pct": 23.21,
+      "mean_abs_error_all": 15.56,
+      "mean_abs_error_when_wrong": 67.04,
+      "random_value_reference": 71.09,
+      "random_value_reference_when_wrong": 71.22,
+      "distinct_confusions": 660
+    },
+    {
+      "mechanism": "величина",
+      "case": "σ = 8",
+      "strength": 8.0,
+      "wrong_pixels_pct": 55.4,
+      "mean_abs_error_all": 38.76,
+      "mean_abs_error_when_wrong": 69.97,
+      "random_value_reference": 71.09,
+      "random_value_reference_when_wrong": 71.06,
+      "distinct_confusions": 1584
+    },
+    {
+      "mechanism": "величина",
+      "case": "σ = 16",
+      "strength": 16.0,
+      "wrong_pixels_pct": 82.32,
+      "mean_abs_error_all": 58.85,
+      "mean_abs_error_when_wrong": 71.49,
+      "random_value_reference": 71.09,
+      "random_value_reference_when_wrong": 71.06,
+      "distinct_confusions": 3601
     }
   ],
   "noise_attacks": [
@@ -1759,10 +1966,11 @@
     "noise_strip": "results/luma\\noise_strip.png",
     "noise_deep": "results/luma\\noise_deep.png",
     "analog_tract": "results/luma\\analog_tract.png",
-    "tract_example": "results/luma\\tract_example.png"
+    "tract_example": "results/luma\\tract_example.png",
+    "failure_geometry": "results/luma\\failure_geometry.png"
   },
-  "run_id": "fe45d509310b99d4",
-  "commit": "a3c7bfd42b6fb6d7d7140d72b20fc21faed0d6c0",
+  "run_id": "ed61a8d81b2a58c2",
+  "commit": "1593bf15e81689b6b7b7013ac4f2a6a0e74a9bd0",
   "git_worktree": "clean",
   "environment": {
     "python": "3.12.10",
@@ -1781,15 +1989,15 @@
       "yaml": "6.0.3"
     },
     "avsec_version": "0.1.0",
-    "git_commit": "a3c7bfd42b6fb6d7d7140d72b20fc21faed0d6c0",
+    "git_commit": "1593bf15e81689b6b7b7013ac4f2a6a0e74a9bd0",
     "git_worktree": "clean",
     "git_dirty": false,
     "git_dirty_files": [],
     "git_branch": "main",
-    "git_describe": "v1.1.0-29-ga3c7bfd",
+    "git_describe": "v1.1.0-31-g1593bf1",
     "git_dirty_note": "",
     "pip_freeze": [
-      "-e git+https://github.com/RE22GDV/avsec.git@a3c7bfd42b6fb6d7d7140d72b20fc21faed0d6c0#egg=avsec",
+      "-e git+https://github.com/RE22GDV/avsec.git@1593bf15e81689b6b7b7013ac4f2a6a0e74a9bd0#egg=avsec",
       "PyYAML==6.0.3",
       "Pygments==2.21.0",
       "cffi==2.1.1",
