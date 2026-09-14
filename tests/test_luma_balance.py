@@ -235,3 +235,40 @@ def test_noise_breaks_the_constant_luma_property_without_creating_a_leak():
     assert float(y.std()) > 1.0, "noise must break the constant-luma property"
     corr = float(np.corrcoef(y.ravel(), img.ravel().astype(np.float64))[0, 1])
     assert abs(corr) < 0.05, "but the variation must not correlate with the frame"
+
+
+def test_error_across_the_palette_plane_costs_less_than_error_inside_it():
+    """The mechanism behind the impairment tables, not just their numbers.
+
+    Constant luminance is one linear constraint, so the palette lies in a plane
+    of RGB space and nearest-codeword decoding effectively sees the projection
+    onto it.  Error along the plane normal should therefore cost far less than
+    the same amount of error inside the plane.
+    """
+    from avsec.luma_lab import failure_geometry
+
+    rows = [r for r in failure_geometry(KEY, SID, _frame())
+            if r["mechanism"] == "напрям" and r["strength"] == 8.0]
+    by = {r["case"]: r for r in rows}
+    assert by["поперек площини палітри"]["applied_rms_levels"] == pytest.approx(
+        by["у площині палітри"]["applied_rms_levels"], rel=0.05), \
+        "the two directions must carry the same amount of error"
+    assert (by["поперек площини палітри"]["exact_pixels_pct"]
+            > by["у площині палітри"]["exact_pixels_pct"] + 30)
+
+
+def test_smoothing_spares_exactly_the_windows_that_held_one_value():
+    """Why a two-tap kernel destroys the scheme outright.
+
+    The mean of two codewords is a legal point of the palette plane belonging
+    to an unrelated message value, so a pixel can only survive when its whole
+    kernel window carried the same value and the mean changed nothing.
+    """
+    from avsec.luma_lab import failure_geometry
+
+    rows = [r for r in failure_geometry(KEY, SID, _frame())
+            if r["mechanism"] == "змішування"]
+    assert rows, "the mixing measurement must run"
+    for r in rows:
+        assert r["exact_within_flat_pct"] > 99.0
+        assert r["exact_within_varying_pct"] < 2.0

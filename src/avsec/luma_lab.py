@@ -385,6 +385,137 @@ def noise_deep(key: bytes, sid: bytes, img: np.ndarray,
     return out
 
 
+def failure_geometry(key: bytes, sid: bytes, img: np.ndarray,
+                     level: int = BEST_LEVEL) -> List[Dict[str, Any]]:
+    """Three mechanisms behind the numbers of the impairment sections.
+
+    The impairment tables say how much each perturbation costs.  They do not
+    say why the costs differ so much in *character*, and that question has a
+    geometric answer that can be measured rather than asserted.
+
+    ``напрям``
+        The constant-luminance constraint is one linear equation, so the
+        palette lies in a plane of RGB space.  Decoding compares distances to
+        points of that plane, which means the component of the error along the
+        plane normal is projected away and only the in-plane component can move
+        a point to a different codeword.  Both components are applied on their
+        own, rescaled to the same RMS, so the comparison is between directions
+        and not between amounts.
+    ``змішування``
+        A smoothing kernel replaces a pixel by the mean of its window.  A mean
+        of points of the plane is again a point of the plane, so the result is
+        a legal ciphertext value belonging to an unrelated message value.  The
+        prediction is that only pixels whose window carried a single value can
+        survive, and both groups are counted separately here.
+    ``величина``
+        A wrong codeword carries an unrelated value, so the size of a single
+        failure should match what a uniformly drawn value would give.  The
+        reference is computed from the frame itself rather than assumed.
+    """
+    mono = LumaBalancedMono(key, sid, level)
+    ct = mono.encrypt(img, 0)
+    src = np.asarray(img, dtype=np.int64)
+    rng = np.random.default_rng(90210)
+    normal = np.array([BT601_R, BT601_G, BT601_B], dtype=np.float64)
+    normal = normal / np.linalg.norm(normal)
+    out: List[Dict[str, Any]] = []
+
+    def _decode(bad: np.ndarray) -> np.ndarray:
+        return mono.decrypt(bad, 0, nearest=True).astype(np.int64)
+
+    # -- 1. direction: the same amount of error, aimed two ways ------------
+    for sigma in (0.5, 1.0, 2.0, 4.0, 8.0):
+        e = rng.normal(0.0, sigma, ct.shape)
+        along = (e * normal[None, None, :]).sum(axis=2)
+        e_normal = along[..., None] * normal[None, None, :]
+        e_plane = e - e_normal
+        target = float(np.sqrt((e ** 2).mean()))
+        parts = {"ізотропний": e,
+                 "у площині палітри": e_plane,
+                 "поперек площини палітри": e_normal}
+        for label, vec in parts.items():
+            rms = float(np.sqrt((vec ** 2).mean()))
+            scaled = vec if rms <= 1e-12 else vec * (target / rms)
+            bad = np.clip(np.asarray(ct, dtype=np.float64) + scaled,
+                          0, 255).astype(np.uint8)
+            got = _decode(bad)
+            out.append({
+                "mechanism": "напрям",
+                "case": label,
+                "strength": float(sigma),
+                "applied_rms_levels": round(float(np.sqrt((scaled ** 2).mean())), 3),
+                "exact_pixels_pct": round(float((got == src).mean() * 100), 2),
+                "psnr_db": round(_psnr(got.astype(np.uint8), img), 2),
+            })
+
+    # -- 2. mixing: only a window of one value can survive -----------------
+    for k in (2, 3, 4):
+        bad = _impair(ct, "chroma_lowpass", float(k), rng)
+        got = _decode(bad)
+        ok = got == src
+        # np.convolve(..., mode="same") reads x[i+s-k+1 .. i+s] with
+        # s = (k - 1) // 2; a window is flat when the source value is the same
+        # across all of it, and then the mean changes nothing
+        sft = (k - 1) // 2
+        flat = np.ones_like(src, dtype=bool)
+        for off in range(sft - k + 1, sft + 1):
+            shifted = np.roll(src, -off, axis=1)
+            if off < 0:
+                shifted[:, :(-off)] = -1
+            elif off > 0:
+                shifted[:, -off:] = -1
+            flat &= shifted == src
+        n_flat = int(flat.sum())
+        n_diff = int((~flat).sum())
+        out.append({
+            "mechanism": "змішування",
+            "case": f"ядро {k} відліки",
+            "strength": float(k),
+            "flat_window_pct": round(n_flat / src.size * 100, 2),
+            "exact_pixels_pct": round(float(ok.mean() * 100), 2),
+            "exact_within_flat_pct": round(
+                float(ok[flat].mean() * 100) if n_flat else 0.0, 2),
+            "exact_within_varying_pct": round(
+                float(ok[~flat].mean() * 100) if n_diff else 0.0, 2),
+            "psnr_db": round(_psnr(got.astype(np.uint8), img), 2),
+        })
+
+    # -- 3. magnitude: what one failure costs ------------------------------
+    values = np.arange(256, dtype=np.float64)
+    # expected |v - u| for u drawn uniformly over the 256 message values
+    per_value = np.abs(values[:, None] - values[None, :]).mean(axis=1)
+    hist = np.bincount(src.ravel(), minlength=256).astype(np.float64)
+    random_ref = float((hist / hist.sum() * per_value).sum())
+    for sigma in (1.0, 2.0, 4.0, 8.0, 16.0):
+        bad = _impair(ct, "gauss", float(sigma), rng)
+        got = _decode(bad)
+        wrong = got != src
+        n_wrong = int(wrong.sum())
+        err = np.abs(got - src)
+        out.append({
+            "mechanism": "величина",
+            "case": f"σ = {sigma:g}",
+            "strength": float(sigma),
+            "wrong_pixels_pct": round(n_wrong / src.size * 100, 2),
+            "mean_abs_error_all": round(float(err.mean()), 2),
+            "mean_abs_error_when_wrong": round(
+                float(err[wrong].mean()) if n_wrong else 0.0, 2),
+            "random_value_reference": round(random_ref, 2),
+            # the same reference restricted to the pixels that actually failed:
+            # which values fail is not uniform, so the whole-frame reference is
+            # not the right yardstick at low sigma
+            "random_value_reference_when_wrong": round(
+                float(per_value[src[wrong]].mean()) if n_wrong else 0.0, 2),
+            # how many distinct value pairs the failures actually consist of:
+            # at a small sigma only geometrically close codewords are
+            # reachable, so the average runs over few pairs and need not match
+            # the full-range expectation
+            "distinct_confusions": int(np.unique(
+                (src[wrong] << 8) | got[wrong]).size) if n_wrong else 0,
+        })
+    return out
+
+
 def noise_attacks(cfg: ExperimentConfig, key: bytes, sid: bytes,
                   img: np.ndarray, level: int = BEST_LEVEL
                   ) -> List[Dict[str, Any]]:
@@ -697,6 +828,9 @@ def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
     spacing = [codeword_spacing(n) for n in (256, 4096, 32768, 65536)]
     deep = noise_deep(key, sid, frames[0])
 
+    say("геометрія відмови", 0.84)
+    geometry = failure_geometry(key, sid, frames[0])
+
     say("атаки на спотворений шифротекст", 0.86)
     natt = noise_attacks(cfg, key, sid, frames[0])
     strip_images, strip_rows = noise_strip(key, sid, frames[0])
@@ -726,6 +860,7 @@ def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
     figures["noise_deep"] = _noise_deep_figure(out, deep, natt, spacing)
     figures["analog_tract"] = _tract_figure(out, tract, residual)
     figures["tract_example"] = _example_figure(out, images, ex_rows)
+    figures["failure_geometry"] = _geometry_figure(out, geometry, spacing)
 
     summary = {
         "kind": "luma_balance",
@@ -740,6 +875,7 @@ def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
         "noise_tolerance": noise,
         "codeword_spacing": spacing,
         "noise_deep": deep,
+        "failure_geometry": geometry,
         "noise_attacks": natt,
         "noise_strip": strip_rows,
         "tract_residual_error": residual,
@@ -766,6 +902,7 @@ def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
     write_csv(os.path.join(out, "analog_tract.csv"), tract)
     write_csv(os.path.join(out, "tract_ablation.csv"), ablation)
     write_csv(os.path.join(out, "tract_example.csv"), ex_rows)
+    write_csv(os.path.join(out, "failure_geometry.csv"), geometry)
     say("готово", 1.0)
     return summary
 
@@ -1060,6 +1197,86 @@ def _example_figure(out_dir, images, rows):
     return path
 
 
+def _geometry_figure(out_dir, geometry, spacing, level=BEST_LEVEL):
+    """The plane, the two error directions, and what mixing does."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    pal = constant_luma_palette(level).astype(np.float64)
+    picked = pal[np.linspace(0, pal.shape[0] - 1, 256).astype(np.int64)]
+    normal = np.array([BT601_R, BT601_G, BT601_B], dtype=np.float64)
+    normal = normal / np.linalg.norm(normal)
+    u = np.array([1.0, 0.0, 0.0]) - normal * normal[0]
+    u = u / np.linalg.norm(u)
+    v = np.cross(normal, u)
+    centre = pal.mean(axis=0)
+
+    def flat(pts):
+        d = pts - centre
+        return d @ u, d @ v
+
+    fig, axes = plt.subplots(1, 3, figsize=(15.0, 4.6))
+
+    ax = axes[0]
+    px, py = flat(pal)
+    ax.scatter(px, py, s=1.2, c=np.clip(pal / 255.0, 0, 1), alpha=0.55)
+    kx, ky = flat(picked)
+    ax.scatter(kx, ky, s=9, facecolors="none", edgecolors="#263238",
+               linewidths=0.6, label="256 кодових слів")
+    ax.set_title("Палітра лежить у площині сталої яскравості", fontsize=11)
+    ax.set_xlabel("перша вісь у площині, рівнів")
+    ax.set_ylabel("друга вісь у площині, рівнів")
+    ax.legend(loc="upper right", fontsize=8.5)
+    ax.set_aspect("equal")
+    ax.grid(alpha=0.25)
+
+    ax = axes[1]
+    rows = [r for r in geometry if r["mechanism"] == "напрям"]
+    styles = {"ізотропний": ("#455a64", "o", "-"),
+              "у площині палітри": ("#c62828", "s", "-"),
+              "поперек площини палітри": ("#2e7d32", "^", "--")}
+    for label, (c, mk, ls) in styles.items():
+        sel = [r for r in rows if r["case"] == label]
+        ax.plot([r["strength"] for r in sel],
+                [r["exact_pixels_pct"] for r in sel],
+                color=c, marker=mk, linestyle=ls, label=label)
+    ax.set_xscale("log", base=2)
+    ax.set_xlabel("RMS похибки, рівнів")
+    ax.set_ylabel("пікселів відновлено точно, %")
+    ax.set_title("Та сама похибка, спрямована по-різному", fontsize=11)
+    ax.legend(fontsize=8.5)
+    ax.grid(alpha=0.3)
+
+    ax = axes[2]
+    mix = [r for r in geometry if r["mechanism"] == "змішування"]
+    x = np.arange(len(mix))
+    w = 0.27
+    ax.bar(x - w, [r["flat_window_pct"] for r in mix], w,
+           color="#90a4ae", label="вікно з одного значення")
+    ax.bar(x, [r["exact_within_flat_pct"] for r in mix], w,
+           color="#2e7d32", label="відновлено в таких вікнах")
+    ax.bar(x + w, [r["exact_within_varying_pct"] for r in mix], w,
+           color="#c62828", label="відновлено в решті")
+    ax.set_xticks(x)
+    ax.set_xticklabels([r["case"] for r in mix], fontsize=9)
+    ax.set_ylabel("%")
+    ax.set_title("Згладжування: виживає лише однорідне вікно", fontsize=11)
+    ax.legend(fontsize=8.5)
+    ax.grid(alpha=0.3, axis="y")
+
+    fig.suptitle("Чому спотворення діють саме так: геометрія кодової книги",
+                 fontsize=13)
+    fig.tight_layout(rect=(0, 0, 1, 0.94))
+    path = os.path.join(out_dir, "failure_geometry.png")
+    fig.savefig(path, dpi=140)
+    fig.savefig(path.replace(".png", ".svg"))
+    plt.close(fig)
+    return path
+
+
 def _tract_figure(out_dir, tract, residual):
     """Residual error against codeword spacing, and the resulting quality."""
     import matplotlib
@@ -1139,6 +1356,7 @@ def _tract_figure(out_dir, tract, residual):
 __all__ = ["NOISE_SIGMAS", "FINE_SIGMAS", "IMPAIRMENTS", "STRIP_SIGMAS",
            "ANALOG_BITS", "ANALOG_CHANNELS", "tract_residual_error",
            "analog_sweep", "tract_ablation", "tract_example",
+           "failure_geometry",
            "capacity_sweep", "monochrome_path", "colour_path",
            "luma_only_observer", "plane_attacks", "noise_tolerance",
            "codeword_spacing", "noise_deep", "noise_attacks", "noise_strip",
