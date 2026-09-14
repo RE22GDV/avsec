@@ -1,5 +1,5 @@
 boundary_direct_pct,boundary_neighbour_pct,boundary_psnr_db,boundary_seconds,chance_level,known_pair_plain_accuracy,known_pair_plain_seconds,known_pair_subst_accuracy,known_pair_subst_seconds,merged_alphabet_covered,multi_frame_accuracy,substitution_detected_global,target
-1.04,35.67,15.4,0.0832,0.005208,1.0,0.0294,1.0,0.0453,0.8359,0.0,1,B2
-0.52,2.81,9.58,0.0994,0.005208,0.0312,0.0307,1.0,0.0466,0.8359,0.0,1,B2s (session)
-0.52,3.93,9.43,0.1022,0.005208,0.0052,0.0305,1.0,0.0445,0.8359,0.0,1,B2s (frame)
-0.52,0.28,9.6,0.1001,0.005208,0.0104,0.0305,1.0,0.045,0.8359,0.0,0,B2s (block)
+1.04,35.67,15.4,0.087,0.005208,1.0,0.033,1.0,0.0461,0.8359,0.0,1,B2
+0.52,2.81,9.58,0.1029,0.005208,0.0312,0.0321,1.0,0.0461,0.8359,0.0,1,B2s (session)
+0.52,3.93,9.43,0.1056,0.005208,0.0052,0.0313,1.0,0.0448,0.8359,0.0,1,B2s (frame)
+0.52,0.28,9.6,0.1038,0.005208,0.0104,0.0315,1.0,0.0499,0.8359,0.0,0,B2s (block)

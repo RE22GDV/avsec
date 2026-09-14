@@ -1,0 +1,7 @@
+boundary_direct_pct,boundary_neighbour_pct,boundary_psnr_db,boundary_seconds,chance_level,known_pair_plain_accuracy,known_pair_plain_seconds,known_pair_subst_accuracy,known_pair_subst_seconds,merged_alphabet_covered,multi_frame_accuracy,substitution_detected_global,table_source,target
+0.0,4.49,9.55,0.1119,0.005208,0.0417,0.0309,1.0,0.0457,0.8359,0.0104,1,random,B2s (session)
+0.0,2.53,9.28,0.1,0.005208,0.0,0.0305,1.0,0.046,0.8359,0.0,1,random,B2s (frame)
+0.0,0.84,9.63,0.1158,0.005208,0.0104,0.0332,1.0,0.0485,0.8359,0.0,0,random,B2s (block)
+0.52,3.65,9.57,0.1116,0.005208,0.026,0.0332,1.0,0.0461,0.8359,0.0,1,algebraic,B2s (session)
+0.52,2.25,9.76,0.1007,0.005208,0.0156,0.0331,1.0,0.045,0.8359,0.0,1,algebraic,B2s (frame)
+0.0,0.56,9.42,0.1028,0.005208,0.0104,0.0337,1.0,0.0451,0.8359,0.0052,0,algebraic,B2s (block)

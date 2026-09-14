@@ -1,0 +1,4 @@
+algebraic_degree,avalanche_bits,bijective,differential_uniformity,fixed_points,linearity,nonlinearity,opposite_fixed_points,storage,stored_bits,table
+7,4.0391,True,4,0,32,112,0,обчислюється,0,"алгебраїчна (публічна, як в AES)"
+7,4.0391,True,4,3,32,112,1,16 біт ключа,16,алгебраїчна + ключове забілювання
+7,4.0117,True,12,1,76,90,2,2048 біт таблиці,2048,ключова випадкова (поточна в B2s)

@@ -20,6 +20,7 @@
 | [related_work.md](related_work.md) | Суміжні напрями, зіставлення постановок і визначення внеску роботи |
 | [threat_model.md](threat_model.md) | Модель загроз: об'єкти захисту, можливості порушника, межі гарантій |
 | [substitution_b2s.md](substitution_b2s.md) | **Схема `B2s`**: ключова заміна значень пікселів разом із перестановкою блоків — побудова, таблиці, криптоаналіз, вартість у каналі |
+| [galois_sbox.md](galois_sbox.md) | Обчислювана таблиця замін над полем GF(2⁸): арифметика поля, звірка з таблицею AES, виміряні криптографічні властивості |
 
 ## 2. Будова системи
 
@@ -69,6 +70,7 @@
 | --- | --- |
 | Ознайомитися з виконанням завдання | [reconstruction_2021.md](reconstruction_2021.md) |
 | Розібратися в поєднанні двох примітивів | [substitution_b2s.md](substitution_b2s.md) |
+| Зрозуміти, як таблицю замін обчислюють замість зберігання | [galois_sbox.md](galois_sbox.md) |
 | Оцінити коректність висновків | [claims.md](claims.md) → [experiments.md](experiments.md) → [results.md](results.md) → [limitations.md](limitations.md) |
 | Розібратися в реалізації | [architecture.md](architecture.md) → [protocol.md](protocol.md) → [threat_model.md](threat_model.md) |
 | Відтворити результати | [../results/README.md](../results/README.md) → [datasets.md](datasets.md) → [programme.md](programme.md) |
