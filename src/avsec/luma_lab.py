@@ -43,8 +43,21 @@ from avsec.luma_balance import (
 )
 from avsec.utils import ensure_dir, environment_record, write_csv, write_json
 
+BT601_R, BT601_G, BT601_B = 0.299, 0.587, 0.114
+
 #: Amplitude perturbations used for the noise-tolerance section, in levels.
 NOISE_SIGMAS: Tuple[float, ...] = (0.0, 0.5, 1.0, 2.0, 4.0, 8.0)
+
+#: Finer grid for the deeper analysis.
+FINE_SIGMAS: Tuple[float, ...] = (0.0, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0,
+                                  4.0, 6.0, 8.0, 12.0, 16.0)
+
+#: Perturbations an analog path actually applies, beyond additive noise.
+IMPAIRMENTS: Tuple[str, ...] = ("gauss", "uniform", "chroma_lowpass",
+                                "gain_offset", "burst")
+
+#: Noise levels used for the picture strip.
+STRIP_SIGMAS: Tuple[float, ...] = (0.0, 1.0, 2.0, 4.0, 8.0, 16.0)
 
 
 def _psnr(a: np.ndarray, b: np.ndarray) -> float:
@@ -271,6 +284,174 @@ def noise_tolerance(key: bytes, sid: bytes, img: np.ndarray,
     return out
 
 
+# ------------------------------------------------- 7. deeper noise analysis
+def codeword_spacing(n_codewords: int, level: int = BEST_LEVEL) -> Dict[str, Any]:
+    """Distance between neighbouring codewords - what decides tolerance.
+
+    A codebook drawn from a palette of fixed size gets sparser as fewer
+    codewords are taken.  The nearest-neighbour distance is therefore the
+    quantity that predicts how much amplitude error a decoder can undo, and it
+    differs between the monochrome and the colour path by construction.
+    """
+    from scipy.spatial import cKDTree
+
+    pal = constant_luma_palette(level)
+    picked = pal[np.linspace(0, pal.shape[0] - 1, n_codewords).astype(np.int64)]
+    d, _ = cKDTree(picked.astype(np.float64)).query(picked.astype(np.float64), k=2)
+    nn = d[:, 1]
+    return {
+        "codewords": int(n_codewords),
+        "palette": int(pal.shape[0]),
+        "min_distance": round(float(nn.min()), 3),
+        "median_distance": round(float(np.median(nn)), 3),
+        "mean_distance": round(float(nn.mean()), 3),
+        "half_min_distance": round(float(nn.min()) / 2, 3),
+    }
+
+
+def _impair(ct: np.ndarray, kind: str, strength: float,
+            rng: np.random.Generator) -> np.ndarray:
+    """One perturbation of the ciphertext, in the units its name implies."""
+    a = np.asarray(ct, dtype=np.float64)
+    if strength <= 0:
+        return np.clip(a, 0, 255).astype(np.uint8)
+    if kind == "gauss":
+        a = a + rng.normal(0, strength, a.shape)
+    elif kind == "uniform":
+        a = a + rng.uniform(-strength, strength, a.shape)
+    elif kind == "chroma_lowpass":
+        # a composite path carries chroma at a fraction of the luma bandwidth;
+        # the message of this scheme lives entirely in chroma
+        y = luma(a)
+        cb, cr = a[..., 2] - y, a[..., 0] - y
+        k = max(1, int(round(strength)))
+        ker = np.ones(k) / k
+        for plane in (cb, cr):
+            for r in range(plane.shape[0]):
+                plane[r] = np.convolve(plane[r], ker, mode="same")
+        r_ = y + cr
+        b_ = y + cb
+        g_ = (y - BT601_R * r_ - BT601_B * b_) / BT601_G
+        a = np.stack([r_, g_, b_], axis=2)
+    elif kind == "gain_offset":
+        gain = 1.0 + rng.normal(0, strength / 100.0, 3)
+        off = rng.normal(0, strength, 3)
+        a = a * gain[None, None, :] + off[None, None, :]
+    elif kind == "burst":
+        rows = int(round(strength))
+        h = a.shape[0]
+        for _ in range(max(1, h // 48)):
+            r0 = int(rng.integers(0, max(1, h - rows)))
+            a[r0:r0 + rows] = rng.integers(0, 256, (min(rows, h - r0),
+                                                    a.shape[1], 3))
+    else:
+        raise ValueError(f"unknown impairment {kind!r}")
+    return np.clip(a, 0, 255).astype(np.uint8)
+
+
+def noise_deep(key: bytes, sid: bytes, img: np.ndarray,
+               level: int = BEST_LEVEL) -> List[Dict[str, Any]]:
+    """Every impairment against both decoders, with the error profile.
+
+    ``mean_abs_error`` separates a degraded picture from a destroyed one: a
+    codebook has no order, so a pixel that decodes to the wrong codeword is
+    wrong by an arbitrary amount rather than by a little.
+    """
+    mono = LumaBalancedMono(key, sid, level)
+    ct = mono.encrypt(img, 0)
+    rng = np.random.default_rng(20240909)
+    out: List[Dict[str, Any]] = []
+    grid = {"gauss": FINE_SIGMAS, "uniform": FINE_SIGMAS,
+            "chroma_lowpass": (0, 2, 3, 4, 6, 8, 12, 16),
+            "gain_offset": (0.0, 0.5, 1.0, 2.0, 4.0, 8.0),
+            "burst": (0, 2, 4, 8, 16, 24)}
+    for kind in IMPAIRMENTS:
+        for strength in grid[kind]:
+            bad = _impair(ct, kind, float(strength), rng)
+            st = luma_statistics(bad)
+            row: Dict[str, Any] = {
+                "impairment": kind,
+                "strength": float(strength),
+                "cipher_luma_std_after": st["luma_std"],
+                "cipher_luma_levels_after": st["rounded_levels_used"],
+            }
+            for tag, nearest in (("exact", False), ("nearest", True)):
+                got = mono.decrypt(bad, 0, nearest=nearest)
+                err = np.abs(got.astype(np.int64) - img.astype(np.int64))
+                row[f"{tag}_pixels_pct"] = round(float((err == 0).mean() * 100), 2)
+                row[f"{tag}_psnr_db"] = round(_psnr(got, img), 2)
+                row[f"{tag}_mean_abs_error"] = round(float(err.mean()), 2)
+            out.append(row)
+    return out
+
+
+def noise_attacks(cfg: ExperimentConfig, key: bytes, sid: bytes,
+                  img: np.ndarray, level: int = BEST_LEVEL
+                  ) -> List[Dict[str, Any]]:
+    """Does a perturbed ciphertext leak more than a clean one?
+
+    Two questions at once.  Noise destroys the constant-luminance property, so
+    the luminance plane is no longer empty - but the noise is independent of
+    the picture, so whether it *leaks* is a separate matter and is measured
+    here.  And the key-free reassembly attack is re-run on the perturbed
+    planes, because a solver could in principle exploit the added structure.
+    """
+    from avsec.attacks import attack_boundary_reassembly
+    from avsec.baselines import CryptoPermutationScrambler
+
+    rows, cols = cfg.b2_grid
+    perm = CryptoPermutationScrambler(rows, cols, key, sid)
+    fitted = perm._join(perm._tiles(img))
+    scrambled = perm.scramble(img, 0)
+    mono = LumaBalancedMono(key, sid, level)
+    ct = mono.encrypt(scrambled, 0)
+    rng = np.random.default_rng(4242)
+    src = fitted.astype(np.float64).ravel()
+
+    out: List[Dict[str, Any]] = []
+    for sigma in STRIP_SIGMAS:
+        bad = _impair(ct, "gauss", float(sigma), rng)
+        pl = chroma_planes(bad)
+        y_plane = np.clip(np.rint(pl["Y"]), 0, 255).astype(np.uint8)
+        for name, view in (("яскравість", y_plane), ("Cb", _to_grey(pl["Cb"]))):
+            ba = attack_boundary_reassembly(view, rows, cols,
+                                            perm.permutation(0), fitted)
+            v = view.astype(np.float64).ravel()
+            out.append({
+                "sigma_levels": float(sigma),
+                "plane": name,
+                "plane_std": round(float(v.std()), 4),
+                "correlation_with_source": round(
+                    0.0 if v.std() == 0 else float(np.corrcoef(v, src)[0, 1]), 4),
+                "neighbour_accuracy_pct":
+                    round(ba.metrics["neighbour_accuracy"] * 100, 2),
+                "direct_accuracy_pct":
+                    round(ba.metrics["direct_accuracy"] * 100, 2),
+            })
+    return out
+
+
+def noise_strip(key: bytes, sid: bytes, img: np.ndarray,
+                level: int = BEST_LEVEL) -> Tuple[Dict[str, np.ndarray],
+                                                  List[Dict[str, Any]]]:
+    """Ciphertext and recovery at each noise level, for the picture strip."""
+    mono = LumaBalancedMono(key, sid, level)
+    ct = mono.encrypt(img, 0)
+    rng = np.random.default_rng(20240909)
+    images: Dict[str, np.ndarray] = {}
+    rows: List[Dict[str, Any]] = []
+    for sigma in STRIP_SIGMAS:
+        bad = _impair(ct, "gauss", float(sigma), rng)
+        got = mono.decrypt(bad, 0, nearest=True)
+        tag = f"{sigma:g}".replace(".", "p")
+        images[f"noise_{tag}_cipher"] = bad
+        images[f"noise_{tag}_recovered"] = got
+        rows.append({"sigma_levels": float(sigma),
+                     "psnr_db": round(_psnr(got, img), 2),
+                     "exact_pixels_pct": round(float((got == img).mean() * 100), 2)})
+    return images, rows
+
+
 # ------------------------------------------------------------------ runner
 def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
                  n_frames: int = 3, progress=None) -> Dict[str, Any]:
@@ -313,14 +494,25 @@ def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
     say("атаки за площинами", 0.7)
     attacks = plane_attacks(cfg, key, sid, frames[0])
 
-    say("стійкість до похибки", 0.85)
+    say("стійкість до похибки", 0.78)
     noise = noise_tolerance(key, sid, frames[0])
+
+    say("глибокий аналіз спотворень", 0.82)
+    spacing = [codeword_spacing(n) for n in (256, 4096, 32768, 65536)]
+    deep = noise_deep(key, sid, frames[0])
+
+    say("атаки на спотворений шифротекст", 0.86)
+    natt = noise_attacks(cfg, key, sid, frames[0])
+    strip_images, strip_rows = noise_strip(key, sid, frames[0])
 
     say("зображення й рисунки", 0.92)
     images = dict(mono_images)
     images.update(colour_images)
+    images.update(strip_images)
     _save(img_dir, images)
     figures = _figures(out, images, sweep, mono_rows, colour_rows, attacks, noise)
+    figures["noise_strip"] = _noise_strip_figure(out, images, strip_rows)
+    figures["noise_deep"] = _noise_deep_figure(out, deep, natt, spacing)
 
     summary = {
         "kind": "luma_balance",
@@ -333,6 +525,10 @@ def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
         "luma_only_observer": observer,
         "plane_attacks": attacks,
         "noise_tolerance": noise,
+        "codeword_spacing": spacing,
+        "noise_deep": deep,
+        "noise_attacks": natt,
+        "noise_strip": strip_rows,
         "figures": figures,
         "run_id": cfg.run_identity(),
         "commit": env.get("git_commit"),
@@ -345,6 +541,10 @@ def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
     write_csv(os.path.join(out, "colour.csv"), colour_rows)
     write_csv(os.path.join(out, "plane_attacks.csv"), attacks)
     write_csv(os.path.join(out, "noise_tolerance.csv"), noise)
+    write_csv(os.path.join(out, "codeword_spacing.csv"), spacing)
+    write_csv(os.path.join(out, "noise_deep.csv"), deep)
+    write_csv(os.path.join(out, "noise_attacks.csv"), natt)
+    write_csv(os.path.join(out, "noise_strip.csv"), strip_rows)
     say("готово", 1.0)
     return summary
 
@@ -458,6 +658,137 @@ def _figures(out_dir: str, images: Dict[str, np.ndarray],
     return paths
 
 
-__all__ = ["NOISE_SIGMAS", "capacity_sweep", "monochrome_path", "colour_path",
+def _noise_strip_figure(out_dir, images, rows):
+    """Ciphertext and recovery at each noise level, one column per level."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    n = len(rows)
+    fig, axes = plt.subplots(2, n, figsize=(2.6 * n, 5.9))
+    for k, r in enumerate(rows):
+        tag = f"{r['sigma_levels']:g}".replace(".", "p")
+        axes[0, k].imshow(np.asarray(images[f"noise_{tag}_cipher"], dtype=np.uint8))
+        axes[0, k].set_title(f"σ = {r['sigma_levels']:g}", fontsize=10)
+        axes[1, k].imshow(np.asarray(images[f"noise_{tag}_recovered"],
+                                     dtype=np.uint8), cmap="gray", vmin=0, vmax=255)
+        axes[1, k].set_xlabel(f"{r['psnr_db']:.2f} дБ\n{r['exact_pixels_pct']:.2f} % точно",
+                              fontsize=8.5)
+        for row in (0, 1):
+            axes[row, k].set_xticks([])
+            axes[row, k].set_yticks([])
+    axes[0, 0].set_ylabel("спотворений\nшифротекст", fontsize=9.5)
+    axes[1, 0].set_ylabel("відновлено за\nнайближчим\nкодовим словом", fontsize=9.5)
+    fig.suptitle("Зображення за різних рівнів шуму на шифротексті", fontsize=12.5)
+    fig.text(0.012, 0.012,
+             "Декодування за найближчим кодовим словом. Помилка в кодовому "
+             "слові дає довільне значення, тому дефекти виглядають як окремі "
+             "різкі точки, а не як розмиття.",
+             fontsize=8, color="#37474f", wrap=True)
+    fig.tight_layout(rect=(0, 0.045, 1, 0.94))
+    path = os.path.join(out_dir, "noise_strip.png")
+    fig.savefig(path, dpi=140)
+    fig.savefig(path.replace(".png", ".svg"))
+    plt.close(fig)
+    return path
+
+
+def _noise_deep_figure(out_dir, deep, natt, spacing):
+    """Impairment curves, the error profile, codeword spacing and attacks."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    fig, axes = plt.subplots(2, 2, figsize=(13.6, 9.0))
+
+    ax = axes[0, 0]
+    for kind, colour, label in (
+            ("gauss", "#1565c0", "гауссів шум, σ рівнів"),
+            ("uniform", "#00897b", "рівномірний, ± рівнів"),
+            ("gain_offset", "#8d6e63", "дрейф підсилення й зміщення")):
+        rs = [r for r in deep if r["impairment"] == kind]
+        ax.plot([r["strength"] for r in rs], [r["nearest_psnr_db"] for r in rs],
+                marker="o", ms=4, color=colour, label=label)
+    ax.axhline(20.0, color="#b71c1c", ls=":", lw=1.2)
+    ax.annotate("робочий поріг 20 дБ", (0.2, 21), fontsize=8, color="#b71c1c")
+    ax.set_xlabel("сила спотворення, рівнів", fontsize=9)
+    ax.set_ylabel("PSNR відновлення, дБ", fontsize=9)
+    ax.set_title("Амплітудні спотворення", fontsize=10.5)
+    ax.legend(fontsize=8)
+    ax.grid(alpha=0.25)
+
+    ax = axes[0, 1]
+    for kind, colour, label, xl in (
+            ("chroma_lowpass", "#e65100", "смуга кольоровості, відліків", "ядро"),
+            ("burst", "#6a1b9a", "пакетне пошкодження, рядків", "рядків")):
+        rs = [r for r in deep if r["impairment"] == kind]
+        ax.plot([r["strength"] for r in rs], [r["nearest_psnr_db"] for r in rs],
+                marker="s", ms=4, color=colour, label=label)
+    ax.axhline(20.0, color="#b71c1c", ls=":", lw=1.2)
+    ax.set_xlabel("ширина ядра або висота пакета", fontsize=9)
+    ax.set_ylabel("PSNR відновлення, дБ", fontsize=9)
+    ax.set_title("Спотворення, властиві аналоговому тракту", fontsize=10.5)
+    ax.legend(fontsize=8)
+    ax.grid(alpha=0.25)
+
+    ax = axes[1, 0]
+    rs = [r for r in deep if r["impairment"] == "gauss"]
+    x = [r["strength"] for r in rs]
+    ax.plot(x, [r["exact_pixels_pct"] for r in rs], marker="o", ms=4,
+            color="#ef5350", label="точний пошук у таблиці")
+    ax.plot(x, [r["nearest_pixels_pct"] for r in rs], marker="o", ms=4,
+            color="#2e7d32", label="за найближчим кодовим словом")
+    ax2 = ax.twinx()
+    ax2.plot(x, [r["nearest_mean_abs_error"] for r in rs], marker="^", ms=4,
+             color="#5c6bc0", ls="--", label="середня похибка")
+    ax2.set_ylabel("середня похибка значення, рівнів", fontsize=9,
+                   color="#5c6bc0")
+    ax.set_xlabel("гауссів шум, σ рівнів", fontsize=9)
+    ax.set_ylabel("пікселів відновлено точно, %", fontsize=9)
+    ax.set_title("Два декодери й профіль похибки", fontsize=10.5)
+    ax.legend(fontsize=8, loc="center right")
+    ax.grid(alpha=0.25)
+
+    ax = axes[1, 1]
+    sig = sorted({r["sigma_levels"] for r in natt})
+    for plane, colour in (("яскравість", "#26a69a"), ("Cb", "#ffa726")):
+        rs = [r for r in natt if r["plane"] == plane]
+        rs.sort(key=lambda r: r["sigma_levels"])
+        ax.plot([r["sigma_levels"] for r in rs],
+                [r["neighbour_accuracy_pct"] for r in rs],
+                marker="o", ms=4, color=colour, label=f"площина {plane}")
+    ax.axhline(0.52, color="#607d8b", ls=":", lw=1.2)
+    lo, hi = ax.get_ylim()
+    ax.set_ylim(min(lo, 0.0), max(hi, 1.2))
+    ax.annotate("рівень випадкового розкладання 0,52 %", (0.2, 0.56),
+                fontsize=7.5, color="#607d8b")
+    ax.set_xlabel("гауссів шум на шифротексті, σ рівнів", fontsize=9)
+    ax.set_ylabel("правильних сусідств, %", fontsize=9)
+    ax.set_title("Безключова атака на спотворений шифротекст", fontsize=10.5)
+    ax.legend(fontsize=8)
+    ax.grid(alpha=0.25)
+
+    txt = "  ".join(f"{d['codewords']} слів: мін. відстань {d['min_distance']:g}"
+                    for d in spacing)
+    fig.suptitle("Глибокий аналіз стійкості до спотворень", fontsize=13)
+    fig.text(0.012, 0.012, "Відстань між кодовими словами у просторі RGB — "
+                           + txt + ". Половина мінімальної відстані є межею, "
+                           "до якої декодування за найближчим ще безпомилкове.",
+             fontsize=8, color="#37474f", wrap=True)
+    fig.tight_layout(rect=(0, 0.04, 1, 0.95))
+    path = os.path.join(out_dir, "noise_deep.png")
+    fig.savefig(path, dpi=140)
+    fig.savefig(path.replace(".png", ".svg"))
+    plt.close(fig)
+    return path
+
+
+__all__ = ["NOISE_SIGMAS", "FINE_SIGMAS", "IMPAIRMENTS", "STRIP_SIGMAS",
+           "capacity_sweep", "monochrome_path", "colour_path",
            "luma_only_observer", "plane_attacks", "noise_tolerance",
+           "codeword_spacing", "noise_deep", "noise_attacks", "noise_strip",
            "run_luma_lab"]
