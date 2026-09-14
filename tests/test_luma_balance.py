@@ -178,3 +178,60 @@ def test_a_perturbed_ciphertext_still_decodes_at_small_sigma():
     noisy = np.clip(ct + rng.normal(0, 1.0, ct.shape), 0, 255).astype(np.uint8)
     got = mono.decrypt(noisy, 0, nearest=True)
     assert float((got == img).mean()) > 0.90
+
+
+# ------------------------------------------- what an analog path really does
+def test_narrowing_the_chroma_bandwidth_destroys_the_scheme():
+    """The finding that decides where this scheme can be used at all.
+
+    The message lives entirely in chroma, and averaging two neighbouring
+    codewords gives a colour that is neither of them.  A composite path carries
+    chroma in a much narrower band than luma by standard, so this is not an
+    exotic impairment.
+    """
+    from avsec.luma_lab import _impair
+
+    mono = LumaBalancedMono(KEY, SID)
+    img = _frame()
+    ct = mono.encrypt(img, 0)
+    rng = np.random.default_rng(3)
+    blurred = _impair(ct, "chroma_lowpass", 2.0, rng)
+    got = mono.decrypt(blurred, 0, nearest=True)
+    assert float((got == img).mean()) < 0.20
+
+
+def test_nearest_decoding_beats_exact_lookup_under_noise():
+    """87 percentage points at sigma = 0.25; the decoder choice is not free."""
+    from avsec.luma_lab import _impair
+
+    mono = LumaBalancedMono(KEY, SID)
+    img = _frame()
+    rng = np.random.default_rng(5)
+    noisy = _impair(mono.encrypt(img, 0), "gauss", 0.25, rng)
+    exact = float((mono.decrypt(noisy, 0, nearest=False) == img).mean())
+    near = float((mono.decrypt(noisy, 0, nearest=True) == img).mean())
+    assert near > 0.95
+    assert near - exact > 0.5
+
+
+def test_fewer_codewords_are_spaced_further_apart():
+    """Why the monochrome path tolerates more error than the colour path."""
+    from avsec.luma_lab import codeword_spacing
+
+    small = codeword_spacing(256)
+    large = codeword_spacing(65536)
+    assert small["median_distance"] > 4 * large["median_distance"]
+
+
+def test_noise_breaks_the_constant_luma_property_without_creating_a_leak():
+    """The property is destroyed by something independent of the message."""
+    from avsec.luma_lab import _impair
+
+    mono = LumaBalancedMono(KEY, SID)
+    img = _frame()
+    rng = np.random.default_rng(11)
+    noisy = _impair(mono.encrypt(img, 0), "gauss", 8.0, rng)
+    y = luma(noisy)
+    assert float(y.std()) > 1.0, "noise must break the constant-luma property"
+    corr = float(np.corrcoef(y.ravel(), img.ravel().astype(np.float64))[0, 1])
+    assert abs(corr) < 0.05, "but the variation must not correlate with the frame"

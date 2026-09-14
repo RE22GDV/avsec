@@ -1,0 +1,5 @@
+codewords,half_min_distance,mean_distance,median_distance,min_distance,palette
+256,0.707,9.117,8.544,1.414,111749
+4096,0.5,2.319,2.236,1.0,111749
+32768,0.5,1.121,1.0,1.0,111749
+65536,0.5,1.014,1.0,1.0,111749
