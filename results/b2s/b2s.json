@@ -83,39 +83,39 @@
     {
       "target": "B2",
       "known_pair_plain_accuracy": 1.0,
-      "known_pair_plain_seconds": 0.0294,
+      "known_pair_plain_seconds": 0.0299,
       "known_pair_subst_accuracy": 1.0,
-      "known_pair_subst_seconds": 0.0453,
+      "known_pair_subst_seconds": 0.0435,
       "substitution_detected_global": 1,
       "merged_alphabet_covered": 0.8359,
       "boundary_neighbour_pct": 35.67,
       "boundary_direct_pct": 1.04,
       "boundary_psnr_db": 15.4,
-      "boundary_seconds": 0.0832,
+      "boundary_seconds": 0.084,
       "multi_frame_accuracy": 0.0,
       "chance_level": 0.005208
     },
     {
       "target": "B2s (session)",
       "known_pair_plain_accuracy": 0.0312,
-      "known_pair_plain_seconds": 0.0307,
+      "known_pair_plain_seconds": 0.0294,
       "known_pair_subst_accuracy": 1.0,
-      "known_pair_subst_seconds": 0.0466,
+      "known_pair_subst_seconds": 0.044,
       "substitution_detected_global": 1,
       "merged_alphabet_covered": 0.8359,
       "boundary_neighbour_pct": 2.81,
       "boundary_direct_pct": 0.52,
       "boundary_psnr_db": 9.58,
-      "boundary_seconds": 0.0994,
+      "boundary_seconds": 0.0999,
       "multi_frame_accuracy": 0.0,
       "chance_level": 0.005208
     },
     {
       "target": "B2s (frame)",
       "known_pair_plain_accuracy": 0.0052,
-      "known_pair_plain_seconds": 0.0305,
+      "known_pair_plain_seconds": 0.0296,
       "known_pair_subst_accuracy": 1.0,
-      "known_pair_subst_seconds": 0.0445,
+      "known_pair_subst_seconds": 0.0437,
       "substitution_detected_global": 1,
       "merged_alphabet_covered": 0.8359,
       "boundary_neighbour_pct": 3.93,
@@ -128,15 +128,15 @@
     {
       "target": "B2s (block)",
       "known_pair_plain_accuracy": 0.0104,
-      "known_pair_plain_seconds": 0.0305,
+      "known_pair_plain_seconds": 0.0306,
       "known_pair_subst_accuracy": 1.0,
-      "known_pair_subst_seconds": 0.045,
+      "known_pair_subst_seconds": 0.0444,
       "substitution_detected_global": 0,
       "merged_alphabet_covered": 0.8359,
       "boundary_neighbour_pct": 0.28,
       "boundary_direct_pct": 0.52,
       "boundary_psnr_db": 9.6,
-      "boundary_seconds": 0.1001,
+      "boundary_seconds": 0.0992,
       "multi_frame_accuracy": 0.0,
       "chance_level": 0.005208
     }
@@ -457,14 +457,67 @@
       "coverage": 1.0
     }
   ],
+  "colour": {
+    "correlation": [
+      {
+        "frame": "вихідний кадр",
+        "RG": 0.6786,
+        "RB": 0.1099,
+        "GB": 0.7438,
+        "max_abs_correlation": 0.7438,
+        "equal_R=G": 0.0275,
+        "equal_R=B": 0.0144,
+        "equal_G=B": 0.0165,
+        "mean_equal_fraction": 0.0195
+      },
+      {
+        "frame": "одна таблиця на всі канали",
+        "RG": 0.0213,
+        "RB": 0.0187,
+        "GB": 0.0134,
+        "max_abs_correlation": 0.0213,
+        "equal_R=G": 0.0275,
+        "equal_R=B": 0.0144,
+        "equal_G=B": 0.0165,
+        "mean_equal_fraction": 0.0195
+      },
+      {
+        "frame": "своя таблиця на кожен канал",
+        "RG": -0.001,
+        "RB": 0.0003,
+        "GB": -0.0022,
+        "max_abs_correlation": 0.0022,
+        "equal_R=G": 0.0043,
+        "equal_R=B": 0.0042,
+        "equal_G=B": 0.0036,
+        "mean_equal_fraction": 0.004
+      }
+    ],
+    "scheme": {
+      "scheme": "B2s-colour",
+      "channels": [
+        "R",
+        "G",
+        "B"
+      ],
+      "bits_per_pixel": 24,
+      "tables_per_frame": 576,
+      "table_shape": "16x16 = 256 значень, тобто всі варіації байта",
+      "shared_permutation": true,
+      "table_source": "random",
+      "substitution_mode": "block",
+      "bit_exact_recovery": true
+    }
+  },
   "figures": {
     "sbox_tables": "results/b2s\\sbox_tables.png",
     "stages": "results/b2s\\stages.png",
-    "attacks_and_channel": "results/b2s\\attacks_and_channel.png"
+    "attacks_and_channel": "results/b2s\\attacks_and_channel.png",
+    "colour": "results/b2s\\colour.png"
   },
   "run_id": "fe45d509310b99d4",
-  "commit": "ec6cb9bf07ef4e2435f46c52be1b23373534d056",
-  "git_worktree": "clean",
+  "commit": "fff2e5bf17f2bc0d326c9cc7e7fb782ced1ce25b",
+  "git_worktree": "DIRTY",
   "environment": {
     "python": "3.12.10",
     "platform": "Windows-11-10.0.26200-SP0",
@@ -482,15 +535,31 @@
       "yaml": "6.0.3"
     },
     "avsec_version": "0.1.0",
-    "git_commit": "ec6cb9bf07ef4e2435f46c52be1b23373534d056",
-    "git_worktree": "clean",
-    "git_dirty": false,
-    "git_dirty_files": [],
+    "git_commit": "fff2e5bf17f2bc0d326c9cc7e7fb782ced1ce25b",
+    "git_worktree": "DIRTY",
+    "git_dirty": true,
+    "git_dirty_files": [
+      "ocs/img/b2s_attacks.csv",
+      "docs/img/b2s_attacks_and_channel.svg",
+      "docs/img/b2s_sbox_tables.svg",
+      "docs/img/b2s_stages.svg",
+      "results/b2s/colour.png",
+      "results/b2s/colour.svg",
+      "results/b2s/colour_correlation.csv",
+      "results/b2s/images/colour_1_original.png",
+      "results/b2s/images/colour_2_shared_table.png",
+      "results/b2s/images/colour_3_per_channel.png",
+      "results/b2s/images/colour_4_scrambled.png",
+      "results/b2s/images/colour_5_restored.png",
+      "results/b2s/sbox_channel_B.csv",
+      "results/b2s/sbox_channel_G.csv",
+      "results/b2s/sbox_channel_R.csv"
+    ],
     "git_branch": "main",
-    "git_describe": "v1.1.0-12-gec6cb9b",
-    "git_dirty_note": "",
+    "git_describe": "v1.1.0-15-gfff2e5b-dirty",
+    "git_dirty_note": "УВАГА: робоче дерево змінене; результат отримано кодом, якого немає в жодному коміті",
     "pip_freeze": [
-      "-e git+https://github.com/RE22GDV/avsec.git@ec6cb9bf07ef4e2435f46c52be1b23373534d056#egg=avsec",
+      "-e git+https://github.com/RE22GDV/avsec.git@fff2e5bf17f2bc0d326c9cc7e7fb782ced1ce25b#egg=avsec",
       "PyYAML==6.0.3",
       "Pygments==2.21.0",
       "cffi==2.1.1",
