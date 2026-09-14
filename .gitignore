@@ -30,3 +30,11 @@ data/real/natural/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Робочі матеріали статті — НЕ для репозиторію
+*.docx
+*.doc
+*.odt
+Стаття_*
+Стаття_рисунки/
+article_work/
