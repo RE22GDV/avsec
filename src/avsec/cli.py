@@ -392,6 +392,30 @@ def cmd_analyze(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_gf_lab(args: argparse.Namespace) -> int:
+    """The computed GF(2^8) substitution table against the stored one.
+
+    Verifies the field arithmetic against the published AES S-box, measures the
+    cryptographic properties of both constructions, and sweeps every irreducible
+    polynomial of degree 8.
+    """
+    from avsec.galois_lab import run_galois_lab
+
+    cfg = _cfg(args)
+    res = run_galois_lab(cfg, _out(args, "results/gf_sbox"), progress=_progress)
+    print(json.dumps({
+        "matches_published_aes_sbox":
+            res["verification"]["matches_published_aes_sbox"],
+        "field": res["verification"]["field"]["polynomial"],
+        "properties": [{k: r[k] for k in
+                        ("table", "differential_uniformity", "nonlinearity",
+                         "storage")} for r in res["properties"]],
+        "irreducible_polynomials": len(res["polynomial_sweep"]),
+        "figure": res["figures"].get("gf_sbox"),
+    }, ensure_ascii=False, indent=2))
+    return 0
+
+
 def cmd_subst_lab(args: argparse.Namespace) -> int:
     """B2s: the substitution table, the attacks against it, and its channel cost.
 
@@ -606,6 +630,12 @@ def build_parser() -> argparse.ArgumentParser:
                              "permutation - tables, attacks, channel cost")
     _common(sp)
     sp.set_defaults(func=cmd_subst_lab)
+
+    sp = sub.add_parser("gf-lab",
+                        help="computed GF(2^8) substitution table: verification "
+                             "against AES, properties, polynomial sweep")
+    _common(sp)
+    sp.set_defaults(func=cmd_gf_lab)
 
     sp = sub.add_parser("verify",
                         help="recompute every published claim from the tables")

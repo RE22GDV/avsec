@@ -13,6 +13,7 @@
 #    ./run.sh research     the full research programme (long)
 #    ./run.sh lab          ISITIA 2021: reproduce the scheme + repeat on photos
 #    ./run.sh subst-lab    B2s: keyed substitution on top of the permutation
+#    ./run.sh gf-lab       computed GF(2^8) table: AES check, properties
 #    ./run.sh verify       recheck every published number, runs nothing
 #    ./run.sh sources      download the natural UAV photographs
 #    ./run.sh shell        a shell with the environment active
@@ -102,6 +103,12 @@ case "$CMD" in
     "$PY" -m avsec.cli verify --input runs/main
     "$PY" scripts/publish.py runs/main
     ;;
+  gf-lab)
+    echo "[avsec] GF(2^8) substitution table: verification and properties ..."
+    "$PY" -m avsec.cli gf-lab --config configs/research_main.yaml --output results/gf_sbox
+    echo "[avsec] tables and figure written to results/gf_sbox"
+    ;;
+
   subst-lab)
     echo "[avsec] B2s: substitution table, attacks, channel cost ..."
     "$PY" -m avsec.cli subst-lab --config configs/research_main.yaml --output results/b2s

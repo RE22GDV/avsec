@@ -191,15 +191,22 @@ class _Adapter:
 
 
 def attack_table(cfg: ExperimentConfig, key: bytes, sid: bytes,
-                 frames: Sequence[np.ndarray]) -> List[Dict[str, Any]]:
-    """Every attack against B2 and against B2s, on identical content."""
+                 frames: Sequence[np.ndarray],
+                 source: str = "random") -> List[Dict[str, Any]]:
+    """Every attack against B2 and against B2s, on identical content.
+
+    source selects how the substitution tables are built, so the same
+    comparison can be run for the keyed shuffle and for the computed algebraic
+    table without duplicating the harness.
+    """
     rows, cols = cfg.b2_grid
     img = frames[0]
     out: List[Dict[str, Any]] = []
 
     targets: List[Tuple[str, Any]] = [("B2", _b2(cfg, key, sid))]
     targets += [(f"B2s ({m})",
-                 SubstitutionPermutationScrambler(rows, cols, key, sid, mode=m))
+                 SubstitutionPermutationScrambler(rows, cols, key, sid, mode=m,
+                                                  source=source))
                 for m in SUBSTITUTION_MODES]
 
     for label, sc in targets:

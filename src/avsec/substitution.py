@@ -33,6 +33,20 @@ Three substitution modes, and why the difference matters
     same content encrypt differently - the image analogue of moving from a
     monoalphabetic to a polyalphabetic cipher.
 
+Two ways to build the table
+---------------------------
+``random`` (default)
+    A keyed shuffle of ``0..255``.  Secret, and it has to be stored - 256 bytes.
+    Its resistance to differential and linear analysis is whatever the draw
+    gave.
+
+``algebraic``
+    The AES construction from :mod:`avsec.galois`: the multiplicative inverse in
+    GF(2^8) followed by an affine map, **computed** rather than stored, with
+    key material added before and after.  The table itself is public; the key
+    enters where a block cipher puts it.  Its resistance is a theorem rather
+    than a draw, and :mod:`avsec.sbox_analysis` measures both.
+
 What this does and does not provide
 -----------------------------------
 Substitution removes the local continuity that the key-free reassembly attack
@@ -62,6 +76,9 @@ ALPHABET = 256
 
 #: How the substitution table may vary.  See the module docstring.
 SUBSTITUTION_MODES = ("session", "frame", "block")
+
+#: How the table is built: a keyed shuffle, or the computed algebraic table.
+TABLE_SOURCES = ("random", "algebraic")
 
 
 def crypto_sbox(key: bytes, context: bytes) -> np.ndarray:
@@ -96,15 +113,30 @@ class SubstitutionTables:
     """
 
     def __init__(self, key: bytes, session_id: bytes, n_blocks: int,
-                 mode: str = "block") -> None:
+                 mode: str = "block", source: str = "random") -> None:
         if mode not in SUBSTITUTION_MODES:
             raise ValueError(
                 f"mode must be one of {SUBSTITUTION_MODES}, got {mode!r}")
+        if source not in TABLE_SOURCES:
+            raise ValueError(
+                f"source must be one of {TABLE_SOURCES}, got {source!r}")
         self.key = key
         self.session_id = session_id
         self.n_blocks = int(n_blocks)
         self.mode = mode
+        self.source = source
+        self._algebraic = None
+        if source == "algebraic":
+            from avsec.galois import KeyedAlgebraicSbox
+
+            self._algebraic = KeyedAlgebraicSbox(key)
         self._cache: Dict[int, np.ndarray] = {}
+
+    def _one(self, context: bytes) -> np.ndarray:
+        """One table for this context, by whichever construction is selected."""
+        if self._algebraic is not None:
+            return self._algebraic.table(context)
+        return crypto_sbox(self.key, context)
 
     def n_tables(self) -> int:
         """How many distinct tables are in use at one instant."""
@@ -116,13 +148,12 @@ class SubstitutionTables:
         if key not in self._cache:
             head = b"|" + self.session_id + b"|"
             if self.mode == "session":
-                rows = [crypto_sbox(self.key, head + b"session")]
+                rows = [self._one(head + b"session")]
             elif self.mode == "frame":
-                rows = [crypto_sbox(self.key,
-                                    head + int(frame_id).to_bytes(8, "big"))]
+                rows = [self._one(head + int(frame_id).to_bytes(8, "big"))]
             else:
                 stem = head + int(frame_id).to_bytes(8, "big") + b"|blk"
-                rows = [crypto_sbox(self.key, stem + i.to_bytes(4, "big"))
+                rows = [self._one(stem + i.to_bytes(4, "big"))
                         for i in range(self.n_blocks)]
             self._cache[key] = np.stack(rows).astype(np.uint8)
         return self._cache[key]
@@ -132,13 +163,19 @@ class SubstitutionTables:
         return np.stack([invert_sbox(row) for row in t])
 
     def describe(self) -> Dict[str, object]:
+        derivation = ("keyed Fisher-Yates over a ChaCha20 keystream"
+                      if self.source == "random" else
+                      "computed: inverse in GF(2^8) + affine map, with key "
+                      "material XORed before and after")
         return {
             "primitive": "keyed value substitution (S-box) over 0..255",
             "mode": self.mode,
+            "source": self.source,
             "tables_per_instant": self.n_tables(),
             "alphabet": ALPHABET,
-            "table_space": "256! per table",
-            "derivation": "keyed Fisher-Yates over a ChaCha20 keystream",
+            "table_space": ("256! per table" if self.source == "random"
+                            else "one public table; 2^16 keyed variants per context"),
+            "derivation": derivation,
             "note": ("bijective, so decryption is exact; a table is not "
                      "recoverable without the key, but see the measured "
                      "known-pair attack before treating that as confidentiality"),
@@ -155,15 +192,17 @@ class SubstitutionPermutationScrambler:
 
     def __init__(self, grid_rows: int, grid_cols: int, key: bytes,
                  session_id: bytes, mode: str = "block",
-                 per_frame: bool = True) -> None:
+                 per_frame: bool = True, source: str = "random") -> None:
         from avsec.baselines import CryptoPermutationScrambler
 
         self.rows, self.cols = int(grid_rows), int(grid_cols)
         self.n_blocks = self.rows * self.cols
         self.permuter = CryptoPermutationScrambler(
             grid_rows, grid_cols, key, session_id, per_frame=per_frame)
-        self.subst = SubstitutionTables(key, session_id, self.n_blocks, mode)
+        self.subst = SubstitutionTables(key, session_id, self.n_blocks, mode,
+                                        source)
         self.mode = mode
+        self.source = source
 
     # -- geometry, shared with the permutation half ------------------------
     def permutation(self, frame_id: int = 0) -> np.ndarray:
@@ -216,6 +255,7 @@ class SubstitutionPermutationScrambler:
             "scheme": "B2s",
             "primitives": ["keyed block permutation", "keyed value substitution"],
             "order": "substitute, then permute",
+            "table_source": self.source,
             "grid": f"{self.rows}x{self.cols}",
             "n_blocks": self.n_blocks,
             "substitution": self.subst.describe(),
@@ -225,7 +265,7 @@ class SubstitutionPermutationScrambler:
 def make_b2s_subst_perm(transport, channel_cfg, frame_h: int, frame_w: int,
                         grid_rows: int, grid_cols: int, master,
                         session_id: Optional[bytes] = None, mode: str = "block",
-                        timer=None, session_ids=None):
+                        timer=None, session_ids=None, source: str = "random"):
     """Build ``B2s`` as an analog picture method, like ``B1`` and ``B2``."""
     from avsec.baselines import AnalogPictureMethod, SecureSessionIds
     from avsec.crypto import derive_session_keys
@@ -233,22 +273,24 @@ def make_b2s_subst_perm(transport, channel_cfg, frame_h: int, frame_w: int,
     sid = session_id or (session_ids or SecureSessionIds()).next("B2s")
     keys = derive_session_keys(master, sid)
     sc = SubstitutionPermutationScrambler(grid_rows, grid_cols, keys.key, sid,
-                                          mode=mode, per_frame=True)
+                                          mode=mode, per_frame=True,
+                                          source=source)
     method = AnalogPictureMethod(
         "B2s", transport, channel_cfg, frame_h, frame_w,
         transform=lambda img, fid: sc.scramble(img, fid),
         inverse=lambda img, fid: sc.descramble(img, fid),
         authenticated=False, timer=timer,
         notes=(f"keyed block permutation plus keyed value substitution "
-               f"(mode={mode}); two primitives, still no integrity tag and no "
-               f"freshness counter"),
+               f"(mode={mode}, source={source}); two primitives, still no "
+               f"integrity tag and no freshness counter"),
     )
     method.scrambler = sc
     return method
 
 
 __all__ = [
-    "ALPHABET", "SUBSTITUTION_MODES", "crypto_sbox", "invert_sbox", "apply_sbox",
+    "ALPHABET", "SUBSTITUTION_MODES", "TABLE_SOURCES",
+    "crypto_sbox", "invert_sbox", "apply_sbox",
     "SubstitutionTables", "SubstitutionPermutationScrambler",
     "make_b2s_subst_perm",
 ]
