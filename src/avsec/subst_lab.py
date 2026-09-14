@@ -332,6 +332,145 @@ def channel_sweep(cfg: ExperimentConfig, master, scenes: Sequence[Tuple[str, Any
     return out, examples
 
 
+# ------------------------------------------------------------------ colour
+def colour_frame(height: int, width: int, scene: str = "village") -> np.ndarray:
+    """One RGB crop of the committed UAV photograph."""
+    from avsec.sources.drone import DRONE_SCENES, _crop_resize, load_photo
+
+    rect = [d for d in DRONE_SCENES if d[0] == scene][0][2]
+    bgr = _crop_resize(load_photo(), rect, height, width)
+    return np.ascontiguousarray(np.asarray(bgr)[..., ::-1])
+
+
+def _shared_table_control(rows: int, cols: int, key: bytes, sid: bytes,
+                          img: np.ndarray, mode: str, source: str) -> np.ndarray:
+    """One table applied to all three channels: the control this design needs.
+
+    If the same substitution runs on R, G and B, a value equal in two channels
+    stays equal after it, so the correlation between the planes survives.  The
+    per-channel construction is only worth its extra key material if this
+    control is measurably worse.
+    """
+    from avsec.substitution import SubstitutionTables
+    from avsec.baselines import CryptoPermutationScrambler
+
+    perm = CryptoPermutationScrambler(rows, cols, key, sid)
+    tabs = SubstitutionTables(key, sid, rows * cols, mode, source)
+    out = []
+    for c in range(img.shape[2]):
+        tiles = perm._tiles(np.ascontiguousarray(img[..., c]))
+        t = tabs.tables(0)
+        idx = tiles.astype(np.int64)
+        if t.shape[0] == 1:
+            out.append(perm._join(t[0][idx]))
+        else:
+            got = np.empty_like(tiles)
+            for b in range(tiles.shape[0]):
+                got[b] = t[b][idx[b]]
+            out.append(perm._join(got))
+    return np.stack(out, axis=2)
+
+
+def colour_section(cfg: ExperimentConfig, key: bytes, sid: bytes,
+                   img: np.ndarray, source: str = "random"
+                   ) -> Tuple[List[Dict[str, Any]], Dict[str, np.ndarray],
+                              Dict[str, Any]]:
+    """Per-channel substitution against one shared table, on the same frame."""
+    from avsec.substitution import (ColourSubstitutionPermutation,
+                                    channel_correlation, channel_equality)
+
+    rows, cols = cfg.b2_grid
+    sc = ColourSubstitutionPermutation(rows, cols, key, sid, mode="block",
+                                       source=source)
+    fitted = sc._fit(img)
+    per_channel = sc.substitute(img, 0)
+    shared = _shared_table_control(rows, cols, key, sid, fitted, "block", source)
+    scrambled = sc.scramble(img, 0)
+    restored = sc.descramble(scrambled, 0)
+
+    rows_out: List[Dict[str, Any]] = []
+    for label, frame in (("вихідний кадр", fitted),
+                         ("одна таблиця на всі канали", shared),
+                         ("своя таблиця на кожен канал", per_channel)):
+        corr = channel_correlation(frame)
+        eq = channel_equality(frame)
+        row: Dict[str, Any] = {"frame": label}
+        row.update(corr)
+        row["max_abs_correlation"] = round(max(abs(v) for v in corr.values()), 4)
+        row.update({f"equal_{k}": v for k, v in eq.items()})
+        row["mean_equal_fraction"] = round(float(sum(eq.values()) / len(eq)), 4)
+        rows_out.append(row)
+
+    images = {
+        "colour_1_original": fitted,
+        "colour_2_shared_table": shared,
+        "colour_3_per_channel": per_channel,
+        "colour_4_scrambled": scrambled,
+        "colour_5_restored": restored,
+    }
+    meta = dict(sc.describe())
+    meta["bit_exact_recovery"] = bool(np.array_equal(restored, fitted))
+    meta["tables"] = {ch: t[0].tolist() for ch, t in sc.tables(0).items()}
+    return rows_out, images, meta
+
+
+def _colour_figure(out_dir: str, images: Dict[str, np.ndarray],
+                   corr: List[Dict[str, Any]], tables: Dict[str, Any]) -> str:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    fig = plt.figure(figsize=(15.0, 8.6))
+    gs = fig.add_gridspec(2, 5, height_ratios=[1.35, 1.0], hspace=0.3, wspace=0.22)
+
+    titles = [
+        ("colour_1_original", "1. Вихідний кадр RGB"),
+        ("colour_2_shared_table", "2. Одна таблиця\nна всі три канали"),
+        ("colour_3_per_channel", "3. Своя таблиця\nна кожен канал"),
+        ("colour_4_scrambled", "4. Заміна + перестановка\n(у канал)"),
+        ("colour_5_restored", "5. Відновлено з ключем"),
+    ]
+    for k, (name, title) in enumerate(titles):
+        ax = fig.add_subplot(gs[0, k])
+        ax.imshow(np.asarray(images[name], dtype=np.uint8))
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_title(title, fontsize=9.5)
+
+    for k, (ch, colour) in enumerate((("R", "Reds"), ("G", "Greens"),
+                                      ("B", "Blues"))):
+        ax = fig.add_subplot(gs[1, k])
+        grid = np.array(tables["tables"][ch], dtype=np.int64).reshape(16, 16)
+        ax.imshow(grid, cmap=colour, vmin=0, vmax=255)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_title(f"таблиця замін каналу {ch}\n16 × 16 = 256 значень",
+                     fontsize=9)
+
+    ax = fig.add_subplot(gs[1, 3:])
+    labels = [r["frame"] for r in corr]
+    x = np.arange(len(labels))
+    for i, pair in enumerate(("R=G", "R=B", "G=B")):
+        ax.bar(x + (i - 1) * 0.26, [r["equal_" + pair] * 100 for r in corr],
+               0.25, label=pair)
+    ax.set_xticks(x)
+    ax.set_xticklabels([l.replace(" на ", "\nна ") for l in labels], fontsize=8)
+    ax.set_ylabel("пікселів з однаковим байтом, %", fontsize=9)
+    ax.legend(fontsize=8, title="пара каналів", title_fontsize=8)
+    ax.grid(axis="y", alpha=0.25)
+    ax.set_title("одна таблиця зберігає рівність каналів точно,\n"
+                 "окремі таблиці її руйнують", fontsize=9.5)
+
+    fig.suptitle("B2s у кольорі: своя таблиця замін на кожен канал RGB",
+                 fontsize=12.5)
+    p = os.path.join(out_dir, "colour.png")
+    fig.savefig(p, dpi=140, bbox_inches="tight")
+    fig.savefig(p.replace(".png", ".svg"), bbox_inches="tight")
+    plt.close(fig)
+    return p
+
+
 # ------------------------------------------------------------------ the run
 def run_subst_lab(cfg: ExperimentConfig, output_dir: str = "results/b2s",
                   n_frames: int = 3, progress=None) -> Dict[str, Any]:
@@ -407,13 +546,25 @@ def run_subst_lab(cfg: ExperimentConfig, output_dir: str = "results/b2s",
     # ---- 5. the analog channel -------------------------------------------
     sweep, examples = channel_sweep(cfg, master, scenes, n_frames, progress)
 
-    # ---- 6. pictures ------------------------------------------------------
+    # ---- 6. colour --------------------------------------------------------
+    say("кольоровий кадр", 0.86)
+    rgb = colour_frame(H, W)
+    colour_rows, colour_images, colour_meta = colour_section(cfg, key, sid, rgb)
+    write_csv(os.path.join(out, "colour_correlation.csv"), colour_rows)
+    for ch, tab in colour_meta["tables"].items():
+        write_csv(os.path.join(out, f"sbox_channel_{ch}.csv"),
+                  _table_rows(np.array(tab, dtype=np.uint8), f"S-Box {ch}"))
+
+    # ---- 7. pictures ------------------------------------------------------
     say("зображення", 0.88)
     stages = _stage_images(sc_demo, b2_demo, f0)
     _save_images(img_dir, stages, examples)
+    _save_colour(img_dir, colour_images)
 
     say("рисунки", 0.93)
     figures = _figures(out, box, inv, stages, attacks, sweep, hist)
+    figures["colour"] = _colour_figure(out, colour_images, colour_rows,
+                                       colour_meta)
 
     summary = {
         "kind": "b2s",
@@ -427,6 +578,9 @@ def run_subst_lab(cfg: ExperimentConfig, output_dir: str = "results/b2s",
         "attacks": attacks,
         "reuse_matrix": reuse,
         "channel_sweep": sweep,
+        "colour": {"correlation": colour_rows,
+                   "scheme": {k: v for k, v in colour_meta.items()
+                              if k != "tables"}},
         "figures": figures,
         "run_id": cfg.run_identity(),
         "commit": env.get("git_commit"),
@@ -453,6 +607,14 @@ def _stage_images(sc, b2, frame: np.ndarray) -> Dict[str, np.ndarray]:
         "4_permutation_only_B2": b2.scramble(frame, 0),
         "5_restored": sc.descramble(sc.scramble(frame, 0), 0),
     }
+
+
+def _save_colour(img_dir: str, images: Dict[str, np.ndarray]) -> None:
+    from PIL import Image
+
+    for name, arr in images.items():
+        Image.fromarray(np.asarray(arr, dtype=np.uint8), mode="RGB").save(
+            os.path.join(img_dir, f"{name}.png"))
 
 
 def _save_images(img_dir: str, stages: Dict[str, np.ndarray],
@@ -598,5 +760,6 @@ def _figures(out_dir: str, box: np.ndarray, inv: np.ndarray,
 
 
 __all__ = ["CHANNELS", "BENCH_SCENES", "sbox_tables", "histogram_facts",
+           "colour_frame", "colour_section",
            "attack_table", "reuse_matrix", "channel_sweep", "run_subst_lab",
            "error_amplification"]

@@ -202,3 +202,72 @@ def test_a_one_level_error_becomes_an_arbitrary_value():
     rows = {r["wire_error_levels"]: r for r in error_amplification(box, (1,))}
     assert rows[1]["permutation_error_levels"] == 1
     assert rows[1]["substitution_mean_abs_error"] > 50.0
+
+
+# ------------------------------------------------------------------ colour
+def _rgb(h=192, w=256):
+    from avsec.subst_lab import colour_frame
+
+    return colour_frame(h, w)
+
+
+@pytest.mark.parametrize("source", ("random", "algebraic"))
+@pytest.mark.parametrize("mode", SUBSTITUTION_MODES)
+def test_colour_round_trip_is_bit_exact(mode, source):
+    from avsec.substitution import ColourSubstitutionPermutation
+
+    img = _rgb()
+    sc = ColourSubstitutionPermutation(ROWS, COLS, KEY, SID, mode=mode,
+                                       source=source)
+    assert np.array_equal(sc.descramble(sc.scramble(img, 0), 0), sc._fit(img))
+
+
+def test_each_channel_gets_its_own_table():
+    from avsec.substitution import ColourSubstitutionPermutation
+
+    sc = ColourSubstitutionPermutation(ROWS, COLS, KEY, SID, mode="session")
+    tabs = sc.tables(0)
+    assert set(tabs) == {"R", "G", "B"}
+    assert not np.array_equal(tabs["R"][0], tabs["G"][0])
+    assert not np.array_equal(tabs["R"][0], tabs["B"][0])
+    assert not np.array_equal(tabs["G"][0], tabs["B"][0])
+
+
+def test_a_table_covers_every_byte_value():
+    """16 x 16 = 256: the whole alphabet of one byte, and nothing else."""
+    from avsec.substitution import ColourSubstitutionPermutation
+
+    sc = ColourSubstitutionPermutation(ROWS, COLS, KEY, SID, mode="session")
+    for ch, t in sc.tables(0).items():
+        assert t.shape[1] == 256, ch
+        assert sorted(t[0].tolist()) == list(range(256)), ch
+
+
+def test_one_shared_table_preserves_channel_equality_and_separate_ones_do_not():
+    """The measurement that justifies a table per channel.
+
+    Correlation does not separate the two designs - any substitution destroys
+    it.  Equality does: one table maps equal values to equal values exactly.
+    """
+    from avsec.subst_lab import _shared_table_control
+    from avsec.substitution import (ColourSubstitutionPermutation,
+                                    channel_equality)
+
+    img = _rgb()
+    sc = ColourSubstitutionPermutation(ROWS, COLS, KEY, SID, mode="block")
+    fitted = sc._fit(img)
+    before = channel_equality(fitted)
+
+    shared = _shared_table_control(ROWS, COLS, KEY, SID, fitted, "block", "random")
+    assert channel_equality(shared) == before, "one table preserves equality exactly"
+
+    per_channel = channel_equality(sc.substitute(img, 0))
+    for pair, value in per_channel.items():
+        assert value < before[pair] / 2, pair
+
+
+def test_an_unsupported_channel_count_is_refused():
+    from avsec.substitution import ColourSubstitutionPermutation
+
+    with pytest.raises(ValueError):
+        ColourSubstitutionPermutation(ROWS, COLS, KEY, SID, n_channels=2)

@@ -80,6 +80,12 @@ SUBSTITUTION_MODES = ("session", "frame", "block")
 #: How the table is built: a keyed shuffle, or the computed algebraic table.
 TABLE_SOURCES = ("random", "algebraic")
 
+#: Colour planes, in the order the arrays carry them.  ``A`` is optional: 24
+#: bits are enough for the picture, and the alpha plane only exists when the
+#: source actually has one.
+RGB_CHANNELS = ("R", "G", "B")
+RGBA_CHANNELS = ("R", "G", "B", "A")
+
 
 def crypto_sbox(key: bytes, context: bytes) -> np.ndarray:
     """A bijective table ``0..255 -> 0..255`` derived from the key.
@@ -262,6 +268,159 @@ class SubstitutionPermutationScrambler:
         }
 
 
+# --------------------------------------------------------------- colour
+def channel_correlation(img: np.ndarray) -> Dict[str, float]:
+    """Pearson correlation between the colour planes of one frame.
+
+    A natural photograph has strongly correlated channels: the same scene
+    lights all three.  One table applied to all three would preserve that
+    correlation exactly, so measuring it is how the per-channel construction is
+    justified rather than asserted.
+    """
+    a = np.asarray(img, dtype=np.float64)
+    if a.ndim != 3:
+        raise ValueError("expected a HxWxC colour frame")
+    names = RGBA_CHANNELS[: a.shape[2]]
+    out: Dict[str, float] = {}
+    for i in range(a.shape[2]):
+        for j in range(i + 1, a.shape[2]):
+            x, y = a[..., i].ravel(), a[..., j].ravel()
+            sx, sy = x.std(), y.std()
+            r = 0.0 if sx == 0 or sy == 0 else float(
+                ((x - x.mean()) * (y - y.mean())).mean() / (sx * sy))
+            out[f"{names[i]}{names[j]}"] = round(r, 4)
+    return out
+
+
+def channel_equality(img: np.ndarray) -> Dict[str, float]:
+    """Fraction of pixels where two colour planes carry the same byte.
+
+    This is the discriminator between a shared table and per-channel tables.
+    Correlation is not: any substitution is a relabelling without order
+    structure, so it collapses the linear relation between planes whichever
+    table is used.  Equality is different - one table maps equal values to
+    equal values, always.
+    """
+    a = np.asarray(img)
+    if a.ndim != 3:
+        raise ValueError("expected a HxWxC colour frame")
+    names = RGBA_CHANNELS[: a.shape[2]]
+    out: Dict[str, float] = {}
+    for i in range(a.shape[2]):
+        for j in range(i + 1, a.shape[2]):
+            out[f"{names[i]}={names[j]}"] = round(
+                float((a[..., i] == a[..., j]).mean()), 4)
+    return out
+
+
+class ColourSubstitutionPermutation:
+    """``B2s`` over a colour frame: one substitution table per channel.
+
+    The block permutation is **shared** by the channels by default, because the
+    blocks are one image and moving them apart per channel would be a different
+    transform rather than a stronger one.  The substitution tables are
+    independent: each channel derives its own from the key, so a value that is
+    the same in two channels does not encrypt to the same byte.
+
+    ``per_channel_permutation=True`` is available for comparison; the bench
+    measures what it changes instead of the documentation claiming it.
+    """
+
+    def __init__(self, grid_rows: int, grid_cols: int, key: bytes,
+                 session_id: bytes, mode: str = "block", per_frame: bool = True,
+                 source: str = "random", n_channels: int = 3,
+                 per_channel_permutation: bool = False) -> None:
+        from avsec.baselines import CryptoPermutationScrambler
+
+        if n_channels not in (3, 4):
+            raise ValueError("n_channels must be 3 (RGB) or 4 (RGBA)")
+        self.rows, self.cols = int(grid_rows), int(grid_cols)
+        self.n_blocks = self.rows * self.cols
+        self.n_channels = int(n_channels)
+        self.channels = RGBA_CHANNELS[:n_channels]
+        self.mode = mode
+        self.source = source
+        self.per_channel_permutation = bool(per_channel_permutation)
+
+        self.permuters = []
+        for ch in self.channels:
+            sid = session_id if not per_channel_permutation else (
+                session_id[:7] + ch.encode()[:1])
+            self.permuters.append(CryptoPermutationScrambler(
+                grid_rows, grid_cols, key, sid, per_frame=per_frame))
+        # one table set per channel: the channel tag enters the context, so the
+        # three tables are independent draws from the same key
+        self.subst = [
+            SubstitutionTables(key, session_id + b"|" + ch.encode(),
+                               self.n_blocks, mode, source)
+            for ch in self.channels
+        ]
+
+    # -- geometry ----------------------------------------------------------
+    def _fit(self, img: np.ndarray) -> np.ndarray:
+        planes = [self._plane(img, c) for c in range(self.n_channels)]
+        fitted = [self.permuters[c]._join(self.permuters[c]._tiles(p))
+                  for c, p in enumerate(planes)]
+        return np.stack(fitted, axis=2)
+
+    def _plane(self, img: np.ndarray, c: int) -> np.ndarray:
+        return np.ascontiguousarray(np.asarray(img)[..., c])
+
+    def permutation(self, frame_id: int = 0, channel: int = 0) -> np.ndarray:
+        return self.permuters[channel].permutation(frame_id)
+
+    def tables(self, frame_id: int = 0) -> Dict[str, np.ndarray]:
+        """The substitution tables in use, one entry per channel."""
+        return {ch: self.subst[c].tables(frame_id)
+                for c, ch in enumerate(self.channels)}
+
+    # -- the transform -----------------------------------------------------
+    def _apply(self, plane: np.ndarray, c: int, frame_id: int,
+               inverse: bool) -> np.ndarray:
+        perm = self.permuters[c]
+        tiles = perm._tiles(plane)
+        tabs = (self.subst[c].inverse_tables(frame_id) if inverse
+                else self.subst[c].tables(frame_id))
+        idx = tiles.astype(np.int64)
+        if tabs.shape[0] == 1:
+            return perm._join(tabs[0][idx])
+        out = np.empty_like(tiles)
+        for b in range(tiles.shape[0]):
+            out[b] = tabs[b][idx[b]]
+        return perm._join(out)
+
+    def substitute(self, img: np.ndarray, frame_id: int = 0) -> np.ndarray:
+        planes = [self._apply(self._plane(img, c), c, frame_id, False)
+                  for c in range(self.n_channels)]
+        return np.stack(planes, axis=2)
+
+    def scramble(self, img: np.ndarray, frame_id: int = 0) -> np.ndarray:
+        sub = self.substitute(img, frame_id)
+        planes = [self.permuters[c].scramble(sub[..., c], frame_id)
+                  for c in range(self.n_channels)]
+        return np.stack(planes, axis=2)
+
+    def descramble(self, img: np.ndarray, frame_id: int = 0) -> np.ndarray:
+        planes = []
+        for c in range(self.n_channels):
+            un = self.permuters[c].descramble(np.asarray(img)[..., c], frame_id)
+            planes.append(self._apply(un, c, frame_id, True))
+        return np.stack(planes, axis=2)
+
+    def describe(self) -> Dict[str, object]:
+        return {
+            "scheme": "B2s-colour",
+            "channels": list(self.channels),
+            "bits_per_pixel": 8 * self.n_channels,
+            "tables_per_frame": self.n_blocks * self.n_channels
+                                if self.mode == "block" else self.n_channels,
+            "table_shape": "16x16 = 256 значень, тобто всі варіації байта",
+            "shared_permutation": not self.per_channel_permutation,
+            "table_source": self.source,
+            "substitution_mode": self.mode,
+        }
+
+
 def make_b2s_subst_perm(transport, channel_cfg, frame_h: int, frame_w: int,
                         grid_rows: int, grid_cols: int, master,
                         session_id: Optional[bytes] = None, mode: str = "block",
@@ -290,6 +449,9 @@ def make_b2s_subst_perm(transport, channel_cfg, frame_h: int, frame_w: int,
 
 __all__ = [
     "ALPHABET", "SUBSTITUTION_MODES", "TABLE_SOURCES",
+    "RGB_CHANNELS", "RGBA_CHANNELS", "channel_correlation",
+    "channel_equality",
+    "ColourSubstitutionPermutation",
     "crypto_sbox", "invert_sbox", "apply_sbox",
     "SubstitutionTables", "SubstitutionPermutationScrambler",
     "make_b2s_subst_perm",
