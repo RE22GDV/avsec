@@ -176,32 +176,51 @@ class LumaBalancedMono:
     """
 
     def __init__(self, key: bytes, session_id: bytes, level: int = BEST_LEVEL,
-                 per_frame: bool = True, keyed: bool = True) -> None:
+                 per_frame: bool = True, keyed: bool = True,
+                 source_bits: int = 8) -> None:
+        if not 1 <= int(source_bits) <= 8:
+            raise ValueError("source_bits must be in 1..8")
         self.key = key
         self.session_id = session_id
         self.level = int(level)
         self.per_frame = bool(per_frame)
         self.keyed = bool(keyed)
+        self.source_bits = int(source_bits)
+        self.n_codewords = 1 << self.source_bits
         self._cache: Dict[int, _Codebook] = {}
+
+    # -- optional reduction of the source, to buy codeword spacing ---------
+    def quantise(self, img: np.ndarray) -> np.ndarray:
+        """The frame as it will be recovered, at the chosen source depth."""
+        shift = 8 - self.source_bits
+        q = np.asarray(img, dtype=np.int64) >> shift
+        out = (q << shift) | (q >> max(0, 2 * self.source_bits - 8))
+        return out.astype(np.uint8)
 
     def codebook(self, frame_id: int = 0) -> _Codebook:
         k = int(frame_id) if self.per_frame else 0
         if k not in self._cache:
-            ctx = b"mono|" + self.session_id + b"|" + int(k).to_bytes(8, "big")
-            self._cache[k] = _Codebook(256, self.key, ctx, self.level, self.keyed)
+            ctx = (b"mono|" + self.session_id + b"|"
+                   + int(self.source_bits).to_bytes(1, "big") + b"|"
+                   + int(k).to_bytes(8, "big"))
+            self._cache[k] = _Codebook(self.n_codewords, self.key, ctx,
+                                       self.level, self.keyed)
         return self._cache[k]
 
     def encrypt(self, img: np.ndarray, frame_id: int = 0) -> np.ndarray:
         a = np.asarray(img, dtype=np.uint8)
         if a.ndim != 2:
             raise ValueError("monochrome path expects a HxW frame")
-        return self.codebook(frame_id).encode(a).astype(np.uint8)
+        idx = a.astype(np.int64) >> (8 - self.source_bits)
+        return self.codebook(frame_id).encode(idx).astype(np.uint8)
 
     def decrypt(self, ct: np.ndarray, frame_id: int = 0,
                 nearest: bool = False) -> np.ndarray:
         cb = self.codebook(frame_id)
         idx = cb.decode_nearest(ct) if nearest else cb.decode(ct)
-        return idx.astype(np.uint8)
+        shift = 8 - self.source_bits
+        out = (idx << shift) | (idx >> max(0, 2 * self.source_bits - 8))
+        return out.astype(np.uint8)
 
     def describe(self) -> Dict[str, object]:
         return {
@@ -209,9 +228,10 @@ class LumaBalancedMono:
             "source": "монохромний кадр, 8 біт на піксель",
             "ciphertext": "RGB зі сталою яскравістю",
             "luma_level": self.level,
-            "codewords": 256,
+            "source_bits": self.source_bits,
+            "codewords": self.n_codewords,
             "keyed_assignment": self.keyed,
-            "lossless": True,
+            "lossless": self.source_bits == 8,
             "per_frame_codebook": self.per_frame,
         }
 

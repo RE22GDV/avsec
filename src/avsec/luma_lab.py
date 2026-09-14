@@ -452,6 +452,164 @@ def noise_strip(key: bytes, sid: bytes, img: np.ndarray,
     return images, rows
 
 
+# ------------------------------------------ 8. the project's own analog path
+#: Source depths swept over the tract: fewer bits buy codeword spacing.
+ANALOG_BITS: Tuple[int, ...] = (8, 7, 6, 5, 4, 3)
+
+#: The channel profiles every other method in this project is measured on.
+ANALOG_CHANNELS: Tuple[str, ...] = ("clean", "mild", "moderate", "bursty",
+                                    "harsh")
+
+
+def tract_residual_error(cfg: ExperimentConfig, frames, scene: str
+                         ) -> List[Dict[str, Any]]:
+    """Amplitude error the tract leaves on one plain luma plane.
+
+    Measured with the unprotected ``B0a``, so it is a property of the channel
+    and the carrier, not of any cipher.  It is the quantity the codeword
+    spacing has to beat.
+    """
+    from avsec.baselines import make_b0_analog
+    from avsec.channel import ChannelTrace, preset
+
+    H, W = cfg.frame_height, cfg.frame_width
+    transport = cfg.profile("B4").transport_config(cfg.budget)
+    out: List[Dict[str, Any]] = []
+    for ch in ANALOG_CHANNELS:
+        m = make_b0_analog(transport, preset(ch), H, W)
+        m.reset()
+        tr = ChannelTrace(seed=cfg.channel_seed_value, scene=scene,
+                          repetition=0, profile=ch)
+        errs = []
+        for i, img in enumerate(frames):
+            r = m.process(img, i, tr)
+            errs.append(np.abs(r.reconstructed.astype(np.float64)
+                               - img.astype(np.float64)))
+        e = np.concatenate([x.ravel() for x in errs])
+        out.append({
+            "channel": ch,
+            "rms_error_levels": round(float(np.sqrt((e ** 2).mean())), 2),
+            "median_error_levels": round(float(np.median(e)), 2),
+            "p95_error_levels": round(float(np.percentile(e, 95)), 2),
+            "max_error_levels": round(float(e.max()), 2),
+        })
+    return out
+
+
+def tract_ablation(cfg: ExperimentConfig, master, img: np.ndarray,
+                   scene: str, level: int = BEST_LEVEL) -> List[Dict[str, Any]]:
+    """One impairment at a time, at the strength of the ``mild`` profile.
+
+    ``B0a`` is carried along as the reference: it shows how much each
+    impairment costs a scheme that does not depend on exact pixel values, so
+    the difference isolates what the codebook is sensitive to.
+    """
+    from avsec.baselines import make_b0_analog
+    from avsec.channel import ChannelTrace, preset
+    from avsec.luma_channel import make_b2l
+
+    H, W = cfg.frame_height, cfg.frame_width
+    transport = cfg.profile("B4").transport_config(cfg.budget)
+    mild = preset("mild")
+    steps: List[Tuple[str, Optional[Dict[str, Any]]]] = [
+        ("без спотворень", {}),
+        ("підсилення й зміщення", {"gain": mild.gain, "offset": mild.offset}),
+        ("шум", {"noise_sigma": mild.noise_sigma}),
+        ("фільтр нижніх частот", {"lowpass_taps": mild.lowpass_taps}),
+        ("зсув растру", {"shift_x": mild.shift_x}),
+        ("джитер рядків", {"line_jitter_sigma": mild.line_jitter_sigma}),
+        ("усе разом (профіль mild)", None),
+    ]
+    out: List[Dict[str, Any]] = []
+    for label, over in steps:
+        chan = preset("mild") if over is None else preset("clean")
+        for k, v in (over or {}).items():
+            setattr(chan, k, v)
+        tr = ChannelTrace(seed=cfg.channel_seed_value, scene=scene,
+                          repetition=0, profile="ablation")
+        row: Dict[str, Any] = {"impairment_added": label}
+        m = make_b0_analog(transport, chan, H, W)
+        m.reset()
+        row["B0a_psnr_db"] = round(_psnr(m.process(img, 0, tr).reconstructed, img), 2)
+        for bits in (8, 5, 3):
+            m = make_b2l(transport, chan, H, W, master, session_id=b"B2LBNCH0",
+                         level=level, source_bits=bits)
+            m.reset()
+            shift = 8 - bits
+            ref = (img if bits == 8 else
+                   (((img.astype(np.int64) >> shift) << shift)
+                    | ((img.astype(np.int64) >> shift)
+                       >> max(0, 2 * bits - 8))).astype(np.uint8))
+            row[f"B2l_{bits}bit_psnr_db"] = round(
+                _psnr(m.process(img, 0, tr).reconstructed, ref), 2)
+        out.append(row)
+    return out
+
+
+def analog_sweep(cfg: ExperimentConfig, master, frames, scene: str,
+                 level: int = BEST_LEVEL, progress=None) -> List[Dict[str, Any]]:
+    """``B2l`` over every profile and every source depth, plus the baselines.
+
+    Every row uses the same trace as every other method would in that slot, so
+    the numbers sit next to ``results/main`` rather than beside it.
+    """
+    from avsec.baselines import (make_b0_analog, make_b0a_repetition,
+                                 make_b1_lfsr, make_b2_cryptoperm)
+    from avsec.channel import ChannelTrace, preset
+    from avsec.luma_channel import make_b2l
+
+    H, W = cfg.frame_height, cfg.frame_width
+    transport = cfg.profile("B4").transport_config(cfg.budget)
+    rows, cols = cfg.b2_grid
+    out: List[Dict[str, Any]] = []
+
+    for ci, ch in enumerate(ANALOG_CHANNELS):
+        if progress:
+            progress(f"тракт: {ch}", 0.60 + 0.22 * ci / len(ANALOG_CHANNELS), {})
+        chan = preset(ch)
+        tr = ChannelTrace(seed=cfg.channel_seed_value, scene=scene,
+                          repetition=0, profile=ch)
+        builders: List[Tuple[str, int, Any]] = [
+            ("B0a", 8, lambda: make_b0_analog(transport, chan, H, W)),
+            ("B0a-R", 8, lambda: make_b0a_repetition(transport, chan, H, W,
+                                                     cfg.budget.rasters_per_frame,
+                                                     cfg.b0ar_combine)),
+            ("B1", 8, lambda: make_b1_lfsr(transport, chan, H, W, cfg.lfsr)),
+            ("B2", 8, lambda: make_b2_cryptoperm(transport, chan, H, W, rows,
+                                                 cols, master,
+                                                 session_id=b"B2-LUMA0")),
+        ]
+        for bits in ANALOG_BITS:
+            builders.append((
+                f"B2l-{bits}bit", bits,
+                (lambda b=bits: make_b2l(transport, chan, H, W, master,
+                                         session_id=b"B2LBNCH0", level=level,
+                                         source_bits=b))))
+        for name, bits, build in builders:
+            method = build()
+            method.reset()
+            psnrs, exact = [], []
+            for i, img in enumerate(frames):
+                res = method.process(img, i, tr)
+                ref = (img if bits == 8 else
+                       ((img.astype(np.int64) >> (8 - bits)) << (8 - bits)
+                        | (img.astype(np.int64) >> (8 - bits))
+                        >> max(0, 2 * bits - 8)).astype(np.uint8))
+                psnrs.append(_psnr(res.reconstructed, ref))
+                exact.append(float((res.reconstructed == ref).mean() * 100))
+            sp = codeword_spacing(1 << bits) if name.startswith("B2l") else None
+            out.append({
+                "channel": ch,
+                "method": name,
+                "source_bits": bits,
+                "psnr_db": round(float(np.mean(psnrs)), 2),
+                "exact_pixels_pct": round(float(np.mean(exact)), 2),
+                "median_codeword_distance": sp["median_distance"] if sp else None,
+                "tolerance_levels": round(sp["median_distance"] / 2, 2) if sp else None,
+            })
+    return out
+
+
 # ------------------------------------------------------------------ runner
 def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
                  n_frames: int = 3, progress=None) -> Dict[str, Any]:
@@ -505,6 +663,16 @@ def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
     natt = noise_attacks(cfg, key, sid, frames[0])
     strip_images, strip_rows = noise_strip(key, sid, frames[0])
 
+    say("залишкова похибка тракту", 0.58)
+    residual = tract_residual_error(cfg, list(frames[:n_frames]), "village")
+
+    say("прогін через аналоговий тракт", 0.60)
+    tract = analog_sweep(cfg, cfg.master_secret(), list(frames[:n_frames]),
+                         "village", progress=progress)
+
+    say("розклад профілю за спотвореннями", 0.88)
+    ablation = tract_ablation(cfg, cfg.master_secret(), frames[0], "village")
+
     say("зображення й рисунки", 0.92)
     images = dict(mono_images)
     images.update(colour_images)
@@ -513,6 +681,7 @@ def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
     figures = _figures(out, images, sweep, mono_rows, colour_rows, attacks, noise)
     figures["noise_strip"] = _noise_strip_figure(out, images, strip_rows)
     figures["noise_deep"] = _noise_deep_figure(out, deep, natt, spacing)
+    figures["analog_tract"] = _tract_figure(out, tract, residual)
 
     summary = {
         "kind": "luma_balance",
@@ -529,6 +698,9 @@ def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
         "noise_deep": deep,
         "noise_attacks": natt,
         "noise_strip": strip_rows,
+        "tract_residual_error": residual,
+        "analog_tract": tract,
+        "tract_ablation": ablation,
         "figures": figures,
         "run_id": cfg.run_identity(),
         "commit": env.get("git_commit"),
@@ -545,6 +717,9 @@ def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
     write_csv(os.path.join(out, "noise_deep.csv"), deep)
     write_csv(os.path.join(out, "noise_attacks.csv"), natt)
     write_csv(os.path.join(out, "noise_strip.csv"), strip_rows)
+    write_csv(os.path.join(out, "tract_residual_error.csv"), residual)
+    write_csv(os.path.join(out, "analog_tract.csv"), tract)
+    write_csv(os.path.join(out, "tract_ablation.csv"), ablation)
     say("готово", 1.0)
     return summary
 
@@ -787,7 +962,87 @@ def _noise_deep_figure(out_dir, deep, natt, spacing):
     return path
 
 
+
+
+def _tract_figure(out_dir, tract, residual):
+    """Residual error against codeword spacing, and the resulting quality."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    fig, axes = plt.subplots(1, 3, figsize=(16.0, 5.0))
+
+    ax = axes[0]
+    chans = [r["channel"] for r in residual]
+    rms = [r["rms_error_levels"] for r in residual]
+    ax.bar(range(len(chans)), rms, color="#ef5350", label="залишкова похибка тракту")
+    for bits, colour in ((8, "#1565c0"), (6, "#00897b"), (4, "#f9a825")):
+        tol = [r["tolerance_levels"] for r in tract
+               if r["method"] == f"B2l-{bits}bit"][0]
+        ax.axhline(tol, color=colour, ls="--", lw=1.4,
+                   label=f"межа для {bits} біт: {tol:g}")
+    ax.set_xticks(range(len(chans)))
+    ax.set_xticklabels(chans, fontsize=8.5)
+    ax.set_ylabel("рівнів яскравості", fontsize=9)
+    ax.set_title("Прогноз: похибка тракту\nпроти межі декодування", fontsize=10.5)
+    ax.legend(fontsize=7.5)
+    ax.grid(axis="y", alpha=0.25)
+
+    ax = axes[1]
+    for bits, colour in ((8, "#1565c0"), (7, "#5c6bc0"), (6, "#00897b"),
+                         (5, "#7cb342"), (4, "#f9a825"), (3, "#e65100")):
+        ys = [r["psnr_db"] for ch in ANALOG_CHANNELS
+              for r in tract if r["channel"] == ch
+              and r["method"] == f"B2l-{bits}bit"]
+        ys = [min(y, 60.0) for y in ys]
+        ax.plot(range(len(ANALOG_CHANNELS)), ys, marker="o", ms=4,
+                color=colour, label=f"{bits} біт")
+    ax.axhline(20.0, color="#b71c1c", ls=":", lw=1.2)
+    ax.annotate("робочий поріг 20 дБ", (0.05, 21), fontsize=7.5, color="#b71c1c")
+    ax.set_xticks(range(len(ANALOG_CHANNELS)))
+    ax.set_xticklabels(ANALOG_CHANNELS, fontsize=8.5)
+    ax.set_ylabel("PSNR, дБ (обрізано на 60)", fontsize=9)
+    ax.set_title("Вимірювання: B2l за глибиною джерела", fontsize=10.5)
+    ax.legend(fontsize=7.5, ncol=2)
+    ax.grid(alpha=0.25)
+
+    ax = axes[2]
+    base = ("B0a", "B0a-R", "B1", "B2", "B2l-8bit", "B2l-4bit")
+    width = 0.14
+    x = np.arange(len(ANALOG_CHANNELS))
+    for k, name in enumerate(base):
+        ys = [min([r["psnr_db"] for r in tract if r["channel"] == ch
+                   and r["method"] == name][0], 60.0)
+              for ch in ANALOG_CHANNELS]
+        ax.bar(x + (k - 2.5) * width, ys, width, label=name)
+    ax.axhline(20.0, color="#b71c1c", ls=":", lw=1.2)
+    ax.set_xticks(x)
+    ax.set_xticklabels(ANALOG_CHANNELS, fontsize=8.5)
+    ax.set_ylabel("PSNR, дБ (обрізано на 60)", fontsize=9)
+    ax.set_title("Поруч зі схемами того самого бюджету", fontsize=10.5)
+    ax.legend(fontsize=7.5, ncol=3)
+    ax.grid(axis="y", alpha=0.25)
+
+    fig.suptitle("Схема зі сталою яскравістю через аналоговий тракт проєкту",
+                 fontsize=12.5)
+    fig.text(0.012, 0.012,
+             "Ті самі пʼять профілів каналу, ті самі траси й ті самі сцени, "
+             "що й для решти схем. B2l займає три слоти растру — стільки ж, "
+             "скільки B0a-R і цифрові схеми.",
+             fontsize=8, color="#37474f", wrap=True)
+    fig.tight_layout(rect=(0, 0.04, 1, 0.93))
+    path = os.path.join(out_dir, "analog_tract.png")
+    fig.savefig(path, dpi=140)
+    fig.savefig(path.replace(".png", ".svg"))
+    plt.close(fig)
+    return path
+
+
 __all__ = ["NOISE_SIGMAS", "FINE_SIGMAS", "IMPAIRMENTS", "STRIP_SIGMAS",
+           "ANALOG_BITS", "ANALOG_CHANNELS", "tract_residual_error",
+           "analog_sweep", "tract_ablation",
            "capacity_sweep", "monochrome_path", "colour_path",
            "luma_only_observer", "plane_attacks", "noise_tolerance",
            "codeword_spacing", "noise_deep", "noise_attacks", "noise_strip",
