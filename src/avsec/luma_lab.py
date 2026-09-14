@@ -1,0 +1,463 @@
+"""Bench for luminance-balanced encryption: the two paths, measured separately.
+
+The runner behind ``docs/luma_balance.md``.  It keeps the monochrome and the
+colour path apart throughout, because they are not two settings of one scheme:
+counting the available colours shows that one fits and the other does not, and
+every later number follows from that.
+
+Sections, in the order the document uses them:
+
+1. **Capacity.**  How many 8-bit colours share one luminance level, swept over
+   all levels.  This is the number that decides whether a path is lossless.
+2. **Monochrome path.**  Exact recovery, and what is left in the luminance
+   plane of the ciphertext.
+3. **Colour path.**  The bits that do not fit, and the quality cost of losing
+   them, separated from any cost of the cipher itself.
+4. **The luminance-only observer.**  What the analog path modelled in this
+   project - which carries luma and nothing else - would deliver.
+5. **Attacks.**  The key-free reassembly attack pointed at the luminance plane
+   and at the chroma plane of the same ciphertext.
+6. **Noise tolerance.**  What a perturbed ciphertext decodes to.
+
+Usage::
+
+    avsec luma-lab                  # -> results/luma/
+"""
+from __future__ import annotations
+
+import os
+from typing import Any, Dict, List, Optional, Tuple
+
+import numpy as np
+
+from avsec.config import ExperimentConfig
+from avsec.luma_balance import (
+    BEST_LEVEL,
+    LumaBalancedColour,
+    LumaBalancedMono,
+    chroma_planes,
+    constant_luma_palette,
+    luma,
+    luma_statistics,
+    palette_capacity,
+)
+from avsec.utils import ensure_dir, environment_record, write_csv, write_json
+
+#: Amplitude perturbations used for the noise-tolerance section, in levels.
+NOISE_SIGMAS: Tuple[float, ...] = (0.0, 0.5, 1.0, 2.0, 4.0, 8.0)
+
+
+def _psnr(a: np.ndarray, b: np.ndarray) -> float:
+    m = float(((np.asarray(a, dtype=np.float64)
+                - np.asarray(b, dtype=np.float64)) ** 2).mean())
+    return 99.0 if m <= 1e-12 else float(10 * np.log10(255.0 ** 2 / m))
+
+
+def _entropy(x: np.ndarray) -> float:
+    h = np.bincount(np.rint(np.asarray(x)).astype(np.int64).ravel() & 0xFF,
+                    minlength=256).astype(np.float64)
+    p = h[h > 0] / h.sum()
+    return float(-(p * np.log2(p)).sum())
+
+
+# ------------------------------------------------------------ 1. capacity
+def capacity_sweep(step: int = 8) -> List[Dict[str, Any]]:
+    """Colours per luminance level, and what each level can carry."""
+    r = np.arange(256, dtype=np.float64)
+    y = (0.299 * r[:, None, None] + 0.587 * r[None, :, None]
+         + 0.114 * r[None, None, :])
+    counts = np.bincount(np.rint(y).astype(np.int64).ravel(), minlength=256)
+    out: List[Dict[str, Any]] = []
+    for level in list(range(0, 256, step)) + [int(counts.argmax())]:
+        n = int(counts[level])
+        out.append({
+            "luma_level": int(level),
+            "colours": n,
+            "capacity_bits": round(float(np.log2(n)), 3) if n else 0.0,
+            "fits_monochrome_8_bit": bool(n >= 256),
+            "fits_colour_24_bit": bool(n >= 2 ** 24),
+            "usable_bits": int(np.floor(np.log2(n))) if n else 0,
+        })
+    out.sort(key=lambda d: d["luma_level"])
+    return out
+
+
+# ---------------------------------------------------------- 2. monochrome
+def monochrome_path(key: bytes, sid: bytes, frames: List[np.ndarray],
+                    level: int = BEST_LEVEL) -> Tuple[List[Dict[str, Any]],
+                                                      Dict[str, np.ndarray]]:
+    """Exactness of the lossless path, and the luma left in the ciphertext."""
+    mono = LumaBalancedMono(key, sid, level)
+    rows: List[Dict[str, Any]] = []
+    images: Dict[str, np.ndarray] = {}
+    for i, img in enumerate(frames):
+        ct = mono.encrypt(img, i)
+        back = mono.decrypt(ct, i)
+        st = luma_statistics(ct)
+        rows.append({
+            "frame": i,
+            "bit_exact_recovery": bool(np.array_equal(back, img)),
+            "source_luma_entropy_bits": round(_entropy(img), 4),
+            "cipher_luma_entropy_bits": st["luma_entropy_bits"],
+            "cipher_luma_levels_used": st["rounded_levels_used"],
+            "cipher_luma_std": st["luma_std"],
+            "cipher_luma_min": st["luma_min"],
+            "cipher_luma_max": st["luma_max"],
+        })
+        if i == 0:
+            pl = chroma_planes(ct)
+            images["mono_1_source"] = img
+            images["mono_2_cipher_rgb"] = ct
+            images["mono_3_cipher_as_luma"] = np.rint(pl["Y"]).astype(np.uint8)
+            images["mono_4_cipher_cb"] = _to_grey(pl["Cb"])
+            images["mono_5_cipher_cr"] = _to_grey(pl["Cr"])
+            images["mono_6_restored"] = back
+    return rows, images
+
+
+def _to_grey(plane: np.ndarray) -> np.ndarray:
+    """A signed plane rendered for viewing, with its own range stated by use."""
+    a = np.asarray(plane, dtype=np.float64)
+    lo, hi = float(a.min()), float(a.max())
+    if hi - lo < 1e-9:
+        return np.full(a.shape, 128, dtype=np.uint8)
+    return np.rint((a - lo) / (hi - lo) * 255).astype(np.uint8)
+
+
+# -------------------------------------------------------------- 3. colour
+def colour_path(key: bytes, sid: bytes, rgb: np.ndarray,
+                level: int = BEST_LEVEL) -> Tuple[List[Dict[str, Any]],
+                                                  Dict[str, np.ndarray]]:
+    """The bits that do not fit, and the cost of losing them."""
+    rows: List[Dict[str, Any]] = []
+    images: Dict[str, np.ndarray] = {}
+    for bits in ((5, 6, 5), (5, 5, 5), (4, 4, 4)):
+        col = LumaBalancedColour(key, sid, level, bits)
+        ct = col.encrypt(rgb, 0)
+        back = col.decrypt(ct, 0)
+        q = col.quantise(rgb)
+        st = luma_statistics(ct)
+        rows.append({
+            "bits_kept": "-".join(str(b) for b in bits),
+            "bits_kept_total": sum(bits),
+            "bits_lost": 24 - sum(bits),
+            "codewords": col.n_codewords,
+            "cipher_equals_quantised_source": bool(np.array_equal(back, q)),
+            "psnr_recovered_db": round(_psnr(back, rgb), 2),
+            "psnr_quantisation_only_db": round(_psnr(q, rgb), 2),
+            "cipher_luma_entropy_bits": st["luma_entropy_bits"],
+            "cipher_luma_levels_used": st["rounded_levels_used"],
+        })
+        if bits == (5, 6, 5):
+            pl = chroma_planes(ct)
+            images["colour_1_source"] = rgb
+            images["colour_2_cipher_rgb"] = ct
+            images["colour_3_cipher_as_luma"] = np.rint(pl["Y"]).astype(np.uint8)
+            images["colour_4_cipher_cb"] = _to_grey(pl["Cb"])
+            images["colour_5_restored"] = back
+    return rows, images
+
+
+# ------------------------------------------- 4. the luminance-only observer
+def luma_only_observer(key: bytes, sid: bytes, img: np.ndarray,
+                       level: int = BEST_LEVEL) -> Dict[str, Any]:
+    """What survives if only the luminance plane reaches the receiver.
+
+    The analog path modelled in this project is monochrome by construction -
+    no colour subcarrier, no burst, no PAL phase alternation.  A ciphertext of
+    constant luminance therefore arrives as a flat field.  This measures how
+    much information that field carries, rather than asserting that it carries
+    none.
+    """
+    mono = LumaBalancedMono(key, sid, level)
+    ct = mono.encrypt(img, 0)
+    y = np.rint(luma(ct)).astype(np.uint8)
+    wrong = mono.decrypt(np.stack([y, y, y], axis=2), 0)
+    return {
+        "source_entropy_bits": round(_entropy(img), 4),
+        "cipher_luma_entropy_bits": round(_entropy(y), 6),
+        "cipher_luma_distinct_values": int(np.unique(y).size),
+        "psnr_of_luma_only_decode_db": round(_psnr(wrong, img), 2),
+        "correlation_luma_vs_source": round(
+            float(np.corrcoef(y.ravel().astype(np.float64),
+                              img.ravel().astype(np.float64))[0, 1])
+            if y.std() > 0 else 0.0, 6),
+        "note": ("монохромний тракт цього проєкту переносить лише яскравість; "
+                 "за нульової ентропії яскравості він переносить нуль бітів"),
+    }
+
+
+# ------------------------------------------------------------- 5. attacks
+def plane_attacks(cfg: ExperimentConfig, key: bytes, sid: bytes,
+                  img: np.ndarray, level: int = BEST_LEVEL
+                  ) -> List[Dict[str, Any]]:
+    """The key-free reassembly attack on each plane of the same ciphertext.
+
+    Luminance balancing is applied *after* the block permutation, so the
+    comparison is between three views of one ciphertext: the permuted
+    greyscale that ``B2`` would transmit, the luminance plane of the balanced
+    ciphertext, and its chroma plane.
+    """
+    from avsec.attacks import attack_boundary_reassembly
+    from avsec.baselines import CryptoPermutationScrambler
+
+    rows, cols = cfg.b2_grid
+    perm = CryptoPermutationScrambler(rows, cols, key, sid)
+    fitted = perm._join(perm._tiles(img))
+    scrambled = perm.scramble(img, 0)
+    keyed = chroma_planes(LumaBalancedMono(key, sid, level).encrypt(scrambled, 0))
+    # control: the same luminance constraint with a structure-preserving
+    # assignment, so the contribution of the keying can be separated from the
+    # contribution of the constant-luminance constraint itself
+    ordered = chroma_planes(
+        LumaBalancedMono(key, sid, level, keyed=False).encrypt(scrambled, 0))
+
+    views = [
+        ("B2: перемішана яскравість", scrambled, ""),
+        ("B2l ключова: яскравість", np.rint(keyed["Y"]).astype(np.uint8), "ключова"),
+        ("B2l ключова: Cb", _to_grey(keyed["Cb"]), "ключова"),
+        ("B2l ключова: Cr", _to_grey(keyed["Cr"]), "ключова"),
+        ("B2l впорядкована: яскравість", np.rint(ordered["Y"]).astype(np.uint8),
+         "впорядкована"),
+        ("B2l впорядкована: Cb", _to_grey(ordered["Cb"]), "впорядкована"),
+        ("B2l впорядкована: Cr", _to_grey(ordered["Cr"]), "впорядкована"),
+    ]
+    out: List[Dict[str, Any]] = []
+    src = np.asarray(fitted, dtype=np.float64).ravel()
+    for label, view, codebook in views:
+        ba = attack_boundary_reassembly(view, rows, cols, perm.permutation(0),
+                                        fitted)
+        v = np.asarray(view, dtype=np.float64).ravel()
+        corr = (0.0 if v.std() == 0 else
+                float(np.corrcoef(v, src)[0, 1]))
+        out.append({
+            "view": label,
+            "codebook": codebook,
+            "correlation_with_source": round(corr, 4),
+            "neighbour_accuracy_pct": round(ba.metrics["neighbour_accuracy"] * 100, 2),
+            "direct_accuracy_pct": round(ba.metrics["direct_accuracy"] * 100, 2),
+            "reconstruction_psnr_db": round(ba.metrics["reconstruction_psnr_db"], 2),
+            "plane_std": round(float(np.asarray(view, dtype=np.float64).std()), 4),
+            "seconds": round(ba.seconds, 4),
+        })
+    return out
+
+
+# ------------------------------------------------------- 6. noise tolerance
+def noise_tolerance(key: bytes, sid: bytes, img: np.ndarray,
+                    level: int = BEST_LEVEL,
+                    sigmas: Tuple[float, ...] = NOISE_SIGMAS
+                    ) -> List[Dict[str, Any]]:
+    """Decoding a perturbed ciphertext by nearest codeword.
+
+    A codebook has no order structure, so a small amplitude error does not give
+    a slightly wrong value - it gives an unrelated one, exactly as measured for
+    the substitution table of ``B2s``.
+    """
+    mono = LumaBalancedMono(key, sid, level)
+    ct = mono.encrypt(img, 0).astype(np.float64)
+    rng = np.random.default_rng(20240909)
+    out: List[Dict[str, Any]] = []
+    for s in sigmas:
+        noisy = np.clip(ct + (rng.normal(0, s, ct.shape) if s > 0 else 0),
+                        0, 255).astype(np.uint8)
+        got = mono.decrypt(noisy, 0, nearest=True)
+        out.append({
+            "sigma_levels": s,
+            "exact_pixels_pct": round(float((got == img).mean() * 100), 2),
+            "psnr_db": round(_psnr(got, img), 2),
+            "usable_at_20db": bool(_psnr(got, img) >= 20.0),
+        })
+    return out
+
+
+# ------------------------------------------------------------------ runner
+def run_luma_lab(cfg: ExperimentConfig, output_dir: str = "results/luma",
+                 n_frames: int = 3, progress=None) -> Dict[str, Any]:
+    """Every section above, written to ``output_dir``."""
+    from avsec.crypto import derive_session_keys
+    from avsec.sources.drone import DRONE_SCENES, drone_suite
+    from avsec.subst_lab import colour_frame
+
+    env = environment_record()
+    out = ensure_dir(output_dir)
+    img_dir = ensure_dir(os.path.join(out, "images"))
+    H, W = cfg.frame_height, cfg.frame_width
+
+    def say(stage: str, frac: float) -> None:
+        if progress:
+            try:
+                progress(stage, frac, {})
+            except Exception:
+                pass
+
+    sid = b"LUMALAB0"
+    key = derive_session_keys(cfg.master_secret(), sid).key
+
+    say("місткість палітри", 0.05)
+    cap = palette_capacity(BEST_LEVEL)
+    sweep = capacity_sweep()
+
+    say("монохромний шлях", 0.2)
+    picked = [d for d in DRONE_SCENES if d[0] == "village"]
+    frames = drone_suite(H, W, n_frames=max(2, n_frames), scenes=picked)[0].frames
+    mono_rows, mono_images = monochrome_path(key, sid, list(frames[:n_frames]))
+
+    say("кольоровий шлях", 0.4)
+    rgb = colour_frame(H, W)
+    colour_rows, colour_images = colour_path(key, sid, rgb)
+
+    say("спостерігач із яскравістю", 0.55)
+    observer = luma_only_observer(key, sid, frames[0])
+
+    say("атаки за площинами", 0.7)
+    attacks = plane_attacks(cfg, key, sid, frames[0])
+
+    say("стійкість до похибки", 0.85)
+    noise = noise_tolerance(key, sid, frames[0])
+
+    say("зображення й рисунки", 0.92)
+    images = dict(mono_images)
+    images.update(colour_images)
+    _save(img_dir, images)
+    figures = _figures(out, images, sweep, mono_rows, colour_rows, attacks, noise)
+
+    summary = {
+        "kind": "luma_balance",
+        "title": "Шифрування зі сталою яскравістю: монохромний і кольоровий шляхи",
+        "frame": f"{W}x{H}",
+        "capacity": cap,
+        "capacity_sweep": sweep,
+        "monochrome": mono_rows,
+        "colour": colour_rows,
+        "luma_only_observer": observer,
+        "plane_attacks": attacks,
+        "noise_tolerance": noise,
+        "figures": figures,
+        "run_id": cfg.run_identity(),
+        "commit": env.get("git_commit"),
+        "git_worktree": env.get("git_worktree"),
+        "environment": env.get("environment", env),
+    }
+    write_json(os.path.join(out, "luma.json"), summary)
+    write_csv(os.path.join(out, "capacity_sweep.csv"), sweep)
+    write_csv(os.path.join(out, "monochrome.csv"), mono_rows)
+    write_csv(os.path.join(out, "colour.csv"), colour_rows)
+    write_csv(os.path.join(out, "plane_attacks.csv"), attacks)
+    write_csv(os.path.join(out, "noise_tolerance.csv"), noise)
+    say("готово", 1.0)
+    return summary
+
+
+def _save(img_dir: str, images: Dict[str, np.ndarray]) -> None:
+    from PIL import Image
+
+    for name, arr in images.items():
+        a = np.asarray(arr, dtype=np.uint8)
+        Image.fromarray(a, mode="RGB" if a.ndim == 3 else "L").save(
+            os.path.join(img_dir, f"{name}.png"))
+
+
+def _figures(out_dir: str, images: Dict[str, np.ndarray],
+             sweep: List[Dict[str, Any]], mono: List[Dict[str, Any]],
+             colour: List[Dict[str, Any]], attacks: List[Dict[str, Any]],
+             noise: List[Dict[str, Any]]) -> Dict[str, str]:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    paths: Dict[str, str] = {}
+
+    # -- figure 1: the two paths, side by side --------------------------
+    fig, axes = plt.subplots(2, 5, figsize=(15.5, 6.6))
+    mono_order = [("mono_1_source", "1. Монохромний\nоригінал"),
+                  ("mono_2_cipher_rgb", "2. Шифротекст RGB"),
+                  ("mono_3_cipher_as_luma", "3. Його яскравість\n(що бачить\nмонохромний тракт)"),
+                  ("mono_4_cipher_cb", "4. Площина Cb\n(тут дані)"),
+                  ("mono_6_restored", "5. Відновлено\nточно до біта")]
+    col_order = [("colour_1_source", "1. Кольоровий\nоригінал"),
+                 ("colour_2_cipher_rgb", "2. Шифротекст RGB"),
+                 ("colour_3_cipher_as_luma", "3. Його яскравість"),
+                 ("colour_4_cipher_cb", "4. Площина Cb"),
+                 ("colour_5_restored", "5. Відновлено\n16 з 24 бітів")]
+    for row, order, tag in ((0, mono_order, "МОНОХРОМНИЙ ШЛЯХ"),
+                            (1, col_order, "КОЛЬОРОВИЙ ШЛЯХ")):
+        for k, (name, title) in enumerate(order):
+            ax = axes[row, k]
+            a = np.asarray(images[name], dtype=np.uint8)
+            ax.imshow(a if a.ndim == 3 else a, cmap=None if a.ndim == 3 else "gray",
+                      vmin=None if a.ndim == 3 else 0,
+                      vmax=None if a.ndim == 3 else 255)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.set_title(title, fontsize=8.5)
+        axes[row, 0].set_ylabel(tag, fontsize=9.5, labelpad=8)
+    fig.suptitle("Шифрування зі сталою яскравістю: два шляхи", fontsize=13)
+    fig.text(0.012, 0.012,
+             "Панель 3 обох рядків — це весь сигнал, який дістається "
+             "монохромного тракту: рівне сіре поле з нульовою ентропією. "
+             "Повідомлення живе в панелі 4.",
+             fontsize=8, color="#37474f", wrap=True)
+    fig.tight_layout(rect=(0, 0.04, 1, 0.95))
+    p = os.path.join(out_dir, "paths.png")
+    fig.savefig(p, dpi=140)
+    fig.savefig(p.replace(".png", ".svg"))
+    plt.close(fig)
+    paths["paths"] = p
+
+    # -- figure 2: capacity, attacks, noise ------------------------------
+    fig, axes = plt.subplots(1, 3, figsize=(15.5, 4.6))
+    a0 = axes[0]
+    lv = [r["luma_level"] for r in sweep]
+    cnt = [r["colours"] for r in sweep]
+    a0.plot(lv, cnt, marker="o", ms=3, color="#1565c0")
+    a0.axhline(256, color="#2e7d32", ls="--", lw=1.2)
+    a0.axhline(2 ** 24, color="#b71c1c", ls="--", lw=1.2)
+    a0.set_yscale("log")
+    a0.set_xlabel("рівень яскравості", fontsize=9)
+    a0.set_ylabel("кольорів із цією яскравістю", fontsize=9)
+    a0.set_title("Місткість: скільки кольорів\nмають задану яскравість", fontsize=10)
+    a0.annotate("потрібно для 8 біт (моно)", (5, 300), fontsize=7.5, color="#2e7d32")
+    a0.annotate("потрібно для 24 біт (колір)", (5, 2 ** 24 * 1.4), fontsize=7.5,
+                color="#b71c1c")
+    a0.grid(alpha=0.25)
+
+    a1 = axes[1]
+    labels = [r["view"].replace(": ", ":\n") for r in attacks]
+    vals = [r["neighbour_accuracy_pct"] for r in attacks]
+    colours = ["#ef5350", "#26a69a", "#ffa726", "#ffa726"]
+    a1.bar(range(len(vals)), vals, color=colours)
+    for i, v in enumerate(vals):
+        a1.text(i, v + 1.2, f"{v:.2f}", ha="center", fontsize=8)
+    a1.set_xticks(range(len(labels)))
+    a1.set_xticklabels(labels, fontsize=7.5)
+    a1.set_ylabel("правильних сусідств, %", fontsize=9)
+    a1.set_title("Безключова атака за площинами\nодного шифротексту", fontsize=10)
+    a1.grid(axis="y", alpha=0.25)
+
+    a2 = axes[2]
+    s = [r["sigma_levels"] for r in noise]
+    ps = [r["psnr_db"] for r in noise]
+    a2.plot(s, ps, marker="o", color="#6a1b9a")
+    a2.axhline(20.0, color="#b71c1c", ls=":", lw=1.2)
+    a2.annotate("робочий поріг 20 дБ", (0.05, 21), fontsize=7.5, color="#b71c1c")
+    a2.set_xlabel("шум на шифротексті, рівнів (σ)", fontsize=9)
+    a2.set_ylabel("PSNR відновлення, дБ", fontsize=9)
+    a2.set_title("Стійкість до похибки амплітуди", fontsize=10)
+    a2.grid(alpha=0.25)
+
+    fig.suptitle("Місткість, витік за площинами і стійкість до похибки",
+                 fontsize=12.5)
+    fig.tight_layout(rect=(0, 0.02, 1, 0.93))
+    p = os.path.join(out_dir, "capacity_attacks_noise.png")
+    fig.savefig(p, dpi=140)
+    fig.savefig(p.replace(".png", ".svg"))
+    plt.close(fig)
+    paths["capacity_attacks_noise"] = p
+    return paths
+
+
+__all__ = ["NOISE_SIGMAS", "capacity_sweep", "monochrome_path", "colour_path",
+           "luma_only_observer", "plane_attacks", "noise_tolerance",
+           "run_luma_lab"]

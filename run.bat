@@ -14,6 +14,7 @@ REM    run.bat research     the full research programme (long)
 REM    run.bat lab          ISITIA 2021: reproduce the scheme + repeat on photos
 REM    run.bat subst-lab    B2s: keyed substitution on top of the permutation
 REM    run.bat gf-lab       computed GF(2^8) table: AES check, properties
+REM    run.bat luma-lab     luminance-balanced encryption: mono + colour
 REM    run.bat verify       recheck every published number, runs nothing
 REM    run.bat sources      download the natural UAV photographs
 REM    run.bat shell        a shell with the environment active
@@ -109,6 +110,13 @@ if /i "%CMD%"=="research" (
     "%PY%" -m avsec.cli plots --input runs/main
     "%PY%" -m avsec.cli verify --input runs/main
     "%PY%" scripts\publish.py runs\main
+    goto :eof
+)
+
+if /i "%CMD%"=="luma-lab" (
+    echo [avsec] luminance-balanced encryption: both paths ...
+    "%PY%" -m avsec.cli luma-lab --config configs/research_main.yaml --output results/luma
+    echo [avsec] tables and figures written to results\luma
     goto :eof
 )
 

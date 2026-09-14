@@ -14,6 +14,7 @@
 #    ./run.sh lab          ISITIA 2021: reproduce the scheme + repeat on photos
 #    ./run.sh subst-lab    B2s: keyed substitution on top of the permutation
 #    ./run.sh gf-lab       computed GF(2^8) table: AES check, properties
+#    ./run.sh luma-lab     luminance-balanced encryption: mono + colour
 #    ./run.sh verify       recheck every published number, runs nothing
 #    ./run.sh sources      download the natural UAV photographs
 #    ./run.sh shell        a shell with the environment active
@@ -103,6 +104,12 @@ case "$CMD" in
     "$PY" -m avsec.cli verify --input runs/main
     "$PY" scripts/publish.py runs/main
     ;;
+  luma-lab)
+    echo "[avsec] luminance-balanced encryption: both paths ..."
+    "$PY" -m avsec.cli luma-lab --config configs/research_main.yaml --output results/luma
+    echo "[avsec] tables and figures written to results/luma"
+    ;;
+
   gf-lab)
     echo "[avsec] GF(2^8) substitution table: verification and properties ..."
     "$PY" -m avsec.cli gf-lab --config configs/research_main.yaml --output results/gf_sbox

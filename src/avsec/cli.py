@@ -392,6 +392,30 @@ def cmd_analyze(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_luma_lab(args: argparse.Namespace) -> int:
+    """Luminance-balanced encryption: the monochrome and colour paths.
+
+    Counts the colours available at one luminance level, runs both paths, and
+    measures what a luminance-only receiver is left with.
+    """
+    from avsec.luma_lab import run_luma_lab
+
+    cfg = _cfg(args)
+    res = run_luma_lab(cfg, _out(args, "results/luma"), progress=_progress)
+    print(json.dumps({
+        "capacity": res["capacity"],
+        "monochrome_exact": all(r["bit_exact_recovery"] for r in res["monochrome"]),
+        "cipher_luma_entropy_bits":
+            res["luma_only_observer"]["cipher_luma_entropy_bits"],
+        "colour": [{k: r[k] for k in ("bits_kept", "bits_lost", "psnr_recovered_db")}
+                   for r in res["colour"]],
+        "plane_attacks": [{k: r[k] for k in ("view", "neighbour_accuracy_pct")}
+                          for r in res["plane_attacks"]],
+        "figures": res["figures"],
+    }, ensure_ascii=False, indent=2))
+    return 0
+
+
 def cmd_gf_lab(args: argparse.Namespace) -> int:
     """The computed GF(2^8) substitution table against the stored one.
 
@@ -636,6 +660,12 @@ def build_parser() -> argparse.ArgumentParser:
                              "against AES, properties, polynomial sweep")
     _common(sp)
     sp.set_defaults(func=cmd_gf_lab)
+
+    sp = sub.add_parser("luma-lab",
+                        help="luminance-balanced encryption: monochrome and "
+                             "colour paths, capacity, attacks")
+    _common(sp)
+    sp.set_defaults(func=cmd_luma_lab)
 
     sp = sub.add_parser("verify",
                         help="recompute every published claim from the tables")
