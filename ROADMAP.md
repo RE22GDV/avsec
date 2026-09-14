@@ -265,6 +265,7 @@ avsec verify --input results/natural
 | дізнатися межі гарантій | [docs/threat_model.md](docs/threat_model.md) |
 | побачити, що дає другий примітив | [docs/substitution_b2s.md](docs/substitution_b2s.md) |
 | зрозуміти обчислювану таблицю замін | [docs/galois_sbox.md](docs/galois_sbox.md) |
+| знайти будову або числа однієї схеми | [docs/methods.md](docs/methods.md) |
 | побачити, що вже виправлялося | [docs/revision_history.md](docs/revision_history.md) |
 | зрозуміти місце серед інших робіт | [docs/related_work.md](docs/related_work.md) |
 | дізнатися межі застосовності результатів | [docs/limitations.md](docs/limitations.md) |
