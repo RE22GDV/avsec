@@ -1033,6 +1033,7 @@ avsec/
 | [docs/threat_model.md](docs/threat_model.md) | модель загроз і межі гарантій |
 | [docs/substitution_b2s.md](docs/substitution_b2s.md) | **схема `B2s`**: заміна значень пікселів разом із перестановкою блоків |
 | [docs/galois_sbox.md](docs/galois_sbox.md) | обчислювана таблиця замін над GF(2⁸): звірка з AES, виміряні властивості |
+| [docs/luma_balance.md](docs/luma_balance.md) | шифрування зі сталою яскравістю: місткість, обидва шляхи, витік за площинами |
 
 **Будова системи**
 

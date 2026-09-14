@@ -1,0 +1,525 @@
+{
+  "kind": "luma_balance",
+  "title": "Шифрування зі сталою яскравістю: монохромний і кольоровий шляхи",
+  "frame": "256x192",
+  "capacity": {
+    "level": 130,
+    "colours_with_this_luma": 111749,
+    "capacity_bits": 16.77,
+    "usable_codewords_power_of_two": 65536,
+    "usable_bits": 16,
+    "enough_for_monochrome_8_bit": true,
+    "enough_for_colour_24_bit": false,
+    "colour_bits_lost": 8
+  },
+  "capacity_sweep": [
+    {
+      "luma_level": 0,
+      "colours": 7,
+      "capacity_bits": 2.807,
+      "fits_monochrome_8_bit": false,
+      "fits_colour_24_bit": false,
+      "usable_bits": 2
+    },
+    {
+      "luma_level": 8,
+      "colours": 1806,
+      "capacity_bits": 10.819,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 10
+    },
+    {
+      "luma_level": 16,
+      "colours": 6810,
+      "capacity_bits": 12.733,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 12
+    },
+    {
+      "luma_level": 24,
+      "colours": 15017,
+      "capacity_bits": 13.874,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 13
+    },
+    {
+      "luma_level": 32,
+      "colours": 26142,
+      "capacity_bits": 14.674,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 14
+    },
+    {
+      "luma_level": 40,
+      "colours": 37819,
+      "capacity_bits": 15.207,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 15
+    },
+    {
+      "luma_level": 48,
+      "colours": 49506,
+      "capacity_bits": 15.595,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 15
+    },
+    {
+      "luma_level": 56,
+      "colours": 61180,
+      "capacity_bits": 15.901,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 15
+    },
+    {
+      "luma_level": 64,
+      "colours": 72855,
+      "capacity_bits": 16.153,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 72,
+      "colours": 84533,
+      "capacity_bits": 16.367,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 80,
+      "colours": 95820,
+      "capacity_bits": 16.548,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 88,
+      "colours": 104320,
+      "capacity_bits": 16.671,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 96,
+      "colours": 109609,
+      "capacity_bits": 16.742,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 104,
+      "colours": 111675,
+      "capacity_bits": 16.769,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 112,
+      "colours": 111735,
+      "capacity_bits": 16.77,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 120,
+      "colours": 111733,
+      "capacity_bits": 16.77,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 128,
+      "colours": 111716,
+      "capacity_bits": 16.769,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 130,
+      "colours": 111749,
+      "capacity_bits": 16.77,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 136,
+      "colours": 111741,
+      "capacity_bits": 16.77,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 144,
+      "colours": 111739,
+      "capacity_bits": 16.77,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 152,
+      "colours": 111610,
+      "capacity_bits": 16.768,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 160,
+      "colours": 109122,
+      "capacity_bits": 16.736,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 168,
+      "colours": 103415,
+      "capacity_bits": 16.658,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 176,
+      "colours": 94526,
+      "capacity_bits": 16.528,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 184,
+      "colours": 83068,
+      "capacity_bits": 16.342,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 192,
+      "colours": 71378,
+      "capacity_bits": 16.123,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 16
+    },
+    {
+      "luma_level": 200,
+      "colours": 59700,
+      "capacity_bits": 15.865,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 15
+    },
+    {
+      "luma_level": 208,
+      "colours": 48027,
+      "capacity_bits": 15.552,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 15
+    },
+    {
+      "luma_level": 216,
+      "colours": 36356,
+      "capacity_bits": 15.15,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 15
+    },
+    {
+      "luma_level": 224,
+      "colours": 24681,
+      "capacity_bits": 14.591,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 14
+    },
+    {
+      "luma_level": 232,
+      "colours": 13808,
+      "capacity_bits": 13.753,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 13
+    },
+    {
+      "luma_level": 240,
+      "colours": 6009,
+      "capacity_bits": 12.553,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 12
+    },
+    {
+      "luma_level": 248,
+      "colours": 1410,
+      "capacity_bits": 10.461,
+      "fits_monochrome_8_bit": true,
+      "fits_colour_24_bit": false,
+      "usable_bits": 10
+    }
+  ],
+  "monochrome": [
+    {
+      "frame": 0,
+      "bit_exact_recovery": true,
+      "source_luma_entropy_bits": 6.8507,
+      "cipher_luma_entropy_bits": -0.0,
+      "cipher_luma_levels_used": 1,
+      "cipher_luma_std": 0.284271,
+      "cipher_luma_min": 129.5,
+      "cipher_luma_max": 130.492
+    },
+    {
+      "frame": 1,
+      "bit_exact_recovery": true,
+      "source_luma_entropy_bits": 6.9637,
+      "cipher_luma_entropy_bits": -0.0,
+      "cipher_luma_levels_used": 1,
+      "cipher_luma_std": 0.256218,
+      "cipher_luma_min": 129.5,
+      "cipher_luma_max": 130.492
+    },
+    {
+      "frame": 2,
+      "bit_exact_recovery": true,
+      "source_luma_entropy_bits": 7.0516,
+      "cipher_luma_entropy_bits": -0.0,
+      "cipher_luma_levels_used": 1,
+      "cipher_luma_std": 0.277269,
+      "cipher_luma_min": 129.5,
+      "cipher_luma_max": 130.492
+    }
+  ],
+  "colour": [
+    {
+      "bits_kept": "5-6-5",
+      "bits_kept_total": 16,
+      "bits_lost": 8,
+      "codewords": 65536,
+      "cipher_equals_quantised_source": true,
+      "psnr_recovered_db": 40.34,
+      "psnr_quantisation_only_db": 40.34,
+      "cipher_luma_entropy_bits": -0.0,
+      "cipher_luma_levels_used": 1
+    },
+    {
+      "bits_kept": "5-5-5",
+      "bits_kept_total": 15,
+      "bits_lost": 9,
+      "codewords": 32768,
+      "cipher_equals_quantised_source": true,
+      "psnr_recovered_db": 39.16,
+      "psnr_quantisation_only_db": 39.16,
+      "cipher_luma_entropy_bits": -0.0,
+      "cipher_luma_levels_used": 1
+    },
+    {
+      "bits_kept": "4-4-4",
+      "bits_kept_total": 12,
+      "bits_lost": 12,
+      "codewords": 4096,
+      "cipher_equals_quantised_source": true,
+      "psnr_recovered_db": 33.01,
+      "psnr_quantisation_only_db": 33.01,
+      "cipher_luma_entropy_bits": -0.0,
+      "cipher_luma_levels_used": 1
+    }
+  ],
+  "luma_only_observer": {
+    "source_entropy_bits": 6.8507,
+    "cipher_luma_entropy_bits": -0.0,
+    "cipher_luma_distinct_values": 1,
+    "psnr_of_luma_only_decode_db": 7.86,
+    "correlation_luma_vs_source": 0.0,
+    "note": "монохромний тракт цього проєкту переносить лише яскравість; за нульової ентропії яскравості він переносить нуль бітів"
+  },
+  "plane_attacks": [
+    {
+      "view": "B2: перемішана яскравість",
+      "codebook": "",
+      "correlation_with_source": 0.0369,
+      "neighbour_accuracy_pct": 28.09,
+      "direct_accuracy_pct": 0.0,
+      "reconstruction_psnr_db": 15.35,
+      "plane_std": 31.0898,
+      "seconds": 0.0993
+    },
+    {
+      "view": "B2l ключова: яскравість",
+      "codebook": "ключова",
+      "correlation_with_source": 0.0,
+      "neighbour_accuracy_pct": 0.56,
+      "direct_accuracy_pct": 0.0,
+      "reconstruction_psnr_db": 15.19,
+      "plane_std": 0.0,
+      "seconds": 0.0804
+    },
+    {
+      "view": "B2l ключова: Cb",
+      "codebook": "ключова",
+      "correlation_with_source": -0.0116,
+      "neighbour_accuracy_pct": 0.56,
+      "direct_accuracy_pct": 0.52,
+      "reconstruction_psnr_db": 9.82,
+      "plane_std": 73.0,
+      "seconds": 0.1064
+    },
+    {
+      "view": "B2l ключова: Cr",
+      "codebook": "ключова",
+      "correlation_with_source": 0.0081,
+      "neighbour_accuracy_pct": 1.12,
+      "direct_accuracy_pct": 0.0,
+      "reconstruction_psnr_db": 9.92,
+      "plane_std": 72.8182,
+      "seconds": 0.1065
+    },
+    {
+      "view": "B2l впорядкована: яскравість",
+      "codebook": "впорядкована",
+      "correlation_with_source": 0.0,
+      "neighbour_accuracy_pct": 0.56,
+      "direct_accuracy_pct": 0.0,
+      "reconstruction_psnr_db": 15.19,
+      "plane_std": 0.0,
+      "seconds": 0.0821
+    },
+    {
+      "view": "B2l впорядкована: Cb",
+      "codebook": "впорядкована",
+      "correlation_with_source": 0.0331,
+      "neighbour_accuracy_pct": 5.06,
+      "direct_accuracy_pct": 0.52,
+      "reconstruction_psnr_db": 8.4,
+      "plane_std": 48.1963,
+      "seconds": 0.1075
+    },
+    {
+      "view": "B2l впорядкована: Cr",
+      "codebook": "впорядкована",
+      "correlation_with_source": 0.0223,
+      "neighbour_accuracy_pct": 8.43,
+      "direct_accuracy_pct": 0.0,
+      "reconstruction_psnr_db": 11.61,
+      "plane_std": 52.6449,
+      "seconds": 0.0994
+    }
+  ],
+  "noise_tolerance": [
+    {
+      "sigma_levels": 0.0,
+      "exact_pixels_pct": 100.0,
+      "psnr_db": 99.0,
+      "usable_at_20db": true
+    },
+    {
+      "sigma_levels": 0.5,
+      "exact_pixels_pct": 99.56,
+      "psnr_db": 34.13,
+      "usable_at_20db": true
+    },
+    {
+      "sigma_levels": 1.0,
+      "exact_pixels_pct": 98.32,
+      "psnr_db": 26.46,
+      "usable_at_20db": true
+    },
+    {
+      "sigma_levels": 2.0,
+      "exact_pixels_pct": 93.64,
+      "psnr_db": 20.65,
+      "usable_at_20db": true
+    },
+    {
+      "sigma_levels": 4.0,
+      "exact_pixels_pct": 77.05,
+      "psnr_db": 15.54,
+      "usable_at_20db": false
+    },
+    {
+      "sigma_levels": 8.0,
+      "exact_pixels_pct": 45.31,
+      "psnr_db": 12.1,
+      "usable_at_20db": false
+    }
+  ],
+  "figures": {
+    "paths": "results/luma\\paths.png",
+    "capacity_attacks_noise": "results/luma\\capacity_attacks_noise.png"
+  },
+  "run_id": "fe45d509310b99d4",
+  "commit": "ad0e7d737f460581722289d8ec22c0d50d833331",
+  "git_worktree": "clean",
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "cpu_count": 32,
+    "packages": {
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "cv2": "5.0.0",
+      "cryptography": "50.0.1",
+      "reedsolo": "unknown",
+      "PIL": "12.3.0",
+      "matplotlib": "3.11.2",
+      "yaml": "6.0.3"
+    },
+    "avsec_version": "0.1.0",
+    "git_commit": "ad0e7d737f460581722289d8ec22c0d50d833331",
+    "git_worktree": "clean",
+    "git_dirty": false,
+    "git_dirty_files": [],
+    "git_branch": "main",
+    "git_describe": "v1.1.0-23-gad0e7d7",
+    "git_dirty_note": "",
+    "pip_freeze": [
+      "-e git+https://github.com/RE22GDV/avsec.git@ad0e7d737f460581722289d8ec22c0d50d833331#egg=avsec",
+      "PyYAML==6.0.3",
+      "Pygments==2.21.0",
+      "cffi==2.1.1",
+      "colorama==0.4.6",
+      "contourpy==1.4.0",
+      "cryptography==50.0.1",
+      "cycler==0.12.1",
+      "fonttools==4.65.0",
+      "iniconfig==2.3.0",
+      "kiwisolver==1.5.1",
+      "matplotlib==3.11.2",
+      "numpy==2.5.3",
+      "opencv-python==5.0.0.93",
+      "packaging==26.3",
+      "pillow==12.3.0",
+      "pluggy==1.6.0",
+      "pycparser==3.0",
+      "pyparsing==3.3.2",
+      "pytest-timeout==2.4.0",
+      "pytest==9.1.1",
+      "python-dateutil==2.9.0.post0",
+      "reedsolo==1.7.0",
+      "scipy==1.18.1",
+      "six==1.17.0"
+    ]
+  }
+}

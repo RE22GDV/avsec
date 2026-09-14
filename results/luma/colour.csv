@@ -1,0 +1,4 @@
+bits_kept,bits_kept_total,bits_lost,cipher_equals_quantised_source,cipher_luma_entropy_bits,cipher_luma_levels_used,codewords,psnr_quantisation_only_db,psnr_recovered_db
+5-6-5,16,8,True,-0.0,1,65536,40.34,40.34
+5-5-5,15,9,True,-0.0,1,32768,39.16,39.16
+4-4-4,12,12,True,-0.0,1,4096,33.01,33.01
