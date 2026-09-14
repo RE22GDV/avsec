@@ -28,6 +28,7 @@
   <a href="docs/reconstruction_2021.md"><b>Завдання ISITIA 2021</b></a> ·
   <a href="ROADMAP.md">Road map</a> ·
   <a href="docs/conclusions.md">Висновки</a> ·
+  <a href="docs/substitution_b2s.md">B2s: заміна</a> ·
   <a href="docs/claims.md">Твердження</a> ·
   <a href="docs/limitations.md">Межі застосовності</a> ·
   <a href="docs/glossary.md">Словник</a> ·
@@ -1028,6 +1029,7 @@ avsec/
 | [docs/reconstruction_2021.md](docs/reconstruction_2021.md) | **основний документ завдання**: реконструкція, випробування на зображеннях, криптоаналіз, модифікації |
 | [docs/related_work.md](docs/related_work.md) | суміжні напрями та визначення внеску роботи |
 | [docs/threat_model.md](docs/threat_model.md) | модель загроз і межі гарантій |
+| [docs/substitution_b2s.md](docs/substitution_b2s.md) | **схема `B2s`**: заміна значень пікселів разом із перестановкою блоків |
 
 **Будова системи**
 

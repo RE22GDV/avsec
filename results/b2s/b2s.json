@@ -1,0 +1,520 @@
+{
+  "kind": "b2s",
+  "title": "B2s: перестановка блоків разом із заміною значень пікселів",
+  "grid": "12x16",
+  "frame": "256x192",
+  "sbox": {
+    "bijective": true,
+    "inverse_exact": true,
+    "fixed_points": 2,
+    "fixed_points_expected": 1.0,
+    "mean_abs_shift": 81.88,
+    "mean_abs_shift_random": 85.33,
+    "table_space": "256! ≈ 8,6 · 10^506"
+  },
+  "histograms": {
+    "hist_identical_after_permutation": true,
+    "hist_l1_after_permutation": 0,
+    "hist_identical_after_global_substitution": false,
+    "hist_l1_after_global_substitution": 55348,
+    "sorted_hist_identical_after_global_substitution": true,
+    "sorted_hist_identical_after_block_substitution": false,
+    "sorted_hist_l1_after_block_substitution": 33674,
+    "note": "перестановка не змінює жодного значення, тож гістограма збігається побітово; одна глобальна таблиця переставляє стовпчики гістограми, але впорядкована гістограма лишається тією самою — саме на цьому інваріанті працює атака за відомою парою; окрема таблиця на кожен блок руйнує й цей інваріант"
+  },
+  "error_amplification": [
+    {
+      "wire_error_levels": 1,
+      "permutation_error_levels": 1,
+      "substitution_mean_abs_error": 85.08,
+      "substitution_median_abs_error": 78.0,
+      "mean_abs_error_random": 85.0
+    },
+    {
+      "wire_error_levels": 2,
+      "permutation_error_levels": 2,
+      "substitution_mean_abs_error": 86.17,
+      "substitution_median_abs_error": 78.5,
+      "mean_abs_error_random": 85.0
+    },
+    {
+      "wire_error_levels": 4,
+      "permutation_error_levels": 4,
+      "substitution_mean_abs_error": 86.22,
+      "substitution_median_abs_error": 75.0,
+      "mean_abs_error_random": 85.0
+    },
+    {
+      "wire_error_levels": 8,
+      "permutation_error_levels": 8,
+      "substitution_mean_abs_error": 81.89,
+      "substitution_median_abs_error": 70.0,
+      "mean_abs_error_random": 85.0
+    },
+    {
+      "wire_error_levels": 16,
+      "permutation_error_levels": 16,
+      "substitution_mean_abs_error": 80.36,
+      "substitution_median_abs_error": 69.5,
+      "mean_abs_error_random": 85.0
+    }
+  ],
+  "correctness": [
+    {
+      "substitution_mode": "session",
+      "tables_per_frame": 1,
+      "bit_exact_recovery": true,
+      "frames_checked": 3
+    },
+    {
+      "substitution_mode": "frame",
+      "tables_per_frame": 1,
+      "bit_exact_recovery": true,
+      "frames_checked": 3
+    },
+    {
+      "substitution_mode": "block",
+      "tables_per_frame": 192,
+      "bit_exact_recovery": true,
+      "frames_checked": 3
+    }
+  ],
+  "attacks": [
+    {
+      "target": "B2",
+      "known_pair_plain_accuracy": 1.0,
+      "known_pair_plain_seconds": 0.0294,
+      "known_pair_subst_accuracy": 1.0,
+      "known_pair_subst_seconds": 0.0453,
+      "substitution_detected_global": 1,
+      "merged_alphabet_covered": 0.8359,
+      "boundary_neighbour_pct": 35.67,
+      "boundary_direct_pct": 1.04,
+      "boundary_psnr_db": 15.4,
+      "boundary_seconds": 0.0832,
+      "multi_frame_accuracy": 0.0,
+      "chance_level": 0.005208
+    },
+    {
+      "target": "B2s (session)",
+      "known_pair_plain_accuracy": 0.0312,
+      "known_pair_plain_seconds": 0.0307,
+      "known_pair_subst_accuracy": 1.0,
+      "known_pair_subst_seconds": 0.0466,
+      "substitution_detected_global": 1,
+      "merged_alphabet_covered": 0.8359,
+      "boundary_neighbour_pct": 2.81,
+      "boundary_direct_pct": 0.52,
+      "boundary_psnr_db": 9.58,
+      "boundary_seconds": 0.0994,
+      "multi_frame_accuracy": 0.0,
+      "chance_level": 0.005208
+    },
+    {
+      "target": "B2s (frame)",
+      "known_pair_plain_accuracy": 0.0052,
+      "known_pair_plain_seconds": 0.0305,
+      "known_pair_subst_accuracy": 1.0,
+      "known_pair_subst_seconds": 0.0445,
+      "substitution_detected_global": 1,
+      "merged_alphabet_covered": 0.8359,
+      "boundary_neighbour_pct": 3.93,
+      "boundary_direct_pct": 0.52,
+      "boundary_psnr_db": 9.43,
+      "boundary_seconds": 0.1022,
+      "multi_frame_accuracy": 0.0,
+      "chance_level": 0.005208
+    },
+    {
+      "target": "B2s (block)",
+      "known_pair_plain_accuracy": 0.0104,
+      "known_pair_plain_seconds": 0.0305,
+      "known_pair_subst_accuracy": 1.0,
+      "known_pair_subst_seconds": 0.045,
+      "substitution_detected_global": 0,
+      "merged_alphabet_covered": 0.8359,
+      "boundary_neighbour_pct": 0.28,
+      "boundary_direct_pct": 0.52,
+      "boundary_psnr_db": 9.6,
+      "boundary_seconds": 0.1001,
+      "multi_frame_accuracy": 0.0,
+      "chance_level": 0.005208
+    }
+  ],
+  "reuse_matrix": [
+    {
+      "permutation": "стала",
+      "substitution_mode": "session",
+      "frame0_permutation_accuracy": 1.0,
+      "frame1_psnr_db": 45.32,
+      "frame1_readable": true
+    },
+    {
+      "permutation": "стала",
+      "substitution_mode": "frame",
+      "frame0_permutation_accuracy": 1.0,
+      "frame1_psnr_db": 10.66,
+      "frame1_readable": false
+    },
+    {
+      "permutation": "стала",
+      "substitution_mode": "block",
+      "frame0_permutation_accuracy": 1.0,
+      "frame1_psnr_db": 15.51,
+      "frame1_readable": false
+    },
+    {
+      "permutation": "щокадрова",
+      "substitution_mode": "session",
+      "frame0_permutation_accuracy": 1.0,
+      "frame1_psnr_db": 12.22,
+      "frame1_readable": false
+    },
+    {
+      "permutation": "щокадрова",
+      "substitution_mode": "frame",
+      "frame0_permutation_accuracy": 1.0,
+      "frame1_psnr_db": 11.29,
+      "frame1_readable": false
+    },
+    {
+      "permutation": "щокадрова",
+      "substitution_mode": "block",
+      "frame0_permutation_accuracy": 1.0,
+      "frame1_psnr_db": 15.5,
+      "frame1_readable": false
+    }
+  ],
+  "channel_sweep": [
+    {
+      "channel": "clean",
+      "method": "B1",
+      "scene": "sky_horizon",
+      "n_frames": 3,
+      "psnr_full_db": 53.16,
+      "psnr_min_db": 53.15,
+      "coverage": 1.0
+    },
+    {
+      "channel": "clean",
+      "method": "B2",
+      "scene": "sky_horizon",
+      "n_frames": 3,
+      "psnr_full_db": 53.16,
+      "psnr_min_db": 53.15,
+      "coverage": 1.0
+    },
+    {
+      "channel": "clean",
+      "method": "B2s",
+      "scene": "sky_horizon",
+      "n_frames": 3,
+      "psnr_full_db": 14.48,
+      "psnr_min_db": 14.22,
+      "coverage": 1.0
+    },
+    {
+      "channel": "clean",
+      "method": "B1",
+      "scene": "village",
+      "n_frames": 3,
+      "psnr_full_db": 53.22,
+      "psnr_min_db": 53.2,
+      "coverage": 1.0
+    },
+    {
+      "channel": "clean",
+      "method": "B2",
+      "scene": "village",
+      "n_frames": 3,
+      "psnr_full_db": 53.22,
+      "psnr_min_db": 53.2,
+      "coverage": 1.0
+    },
+    {
+      "channel": "clean",
+      "method": "B2s",
+      "scene": "village",
+      "n_frames": 3,
+      "psnr_full_db": 14.5,
+      "psnr_min_db": 14.41,
+      "coverage": 1.0
+    },
+    {
+      "channel": "mild",
+      "method": "B1",
+      "scene": "sky_horizon",
+      "n_frames": 3,
+      "psnr_full_db": 30.18,
+      "psnr_min_db": 30.08,
+      "coverage": 1.0
+    },
+    {
+      "channel": "mild",
+      "method": "B2",
+      "scene": "sky_horizon",
+      "n_frames": 3,
+      "psnr_full_db": 30.25,
+      "psnr_min_db": 30.1,
+      "coverage": 1.0
+    },
+    {
+      "channel": "mild",
+      "method": "B2s",
+      "scene": "sky_horizon",
+      "n_frames": 3,
+      "psnr_full_db": 9.53,
+      "psnr_min_db": 9.49,
+      "coverage": 1.0
+    },
+    {
+      "channel": "mild",
+      "method": "B1",
+      "scene": "village",
+      "n_frames": 3,
+      "psnr_full_db": 29.6,
+      "psnr_min_db": 29.42,
+      "coverage": 1.0
+    },
+    {
+      "channel": "mild",
+      "method": "B2",
+      "scene": "village",
+      "n_frames": 3,
+      "psnr_full_db": 29.64,
+      "psnr_min_db": 29.49,
+      "coverage": 1.0
+    },
+    {
+      "channel": "mild",
+      "method": "B2s",
+      "scene": "village",
+      "n_frames": 3,
+      "psnr_full_db": 9.54,
+      "psnr_min_db": 9.48,
+      "coverage": 1.0
+    },
+    {
+      "channel": "moderate",
+      "method": "B1",
+      "scene": "sky_horizon",
+      "n_frames": 3,
+      "psnr_full_db": 22.58,
+      "psnr_min_db": 21.92,
+      "coverage": 1.0
+    },
+    {
+      "channel": "moderate",
+      "method": "B2",
+      "scene": "sky_horizon",
+      "n_frames": 3,
+      "psnr_full_db": 22.37,
+      "psnr_min_db": 21.82,
+      "coverage": 1.0
+    },
+    {
+      "channel": "moderate",
+      "method": "B2s",
+      "scene": "sky_horizon",
+      "n_frames": 3,
+      "psnr_full_db": 9.51,
+      "psnr_min_db": 9.51,
+      "coverage": 1.0
+    },
+    {
+      "channel": "moderate",
+      "method": "B1",
+      "scene": "village",
+      "n_frames": 3,
+      "psnr_full_db": 23.0,
+      "psnr_min_db": 22.49,
+      "coverage": 1.0
+    },
+    {
+      "channel": "moderate",
+      "method": "B2",
+      "scene": "village",
+      "n_frames": 3,
+      "psnr_full_db": 22.96,
+      "psnr_min_db": 22.47,
+      "coverage": 1.0
+    },
+    {
+      "channel": "moderate",
+      "method": "B2s",
+      "scene": "village",
+      "n_frames": 3,
+      "psnr_full_db": 9.55,
+      "psnr_min_db": 9.54,
+      "coverage": 1.0
+    },
+    {
+      "channel": "bursty",
+      "method": "B1",
+      "scene": "sky_horizon",
+      "n_frames": 3,
+      "psnr_full_db": 14.77,
+      "psnr_min_db": 13.54,
+      "coverage": 1.0
+    },
+    {
+      "channel": "bursty",
+      "method": "B2",
+      "scene": "sky_horizon",
+      "n_frames": 3,
+      "psnr_full_db": 14.71,
+      "psnr_min_db": 13.5,
+      "coverage": 1.0
+    },
+    {
+      "channel": "bursty",
+      "method": "B2s",
+      "scene": "sky_horizon",
+      "n_frames": 3,
+      "psnr_full_db": 9.53,
+      "psnr_min_db": 9.43,
+      "coverage": 1.0
+    },
+    {
+      "channel": "bursty",
+      "method": "B1",
+      "scene": "village",
+      "n_frames": 3,
+      "psnr_full_db": 16.22,
+      "psnr_min_db": 14.85,
+      "coverage": 1.0
+    },
+    {
+      "channel": "bursty",
+      "method": "B2",
+      "scene": "village",
+      "n_frames": 3,
+      "psnr_full_db": 13.08,
+      "psnr_min_db": 5.04,
+      "coverage": 1.0
+    },
+    {
+      "channel": "bursty",
+      "method": "B2s",
+      "scene": "village",
+      "n_frames": 3,
+      "psnr_full_db": 9.65,
+      "psnr_min_db": 9.5,
+      "coverage": 1.0
+    },
+    {
+      "channel": "harsh",
+      "method": "B1",
+      "scene": "sky_horizon",
+      "n_frames": 3,
+      "psnr_full_db": 16.42,
+      "psnr_min_db": 15.83,
+      "coverage": 1.0
+    },
+    {
+      "channel": "harsh",
+      "method": "B2",
+      "scene": "sky_horizon",
+      "n_frames": 3,
+      "psnr_full_db": 16.42,
+      "psnr_min_db": 15.97,
+      "coverage": 1.0
+    },
+    {
+      "channel": "harsh",
+      "method": "B2s",
+      "scene": "sky_horizon",
+      "n_frames": 3,
+      "psnr_full_db": 9.47,
+      "psnr_min_db": 9.45,
+      "coverage": 1.0
+    },
+    {
+      "channel": "harsh",
+      "method": "B1",
+      "scene": "village",
+      "n_frames": 3,
+      "psnr_full_db": 16.69,
+      "psnr_min_db": 15.8,
+      "coverage": 1.0
+    },
+    {
+      "channel": "harsh",
+      "method": "B2",
+      "scene": "village",
+      "n_frames": 3,
+      "psnr_full_db": 16.7,
+      "psnr_min_db": 15.67,
+      "coverage": 1.0
+    },
+    {
+      "channel": "harsh",
+      "method": "B2s",
+      "scene": "village",
+      "n_frames": 3,
+      "psnr_full_db": 9.53,
+      "psnr_min_db": 9.49,
+      "coverage": 1.0
+    }
+  ],
+  "figures": {
+    "sbox_tables": "results/b2s\\sbox_tables.png",
+    "stages": "results/b2s\\stages.png",
+    "attacks_and_channel": "results/b2s\\attacks_and_channel.png"
+  },
+  "run_id": "fe45d509310b99d4",
+  "commit": "ec6cb9bf07ef4e2435f46c52be1b23373534d056",
+  "git_worktree": "clean",
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "cpu_count": 32,
+    "packages": {
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "cv2": "5.0.0",
+      "cryptography": "50.0.1",
+      "reedsolo": "unknown",
+      "PIL": "12.3.0",
+      "matplotlib": "3.11.2",
+      "yaml": "6.0.3"
+    },
+    "avsec_version": "0.1.0",
+    "git_commit": "ec6cb9bf07ef4e2435f46c52be1b23373534d056",
+    "git_worktree": "clean",
+    "git_dirty": false,
+    "git_dirty_files": [],
+    "git_branch": "main",
+    "git_describe": "v1.1.0-12-gec6cb9b",
+    "git_dirty_note": "",
+    "pip_freeze": [
+      "-e git+https://github.com/RE22GDV/avsec.git@ec6cb9bf07ef4e2435f46c52be1b23373534d056#egg=avsec",
+      "PyYAML==6.0.3",
+      "Pygments==2.21.0",
+      "cffi==2.1.1",
+      "colorama==0.4.6",
+      "contourpy==1.4.0",
+      "cryptography==50.0.1",
+      "cycler==0.12.1",
+      "fonttools==4.65.0",
+      "iniconfig==2.3.0",
+      "kiwisolver==1.5.1",
+      "matplotlib==3.11.2",
+      "numpy==2.5.3",
+      "opencv-python==5.0.0.93",
+      "packaging==26.3",
+      "pillow==12.3.0",
+      "pluggy==1.6.0",
+      "pycparser==3.0",
+      "pyparsing==3.3.2",
+      "pytest-timeout==2.4.0",
+      "pytest==9.1.1",
+      "python-dateutil==2.9.0.post0",
+      "reedsolo==1.7.0",
+      "scipy==1.18.1",
+      "six==1.17.0"
+    ]
+  }
+}

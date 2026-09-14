@@ -1,0 +1,7 @@
+frame0_permutation_accuracy,frame1_psnr_db,frame1_readable,permutation,substitution_mode
+1.0,45.32,True,стала,session
+1.0,10.66,False,стала,frame
+1.0,15.51,False,стала,block
+1.0,12.22,False,щокадрова,session
+1.0,11.29,False,щокадрова,frame
+1.0,15.5,False,щокадрова,block

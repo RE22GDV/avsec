@@ -1,0 +1,4 @@
+bit_exact_recovery,frames_checked,substitution_mode,tables_per_frame
+True,3,session,1
+True,3,frame,1
+True,3,block,192

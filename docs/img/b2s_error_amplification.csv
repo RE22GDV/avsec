@@ -1,0 +1,6 @@
+mean_abs_error_random,permutation_error_levels,substitution_mean_abs_error,substitution_median_abs_error,wire_error_levels
+85.0,1,85.08,78.0,1
+85.0,2,86.17,78.5,2
+85.0,4,86.22,75.0,4
+85.0,8,81.89,70.0,8
+85.0,16,80.36,69.5,16
