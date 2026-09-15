@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "avsec"
-version = "0.1.0"
+version = "1.2.0"
 description = "Research testbed for secure video over an existing analog composite video path"
 readme = "README.md"
 requires-python = ">=3.10"

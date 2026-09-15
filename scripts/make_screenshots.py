@@ -32,6 +32,14 @@ SHOTS = {
                 (1400, 1620), 180000),
     "ui_budget": ("?tab=budget&auto=1&sync=1", (1400, 1300), 120000),
     "ui_attacks": ("?tab=scramble&auto=1&sync=1", (1400, 1350), 120000),
+    # the three schemes with their own benches, and the checks; each on the
+    # same real drone frame the other shots use, so the pictures compare
+    "ui_substitution": ("?tab=substitution&auto=1&sync=1&pattern=uav:village",
+                        (1400, 2500), 180000),
+    "ui_sbox": ("?tab=sbox&auto=1&sync=1", (1400, 2450), 180000),
+    "ui_luma": ("?tab=luma&auto=1&sync=1&pattern=uav:village",
+                (1400, 2900), 240000),
+    "ui_checks": ("?tab=checks&auto=1&sync=1", (1400, 1150), 180000),
     "ui_explorer": ("?tab=explorer", (1400, 1750), 120000),
 }
 

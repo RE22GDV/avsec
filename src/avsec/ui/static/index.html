@@ -53,6 +53,17 @@ td.num,th.num{text-align:right;font-family:var(--mono)}
 .err{color:var(--err);white-space:pre-wrap;font:12px var(--mono)}
 .ok{color:var(--ok)} .warn{color:var(--warn)}
 .note{font-size:12px;color:var(--muted);border-left:3px solid var(--line);padding:6px 10px;margin:8px 0;background:var(--panel2);border-radius:0 6px 6px 0}
+.ctl{display:inline-flex;flex-direction:column;gap:2px;margin-left:12px;vertical-align:middle}
+.ctl label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.ctl select,.ctl input{width:auto;min-width:150px}
+table.sbox{width:auto;font:11px var(--mono);border-collapse:collapse}
+table.sbox td,table.sbox th{border:1px solid var(--line);padding:2px 5px;text-align:center}
+table.sbox th{background:var(--panel2);color:var(--muted);font-size:10px;text-transform:none}
+table.sbox td{color:var(--fg)}
+.verdict{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;margin-bottom:6px}
+.badge{font:11px var(--mono);border-radius:12px;padding:2px 10px;border:1px solid}
+.badge.pass{color:var(--ok);border-color:var(--ok)}
+.badge.fail{color:var(--err);border-color:var(--err)}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
 .chip{font:11px var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:2px 9px;cursor:pointer;color:var(--muted)}
 .chip.on{border-color:var(--accent);color:var(--fg)}
@@ -130,9 +141,10 @@ details summary{cursor:pointer;color:var(--muted);font-size:12px;margin:6px 0}
   </fieldset>
 
   <fieldset>
-    <legend>Методи</legend>
+    <legend>Методи спільного прогону</legend>
     <div class="chips" id="methods"></div>
     <div class="note" id="methodNote"></div>
+    <div class="note" id="ownBench"></div>
   </fieldset>
 
   <fieldset>
@@ -203,6 +215,9 @@ let DEF = null, UPLOAD = null, CURRENT = "demo", CFG_OVERRIDE = null;
 const TABS = [
   ["demo",       "Демонстрація",     runDemo],
   ["scramble",   "Перестановка та атаки", runScramble],
+  ["substitution","B2s: заміна значень", runSubstitution],
+  ["sbox",       "S-Box над GF(2⁸)", runSbox],
+  ["luma",       "B2l: стала яскравість", runLuma],
   ["comparison", "Порівняння B0–B4/P", runComparison],
   ["sweep",      "Залежність від спотворень", runSweep],
   ["tune",       "Добір параметрів", runTune],
@@ -210,6 +225,7 @@ const TABS = [
   ["cvbs",       "CVBS (рівень B)",  runCvbs],
   ["budget",     "Бюджет каналу",    runBudget],
   ["report",     "Звіт",             runReport],
+  ["checks",     "Перевірки",        runChecks],
   ["explorer",   "Збережені прогони", runExplorer],
 ];
 
@@ -242,19 +258,52 @@ function tabsInit(){
     setTimeout(() => TABRUN[tab](), 60);
   }
 }
+/* Some tabs need a control the shared sidebar has no place for - the
+   substitution mode, the source of the table, the luminance level. They are
+   declared here so the tab panel carries them next to its own run button. */
+const TAB_CONTROLS = {
+  substitution: `
+    <span class="ctl"><label>режим таблиці</label>
+      <select id="sMode"><option value="block">на кожен блок</option>
+        <option value="frame">на кадр</option><option value="session">на сеанс</option></select></span>
+    <span class="ctl"><label>джерело таблиці</label>
+      <select id="sSource"><option value="random">ключова випадкова</option>
+        <option value="algebraic">алгебраїчна GF(2⁸)</option></select></span>`,
+  luma: `
+    <span class="ctl"><label>рівень яскравості</label>
+      <input id="lLevel" type="number" value="130" min="1" max="254"></span>
+    <span class="ctl"><label>бітів джерела</label>
+      <select id="lBits"><option>8</option><option>5</option><option>3</option></select></span>`,
+  checks: `
+    <span class="ctl"><label>каталог для перерахунку</label>
+      <input id="cDir" value="results/main"></span>`,
+};
+
+/* The three benches take minutes, so their tabs offer the stored run as well:
+   the page opens with content and the button recomputes it. */
+const TAB_BENCH = {substitution:"b2s", sbox:"gf", luma:"luma"};
+
 function selectTab(id){
   CURRENT = id;
   document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("active", b.dataset.t===id));
   const t = TABS.find(x=>x[0]===id);
   const label = id==="explorer" ? "Оновити список прогонів" : "Запустити: "+t[1];
+  const bench = TAB_BENCH[id];
+  const extra = bench ? `<button class="sec" onclick="showStored('${bench}')">Показати збережений стенд</button>
+      <button class="sec" onclick="runFullBench('${bench}')">Перерахувати повний стенд</button>` : "";
   $("view").innerHTML = `<div class="panel"><button onclick="TABRUN['${id}']()">${label}</button>
-    <span style="margin-left:10px;color:var(--muted);font-size:12px">${TAB_HINT[id]||""}</span></div>
+    ${extra}${TAB_CONTROLS[id]||""}
+    <div style="margin-top:8px;color:var(--muted);font-size:12px">${TAB_HINT[id]||""}</div></div>
     <div id="out"></div>`;
   if(id==="explorer") runExplorer();
 }
 const TAB_HINT = {
   demo: "один кадр через усі вибрані методи, з зображеннями і метриками",
   scramble: "відтворення алгоритму 2021 року та атаки на нього",
+  substitution: "перестановка блоків разом із ключовою заміною значень пікселів; таблиця, стадії, атаки",
+  sbox: "таблиця замін, обчислена над GF(2⁸): звірка з AES побайтово, виміряні властивості, розгортка за полем",
+  luma: "шифротекст зі сталою яскравістю: що бачить монохромний спостерігач і що робить із цим тракт",
+  checks: "усі перевірки проєкту в одному місці: протокол, паспорт даних, опубліковані числа, документація",
   comparison: "спільні дані, спільний бюджет, довірчі інтервали за послідовностями",
   sweep: "якість і покриття залежно від профілю каналу",
   tune: "перебір із відсіканням; тестова частина не використовується",
@@ -800,6 +849,312 @@ function runBudget(){
   });
 }
 
+/* --------------------------------------------- B2s, the GF S-box, B2l, checks
+   Each of these calls the same library function the CLI calls; the page adds
+   only layout. Where a number has a reference value - the expectation for a
+   random table, the chance level of an attack - it is printed beside it, so a
+   reader is not left to judge the figure alone. */
+
+/* A short list of facts reads better down the page than across it: one row of
+   six long headings scrolls sideways in every panel width. */
+function kv(pairs){
+  return `<table><tbody>` + pairs.map(([k,v])=>
+    `<tr><th style="text-transform:none;font-size:12px;width:52%">${esc(k)}</th>
+     <td class="num">${fmt(v,3)}</td></tr>`).join("") + `</tbody></table>`;
+}
+
+function sboxTable(grid, title){
+  if(!grid) return "";
+  const head = "<tr><th>&nbsp;</th>" + Array.from({length:16},(_,i)=>
+      `<th>.${i.toString(16).toUpperCase()}</th>`).join("") + "</tr>";
+  const body = grid.rows.map((row,hi)=>
+    `<tr><th>${hi.toString(16).toUpperCase()}.</th>` +
+    row.map(v=>`<td>${v}</td>`).join("") + "</tr>").join("");
+  return `<div style="overflow:auto"><div class="note" style="margin-bottom:6px">${esc(title)}</div>
+    <table class="sbox"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+}
+
+function runSubstitution(){
+  job("substitution", {config: cfg(), pattern: $("pattern").value, image_b64: UPLOAD,
+      mode: ($("sMode")||{}).value || "block",
+      source: ($("sSource")||{}).value || "random", run_attacks: true}, res => {
+    const S = res.sanity;
+    let html = `<div class="panel"><h3>Що зроблено з кадром</h3>
+      <div class="note">Заміна значень за таблицею 16×16, потім перестановка ${res.grid.blocks}
+      блоків (${res.grid.rows}×${res.grid.cols}). Режим таблиці: <b>${esc(res.mode)}</b>,
+      джерело: <b>${esc(res.source)}</b>. Відновлення точне: ${res.exact_recovery?'<span class="ok">так</span>':'<span class="err">ні</span>'}.</div>
+      ${gallery(res.images, SUBST_CAPS)}</div>`;
+
+    html += `<div class="panel"><h3>Таблиця замін і обернена до неї</h3>
+      <div class="imgrid" style="grid-template-columns:1fr">
+      </div>${sboxTable(res.sbox, "S-Box: рядок — старший півбайт, стовпець — молодший")}
+      <div style="height:10px"></div>
+      ${sboxTable(res.inverse, "Обернена таблиця S-Box⁻¹, застосовується приймачем")}
+      ${table([
+        {"властивість":"бієктивність", "значення":S.bijective, "очікується":"так"},
+        {"властивість":"обернена точна", "значення":S.inverse_exact, "очікується":"так"},
+        {"властивість":"нерухомі точки", "значення":S.fixed_points, "очікується":S.fixed_points_expected},
+        {"властивість":"середній зсув значення", "значення":S.mean_abs_shift, "очікується":S.mean_abs_shift_random},
+        {"властивість":"простір таблиць", "значення":S.table_space, "очікується":"—"},
+      ], ["властивість","значення","очікується"])}</div>`;
+
+    html += `<div class="panel"><h3>Підсилення похибки</h3>
+      <div class="note">Перестановка переносить значення без змін, тож похибка в d рівнів
+      лишається похибкою в d рівнів. Таблиця замін не зберігає близькості значень,
+      тому та сама похибка стає майже довільною. Це і є причина втрати якості в тракті.</div>
+      ${table(res.error_amplification.map(r=>({
+        "похибка в каналі, рівнів": r.wire_error_levels,
+        "після перестановки": r.permutation_error_levels,
+        "після заміни, середня": r.substitution_mean_abs_error,
+        "після заміни, медіана": r.substitution_median_abs_error,
+        "випадкове значення": r.mean_abs_error_random})),
+        ["похибка в каналі, рівнів","після перестановки","після заміни, середня",
+         "після заміни, медіана","випадкове значення"])}</div>`;
+
+    const H = res.histogram;
+    html += `<div class="panel"><h3>Що кожен примітив лишає незмінним</h3>
+      ${table([
+        {"статистика":"гістограма після перестановки", "збігається":H.hist_identical_after_permutation, "L1":H.hist_l1_after_permutation},
+        {"статистика":"гістограма після глобальної заміни", "збігається":H.hist_identical_after_global_substitution, "L1":H.hist_l1_after_global_substitution},
+        {"статистика":"ВПОРЯДКОВАНА гістограма після глобальної заміни", "збігається":H.sorted_hist_identical_after_global_substitution, "L1":0},
+        {"статистика":"ВПОРЯДКОВАНА гістограма після заміни на кожен блок", "збігається":H.sorted_hist_identical_after_block_substitution, "L1":H.sorted_hist_l1_after_block_substitution},
+      ], ["статистика","збігається","L1"])}
+      <div class="note">${esc(H.note)}</div></div>`;
+
+    if(res.attacks){
+      html += `<div class="panel"><h3>Атаки на B2 і на B2s</h3>
+        ${table(res.attacks.map(a=>({
+          "ціль":a.target,
+          "межі, сусідств %":a.boundary_neighbour_pct,
+          "межі, PSNR дБ":a.boundary_psnr_db,
+          "відома пара (звичайна)":a.known_pair_plain_accuracy,
+          "відома пара (з урахуванням заміни)":a.known_pair_subst_accuracy,
+          "повтор між кадрами":a.multi_frame_accuracy,
+          "випадковий рівень":a.chance_level})),
+          ["ціль","межі, сусідств %","межі, PSNR дБ","відома пара (звичайна)",
+           "відома пара (з урахуванням заміни)","повтор між кадрами","випадковий рівень"])}
+        <div class="note">Заміна усуває безключову атаку за межами, але атака за відомою
+        парою лишається: заміна є бієкцією на значеннях, тож вона переставляє стовпчики
+        гістограми плитки й не змінює її ВПОРЯДКОВАНОЇ гістограми.</div></div>`;
+    }
+    $("out").innerHTML = html;
+  });
+}
+const SUBST_CAPS = {
+  "1_original":"1. кадр джерела", "2_substituted":"2. після заміни значень",
+  "3_substituted_permuted":"3. після заміни й перестановки — те, що йде в канал",
+  "4_permutation_only_B2":"4. для порівняння: сама лише перестановка (B2)",
+  "5_restored":"5. відновлено ключем",
+};
+
+function runSbox(){
+  job("sbox", {config: cfg(), run_sweep: true}, res => {
+    const V = res.verification;
+    let html = `<div class="panel"><h3>Звірка з опублікованою таблицею AES</h3>
+      <div class="verdict">
+        <span class="badge ${V.matches_published_aes_sbox?'pass':'fail'}">
+          ${V.matches_published_aes_sbox?'збігається побайтово':'НЕ ЗБІГАЄТЬСЯ'}</span>
+        <span style="color:var(--muted);font-weight:400;font-size:12px">
+          звірено ${V.bytes_compared} байтів; обернена таблиця точна: ${V.inverse_is_exact?'так':'ні'}</span>
+      </div>
+      <div class="note">Поле: <b>${esc(V.field.polynomial)}</b> (${esc(V.field.polynomial_hex||"")}),
+      твірний елемент ${esc(V.field.generator)}. Таблиця не зберігається, а обчислюється:
+      S(v) = афінне перетворення(v⁻¹) у GF(2⁸).</div></div>`;
+
+    html += `<div class="panel"><h3>Таблиці</h3>
+      ${sboxTable(res.tables.algebraic, "Алгебраїчна S-Box, обчислена над GF(2⁸) — та сама, що в AES")}
+      <div style="height:10px"></div>
+      ${sboxTable(res.tables.inverse, "Обернена алгебраїчна таблиця")}
+      <details><summary>Ще дві таблиці: з ключовим забілюванням і ключова випадкова</summary>
+        ${sboxTable(res.tables.keyed, "Алгебраїчна з ключовим забілюванням: S_k(v) = S(v ⊕ k_in) ⊕ k_out")}
+        <div style="height:10px"></div>
+        ${sboxTable(res.tables.random, "Ключова випадкова — та, яку зараз використовує B2s")}
+      </details></div>`;
+
+    html += `<div class="panel"><h3>Виміряні властивості</h3>
+      ${table(res.properties.map(r=>({
+        "таблиця":r.table, "диференційна рівномірність":r.differential_uniformity,
+        "нелінійність":r.nonlinearity, "алгебраїчний степінь":r.algebraic_degree,
+        "нерухомі точки":r.fixed_points, "лавина, біт":r.avalanche_bits,
+        "що зберігається":r.storage})),
+        ["таблиця","диференційна рівномірність","нелінійність","алгебраїчний степінь",
+         "нерухомі точки","лавина, біт","що зберігається"])}
+      <div class="note">Менша диференційна рівномірність і більша нелінійність — краще.
+      ${(()=>{ const a=res.properties[0], r=res.properties[res.properties.length-1];
+        return `Алгебраїчна таблиця дає ${a.differential_uniformity} і ${a.nonlinearity}
+          проти ${r.differential_uniformity} і ${r.nonlinearity} у ключової випадкової`;})()},
+      і при цьому не займає пам'яті: зберігати треба лише ключ. Значення для випадкової
+      таблиці залежать від ключа сеансу й змінюються від прогону до прогону; алгебраїчні — ні.</div></div>`;
+
+    if(res.polynomials){
+      const same = res.polynomials.filter(p=>p.same_table_as_aes).length;
+      const du = new Set(res.polynomials.map(p=>p.differential_uniformity));
+      html += `<div class="panel"><h3>Розгортка за всіма незвідними многочленами степеня 8</h3>
+        <div class="note">Многочленів ${res.polynomials.length}; таблицю AES дає ${same} з них.
+        Різних значень диференційної рівномірності серед усіх: ${du.size}
+        — тобто вибір многочлена змінює таблицю, але не її стійкість.</div>
+        ${table(res.polynomials.map(r=>({
+          "многочлен":r.polynomial, "hex":r.polynomial_hex, "твірний":r.generator,
+          "як AES":r.same_table_as_aes, "байтів різниці":r.differing_bytes_vs_aes,
+          "DU":r.differential_uniformity, "NL":r.nonlinearity,
+          "степінь":r.algebraic_degree, "нерухомі":r.fixed_points})),
+          ["многочлен","hex","твірний","як AES","байтів різниці","DU","NL","степінь","нерухомі"])}</div>`;
+    }
+    $("out").innerHTML = html;
+  });
+}
+
+function runLuma(){
+  job("luma", {config: cfg(), pattern: $("pattern").value, image_b64: UPLOAD,
+      level: parseInt(($("lLevel")||{}).value || "130", 10),
+      source_bits: parseInt(($("lBits")||{}).value || "8", 10),
+      run_attacks: true, run_tract: true}, res => {
+    const C = res.capacity, S = res.statistics;
+    let html = `<div class="panel"><h3>Місткість палітри на рівні ${res.level}</h3>
+      ${kv([
+        ["кольорів із цією яскравістю", C.colours_with_this_luma],
+        ["біт на піксель", C.capacity_bits],
+        ["кодових слів (найбільший степінь 2)", C.usable_codewords_power_of_two],
+        ["вистачає для монохромних 8 біт", C.enough_for_monochrome_8_bit],
+        ["вистачає для кольорових 24 біт", C.enough_for_colour_24_bit],
+        ["втрачено біт кольору", C.colour_bits_lost]])}
+      <div class="note">Це число вирішує все решту: 8 бітів джерела вміщуються
+      в 16,77 біта палітри, а 24 — ні.</div></div>`;
+
+    html += `<div class="panel"><h3>Кадр, шифротекст і його площини</h3>
+      ${gallery(res.images, LUMA_CAPS)}
+      ${kv([
+        ["рівнів яскравості вжито", S.rounded_levels_used],
+        ["ентропія яскравості шифротексту, біт", S.luma_entropy_bits],
+        ["σ неокругленої яскравості", S.luma_std],
+        ["діапазон неокругленої яскравості", S.luma_min + " … " + S.luma_max],
+        ["відновлення точне до біта", res.exact_recovery]])}
+      <div class="note">Панель 3 — це весь сигнал, який дістається монохромного тракту:
+      рівне сіре поле. Ентропія цієї площини дорівнює нулю не приблизно, а за означенням:
+      у ній рівно одне значення. Повідомлення живе в панелі 4.</div></div>`;
+
+    if(res.plane_attacks){
+      html += `<div class="panel"><h3>Безключова атака за площинами, з контролем</h3>
+        ${table(res.plane_attacks.map(r=>({
+          "площина":r.view, "кодова книга":r.codebook || "—",
+          "правильних сусідств, %":r.neighbour_accuracy_pct,
+          "σ площини":r.plane_std, "кореляція з оригіналом":r.correlation_with_source})),
+          ["площина","кодова книга","правильних сусідств, %","σ площини","кореляція з оригіналом"])}
+        <div class="note">Контроль з УПОРЯДКОВАНОЮ кодовою книгою показує, що приховування
+        структури забезпечує ключове призначення кольорів, а не саме обмеження на
+        яскравість: за впорядкованої книги кольоровість витікає. Випадковий рівень — 0,52 %.</div></div>`;
+    }
+
+    if(res.tract){
+      html += `<div class="panel"><h3>Наскрізний прогін через аналоговий тракт</h3>
+        ${table(res.tract.map(r=>({
+          "профіль":r.channel, "PSNR, дБ":(r.psnr_db>=98?"точно":r.psnr_db),
+          "пікселів точно, %":r.exact_pixels_pct,
+          "середнє пошкодження площин, рівнів":r.mean_channel_damage_levels})),
+          ["профіль","PSNR, дБ","пікселів точно, %","середнє пошкодження площин, рівнів"])}`;
+      for(const ch of ["clean","mild","moderate","bursty","harsh"]){
+        const g = {};
+        if(res.tract_images["example_source"]) g["example_source"] = res.tract_images["example_source"];
+        ["tx","rx","out"].forEach(k=>{ const key = `example_${ch}_${k}`;
+          if(res.tract_images[key]) g[key] = res.tract_images[key]; });
+        if(Object.keys(g).length < 2) continue;
+        html += `<div class="note" style="margin-top:10px">профіль <b>${esc(ch)}</b></div>
+          ${gallery(g, tractCaps(ch))}`;
+      }
+      html += `<div class="note">Стовпці: вихідний кадр, шифротекст перед трактом,
+        ті самі площини після тракту, результат декодування за найближчим кодовим словом.</div></div>`;
+    }
+    $("out").innerHTML = html;
+  });
+}
+const LUMA_CAPS = {
+  "1_original":"1. кадр джерела", "2_ciphertext":"2. шифротекст (колір)",
+  "3_cipher_luma":"3. його яскравість — те, що бачить монохромний спостерігач",
+  "4_cipher_cb":"4. площина Cb — тут живе повідомлення",
+  "5_restored":"5. відновлено ключем",
+};
+function tractCaps(ch){
+  return {"example_source":"1. оригінал",
+          [`example_${ch}_tx`]:"2. що йде в тракт",
+          [`example_${ch}_rx`]:"3. що прийнято",
+          [`example_${ch}_out`]:"4. що отримали"};
+}
+
+function runChecks(){
+  job("checks", {config: cfg(), input_dir: ($("cDir")||{}).value || "results/main"}, res => {
+    let html = `<div class="panel"><div class="verdict">
+      <span class="badge ${res.all_passed?'pass':'fail'}">
+        ${res.n_groups_passed}/${res.n_groups} груп пройдено</span>
+      <span style="color:var(--muted);font-weight:400;font-size:12px">
+        кожна група виконує рівно те, що виконує однойменна команда</span></div></div>`;
+    for(const g of res.groups){
+      html += `<div class="panel"><div class="verdict">
+        <span class="badge ${g.ok?'pass':'fail'}">${g.ok?'пройдено':'ПОМИЛКА'}</span>
+        <span>${esc(g.name)}</span>
+        <span style="color:var(--muted);font-weight:400;font-size:12px">
+          ${g.total?`${g.passed}/${g.total}`:""} ${esc(g.note||"")}</span></div>
+        <div class="note">${esc(g.purpose)} · <code>${esc(g.command)}</code></div>
+        ${g.failures.length?`<div class="err">${g.failures.map(esc).join("\n")}</div>`:""}</div>`;
+    }
+    $("out").innerHTML = html;
+  });
+}
+
+/* ------------------------------------------------- stored and full benches
+   A bench writes one JSON with many sections. Dumping it whole is honest but
+   unreadable, so the sections are listed first - a table gets its own table,
+   everything else keeps its shape - and the raw document stays one click away
+   for anyone who wants to check that nothing was dropped on the way. */
+function benchHtml(d, path, command){
+  const skip = new Set(["kind","title","run_id","commit","git_worktree",
+                        "environment","figures"]);
+  const worktree = d.git_worktree || "—";
+  let html = `<div class="panel"><h3>${esc(d.title || d.kind || "стенд")}</h3>
+    <div class="note">${path?`Джерело: <code>${esc(path)}</code> · `:""}прогін
+    <code>${esc(d.run_id||"—")}</code> · коміт <code>${esc((d.commit||"").slice(0,7))}</code>
+    · робоче дерево <b class="${worktree==="clean"?"ok":"warn"}">${esc(worktree)}</b>.
+    <br>${esc(command||"")}</div></div>`;
+  for(const [name, val] of Object.entries(d)){
+    if(skip.has(name)) continue;
+    if(Array.isArray(val) && val.length && typeof val[0] === "object"){
+      const cols = [...new Set(val.flatMap(r=>Object.keys(r)))];
+      html += `<div class="panel"><h3>${esc(name)}</h3>
+        <div class="note">${val.length} рядків</div>${table(val, cols)}</div>`;
+    } else {
+      html += `<div class="panel"><h3>${esc(name)}</h3>
+        <pre>${esc(JSON.stringify(val, null, 1))}</pre></div>`;
+    }
+  }
+  html += `<div class="panel"><details><summary>Повний документ прогону, як він лежить на диску</summary>
+    <pre style="max-height:70vh">${esc(JSON.stringify(d, null, 1))}</pre></details></div>`;
+  return html;
+}
+
+async function showStored(which){
+  setStatus("читаю збережений стенд…"); setBar(0.3);
+  try{
+    const r = await sync("stored_lab", {which});
+    setBar(1);
+    if(!r.present){
+      setStatus("немає збереженого прогону", "warn");
+      $("out").innerHTML = `<div class="panel"><div class="note">Файл <code>${esc(r.path)}</code>
+        не знайдено. Запустіть <code>${esc(r.command)}</code> або натисніть
+        «Перерахувати повний стенд».</div></div>`;
+      return;
+    }
+    setStatus("готово", "ok");
+    $("out").innerHTML = benchHtml(r.data, r.path, r.command);
+  }catch(e){ setBar(0); setStatus(String(e), "err"); }
+}
+
+function runFullBench(which){
+  if(which === "luma" && !confirm("Повний стенд B2l триває близько трьох хвилин. Запустити?")) return;
+  job("full_lab", {config: cfg(), which}, res => {
+    $("out").innerHTML = benchHtml(res.data, null,
+      "результат записано в каталог стенда так само, як це робить командний рядок");
+  });
+}
+
 function runReport(){
   job("report", {input_dir:"runs", output_dir:"reports/ui", title:"Звіт avsec (веб-інтерфейс)"},
     res => { $("out").innerHTML = `<div class="panel"><h3>Звіт</h3>
@@ -826,6 +1181,14 @@ async function init(){
   $("sfps").value = b.source_fps; $("lat").value = b.max_virtual_latency_s;
   $("methods").innerHTML = DEF.methods.map(m=>
     `<span class="chip on" data-m="${m}" title="${esc(DEF.method_notes[m]||"")}" onclick="this.classList.toggle('on');showNotes()">${m}</span>`).join("");
+  /* B2s and B2l are not selectable here: they are not part of the shared
+     matrix and have their own benches. Naming them beats leaving a reader to
+     wonder why the catalogue has twelve schemes and this list has ten. */
+  const own = DEF.own_bench_methods || {};
+  $("ownBench").innerHTML = Object.keys(own).length
+    ? `Поза матрицею, з власними стендами: ` + Object.entries(own).map(([m,d])=>
+        `<b>${esc(m)}</b> — ${esc(d)}`).join("; ") + `. Кожна має свою вкладку.`
+    : "";
   applyProfile("b4", DEF.default_profiles.B4);
   applyProfile("p",  DEF.default_profiles.P);
   showNotes();

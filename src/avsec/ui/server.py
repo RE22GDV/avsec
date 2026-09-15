@@ -116,7 +116,7 @@ def _drone_patterns() -> List[str]:
 
 def action_defaults(payload: Dict[str, Any]) -> Dict[str, Any]:
     from avsec.channel import PRESETS
-    from avsec.config import DEFAULT_PROFILES, ExperimentConfig
+    from avsec.config import ALL_METHODS, DEFAULT_PROFILES, ExperimentConfig
     from avsec.interleaving import SCHEMES
     from avsec.modem.cvbs import CVBS_PRESETS
     from avsec.sources import PATTERNS
@@ -129,7 +129,9 @@ def action_defaults(payload: Dict[str, Any]) -> Dict[str, Any]:
         "channel_presets": {k: v.describe() for k, v in PRESETS.items()},
         "cvbs_presets": sorted(CVBS_PRESETS),
         "patterns": sorted(PATTERNS) + _drone_patterns(),
-        "methods": ["B0a", "B0d", "B1", "B2", "B3", "B4", "P"],
+        # the canonical list, not a copy of it: a scheme added to the matrix
+        # used to appear in the command line and silently not here
+        "methods": list(ALL_METHODS),
         "interleaver_schemes": list(SCHEMES),
         "codecs": ["raw", "dct", "jpeg"],
         "default_config": cfg.to_dict(),
@@ -139,12 +141,25 @@ def action_defaults(payload: Dict[str, Any]) -> Dict[str, Any]:
         ) if os.path.isdir("configs") else [],
         "method_notes": {
             "B0a": "незахищене зображення через аналоговий растр (опора для втрат якості)",
+            "B0a-R": ("те саме передавання, але кадр повторюється в усі три слоти, "
+                      "а приймач поєднує копії за медіаною - чесна аналогова опора"),
             "B0d": "той самий цифровий транспорт БЕЗ криптографії - діагностика, нічого не автентифікує",
+            "B0d-W": ("цифровий транспорт із публічним вибілюванням потоку - "
+                      "відокремлює вирівнювання статистики від шифрування"),
             "B1": "перестановка блоків на LFSR (реконструкція статті 2021)",
             "B2": "та сама перестановка з криптогенератором - вміст блоків НЕ шифрується",
             "B3": "AEAD цілого кадру однією одиницею; потрібні всі фрагменти",
             "B4": "незалежно захищені смуги, один опис - сильний базовий метод",
+            "B4t": ("B4 з параметрами транспорту схеми P, але БЕЗ обох механізмів - "
+                    "контрольна схема, яка відокремлює внесок транспорту"),
             "P": "кілька описів + BAWP + спільний добір параметрів (запропоноване)",
+        },
+        # these two are not in the matrix: they have their own benches, their
+        # own tabs and their own documents, so they are named rather than
+        # silently missing from the list above
+        "own_bench_methods": {
+            "B2s": "перестановка блоків разом із ключовою заміною значень пікселів",
+            "B2l": "шифротекст зі сталою яскравістю: монохромний спостерігач бачить сіре поле",
         },
     }
 
@@ -543,6 +558,385 @@ def action_explorer_agemap(payload: Dict[str, Any]) -> Any:
 
 
 
+def _frames_for(payload, cfg, n: int = 1) -> List[np.ndarray]:
+    """``n`` frames of what the tab is pointed at: upload, UAV scene or pattern.
+
+    Some measurements need a *second* frame of the same material - the
+    multi-frame reuse attack, for one - so the frames come from one call rather
+    than from two unrelated sources.  An upload is a still, so it repeats.
+    """
+    from avsec import sources as S
+
+    H, W = cfg.frame_height, cfg.frame_width
+    if payload.get("image_b64"):
+        import cv2
+
+        raw = base64.b64decode(payload["image_b64"].split(",")[-1])
+        img = cv2.imdecode(np.frombuffer(raw, np.uint8), cv2.IMREAD_GRAYSCALE)
+        img = cv2.resize(img, (W, H), interpolation=cv2.INTER_AREA)
+        return [img] * n
+    name = payload.get("pattern", "edges")
+    if name.startswith("uav:"):
+        from avsec.sources.drone import DRONE_SCENES, drone_suite
+
+        want = name.split(":", 1)[1]
+        picked = [d for d in DRONE_SCENES if d[0] == want] or None
+        frames = drone_suite(H, W, n_frames=max(2, n), scenes=picked)[0].frames
+        return [np.asarray(f) for f in frames[:n]]
+    if name not in S.PATTERNS:
+        raise ValueError(f"unknown pattern {name!r}")
+    # a procedural pattern is deterministic, so a moving crop gives a second
+    # frame that differs the way consecutive frames of a scene differ
+    base = S.PATTERNS[name](H + 8, W + 8)
+    return [np.ascontiguousarray(base[i * 4:i * 4 + H, i * 4:i * 4 + W])
+            for i in range(n)]
+
+
+def _frame_for(payload, cfg):
+    """The single frame the interactive tabs work on."""
+    return _frames_for(payload, cfg, 1)[0]
+
+
+def _table_grid(table) -> Dict[str, Any]:
+    """A 16x16 substitution table in the layout every cipher spec prints."""
+    a = np.asarray(table, dtype=np.int64).reshape(16, 16)
+    return {
+        "rows": [[f"{int(v):02X}" for v in row] for row in a],
+        "values": [int(v) for v in a.ravel()],
+    }
+
+
+# ------------------------------------------------- B2s: substitution + permutation
+def action_substitution(payload: Dict[str, Any], progress) -> Dict[str, Any]:
+    """One frame through ``B2s``, the tables it used, and the attacks on it.
+
+    The stages are shown separately because the point of the scheme is that two
+    primitives act in different spaces: substitution changes values and leaves
+    positions, permutation changes positions and leaves values.
+    """
+    from avsec.crypto import derive_session_keys, new_session_id
+    from avsec.subst_lab import (_b2, _sanity, _stage_images, attack_table,
+                                 error_amplification, histogram_facts,
+                                 sbox_tables)
+    from avsec.substitution import (SUBSTITUTION_MODES,
+                                    SubstitutionPermutationScrambler)
+
+    cfg = _config(payload)
+    rows, cols = cfg.b2_grid
+    mode = payload.get("mode", "block")
+    source = payload.get("source", "random")
+    if mode not in SUBSTITUTION_MODES:
+        raise ValueError(f"mode must be one of {SUBSTITUTION_MODES}")
+
+    sid = new_session_id()
+    key = derive_session_keys(cfg.master_secret(), sid).key
+    img = _frame_for(payload, cfg)
+
+    progress("таблиця замін", 0.1, {})
+    box, inv = sbox_tables(key, sid)
+    sc = SubstitutionPermutationScrambler(rows, cols, key, sid, mode=mode,
+                                          source=source)
+    b2 = _b2(cfg, key, sid)
+
+    progress("стадії перетворення", 0.3, {})
+    stages = _stage_images(sc, b2, img)
+    fit = sc._fit(img)
+    glob = SubstitutionPermutationScrambler(rows, cols, key, sid, mode="session",
+                                            source=source)
+
+    result: Dict[str, Any] = {
+        "kind": "substitution",
+        "mode": mode,
+        "source": source,
+        "grid": {"rows": rows, "cols": cols, "blocks": rows * cols},
+        "sbox": _table_grid(box),
+        "inverse": _table_grid(inv),
+        "sanity": _sanity(box, inv),
+        "error_amplification": error_amplification(box),
+        "histogram": histogram_facts(fit, b2.scramble(img, 0),
+                                     glob.substitute(img, 0),
+                                     sc.substitute(img, 0)),
+        "images": {k: png_data_url(v) for k, v in stages.items()},
+        "exact_recovery": bool(np.array_equal(fit, stages["5_restored"])),
+    }
+
+    if payload.get("run_attacks", True):
+        progress("атаки на B2 і B2s", 0.55, {})
+        pair = _frames_for(payload, cfg, 2)
+        result["attacks"] = attack_table(cfg, key, sid,
+                                         [sc._fit(f) for f in pair],
+                                         source=source)
+    return result
+
+
+# ------------------------------------------------------- the computed S-box
+def action_sbox(payload: Dict[str, Any], progress) -> Dict[str, Any]:
+    """The GF(2^8) table: checked against AES, measured, swept over the field.
+
+    The table is *computed*, not stored, so the interesting questions are
+    whether the computation reproduces the published table byte for byte and
+    what its measured resistance is next to a keyed random table.
+    """
+    from avsec.crypto import derive_session_keys, new_session_id
+    from avsec.galois import (GF256, KeyedAlgebraicSbox, algebraic_sbox,
+                              inverse_algebraic_sbox)
+    from avsec.galois_lab import polynomial_sweep, property_table, verify_against_aes
+    from avsec.substitution import crypto_sbox
+
+    sid = new_session_id()
+    cfg = _config(payload)
+    key = derive_session_keys(cfg.master_secret(), sid).key
+
+    progress("звірка з AES", 0.15, {})
+    gf = GF256()
+    box = algebraic_sbox(gf)
+    inv = inverse_algebraic_sbox(gf)
+    keyed = KeyedAlgebraicSbox(key, gf).table(b"|" + sid + b"|session")
+    rnd = crypto_sbox(key, b"|" + sid + b"|session")
+
+    progress("виміряні властивості", 0.45, {})
+    res: Dict[str, Any] = {
+        "kind": "sbox",
+        "verification": verify_against_aes(),
+        "field": gf.describe(),
+        "properties": property_table(key, sid),
+        "tables": {
+            "algebraic": _table_grid(box),
+            "inverse": _table_grid(inv),
+            "keyed": _table_grid(keyed),
+            "random": _table_grid(rnd),
+        },
+    }
+    if payload.get("run_sweep", True):
+        progress("розгортка за незвідними многочленами", 0.7, {})
+        res["polynomials"] = polynomial_sweep()
+    return res
+
+
+# ------------------------------------------ B2l: constant-luminance ciphertext
+def action_luma(payload: Dict[str, Any], progress) -> Dict[str, Any]:
+    """``B2l`` on one frame: what the monochrome observer gets, and the tract.
+
+    The luminance plane of the ciphertext is the whole point, so it is shown as
+    an image next to its statistics: a reader can see the flat grey field and
+    read the entropy that says it carries nothing.
+    """
+    from avsec.crypto import derive_session_keys, new_session_id
+    from avsec.luma_balance import (BEST_LEVEL, LumaBalancedMono, chroma_planes,
+                                    luma_statistics, palette_capacity)
+    from avsec.luma_lab import _to_grey, plane_attacks, tract_example
+
+    cfg = _config(payload)
+    sid = new_session_id()
+    key = derive_session_keys(cfg.master_secret(), sid).key
+    level = int(payload.get("level", BEST_LEVEL))
+    img = _frame_for(payload, cfg)
+
+    progress("шифрування зі сталою яскравістю", 0.15, {})
+    mono = LumaBalancedMono(key, sid, level)
+    ct = mono.encrypt(img, 0)
+    back = mono.decrypt(ct, 0)
+    pl = chroma_planes(ct)
+    stats = luma_statistics(ct)
+
+    res: Dict[str, Any] = {
+        "kind": "luma",
+        "level": level,
+        "capacity": palette_capacity(level),
+        "statistics": stats,
+        "exact_recovery": bool(np.array_equal(img, back)),
+        "images": {
+            "1_original": png_data_url(img),
+            "2_ciphertext": png_data_url(ct),
+            "3_cipher_luma": png_data_url(
+                np.clip(np.rint(pl["Y"]), 0, 255).astype(np.uint8)),
+            "4_cipher_cb": png_data_url(_to_grey(pl["Cb"])),
+            "5_restored": png_data_url(back),
+        },
+    }
+
+    if payload.get("run_attacks", True):
+        progress("атаки за площинами з контролем", 0.45, {})
+        res["plane_attacks"] = plane_attacks(cfg, key, sid, img, level)
+
+    if payload.get("run_tract", True):
+        progress("наскрізний прогін через тракт", 0.7, {})
+        images, rows = tract_example(cfg, cfg.master_secret(), img, "village",
+                                     level=level,
+                                     source_bits=int(payload.get("source_bits", 8)))
+        res["tract"] = rows
+        res["tract_images"] = {k: png_data_url(v, max_width=320)
+                               for k, v in images.items()
+                               if not k.endswith("_damage")}
+    return res
+
+
+# ------------------------------------------------------------------- checks
+def action_checks(payload: Dict[str, Any], progress) -> Dict[str, Any]:
+    """Every check the project can run, in one place, with its own verdict.
+
+    These existed only on the command line.  Each group reports how many checks
+    passed out of how many ran, and the failures are listed rather than
+    summarised, so a red group can be acted on without leaving the page.
+    """
+    import subprocess
+    import sys as _sys
+
+    groups: List[Dict[str, Any]] = []
+
+    def group(name: str, cmd: str, doc: str, ok: bool, passed: int, total: int,
+              failures: Optional[List[str]] = None, note: str = "") -> None:
+        groups.append({"name": name, "command": cmd, "purpose": doc,
+                       "ok": bool(ok), "passed": int(passed), "total": int(total),
+                       "failures": failures or [], "note": note})
+
+    cfg = _config(payload)
+
+    progress("перевірки протоколу", 0.1, {})
+    try:
+        from avsec.experiments import run_protocol_checks
+
+        checks = run_protocol_checks(cfg)
+        n_ok = sum(1 for c in checks if c.get("passed"))
+        group("Протокол AEAD і кадрування", "avsec protocol-check",
+              "мутація кожного семантичного поля, межі парсера, повтори, "
+              "зрив стану сеансу", n_ok == len(checks), n_ok, len(checks),
+              [f"{c.get('name')}: очікувалось {c.get('expected')!r}, "
+               f"отримано {c.get('observed')!r}"
+               for c in checks if not c.get("passed")])
+    except Exception as exc:
+        group("Протокол AEAD і кадрування", "avsec protocol-check",
+              "перевірки протоколу", False, 0, 0, [f"{type(exc).__name__}: {exc}"])
+
+    progress("паспорт набору даних", 0.35, {})
+    try:
+        from avsec.dataset import build_manifest
+        from avsec.experiments import build_sources
+
+        report = build_manifest(build_sources(cfg), seed=cfg.seed).validate()
+        probs = [str(x) for x in (report.get("problems") or [])]
+        # warnings do not fail the check, but hiding them would misrepresent
+        # the manifest: they are listed under the verdict, marked as such
+        probs += [f"попередження: {w}" for w in (report.get("warnings") or [])]
+        group("Паспорт набору даних", "avsec dataset",
+              "дублікати, протікання між поділами, походження кожного джерела",
+              bool(report.get("ok")),
+              0 if report.get("problems") else 1, 1, probs,
+              note=(f"джерел: {report.get('n_sources', '—')}, "
+                    f"сцен: {report.get('n_scenes', '—')}, "
+                    f"кліпів: {report.get('n_clips', '—')}"))
+    except Exception as exc:
+        group("Паспорт набору даних", "avsec dataset", "перевірка паспорта",
+              False, 0, 0, [f"{type(exc).__name__}: {exc}"])
+
+    run_dir = payload.get("input_dir") or "results/main"
+    progress("перерахунок опублікованих чисел", 0.6, {})
+    if os.path.isdir(run_dir):
+        try:
+            from avsec.verify import verify
+
+            res = verify(run_dir, output=None)
+            checks = res.get("checks") or []
+            n_ok = sum(1 for c in checks if c.get("ok"))
+            group("Опубліковані числа", f"avsec verify --input {run_dir}",
+                  "кожне опубліковане число перераховано з таблиць прогону",
+                  bool(res.get("ok")), n_ok, len(checks),
+                  [str(c.get("kind")) + ": " + str(c.get("channel", ""))
+                   for c in checks if not c.get("ok")],
+                  note=f"метрика {res.get('plan', {}).get('metric', '—')}")
+        except Exception as exc:
+            group("Опубліковані числа", f"avsec verify --input {run_dir}",
+                  "перерахунок чисел", False, 0, 0,
+                  [f"{type(exc).__name__}: {exc}"])
+    else:
+        group("Опубліковані числа", f"avsec verify --input {run_dir}",
+              "перерахунок чисел", False, 0, 0,
+              [f"каталог {run_dir} не знайдено"])
+
+    progress("перевірки документації", 0.85, {})
+    root = os.path.dirname(os.path.dirname(os.path.dirname(
+        os.path.dirname(os.path.abspath(__file__)))))
+    for name, script, doc in (
+            ("Посилання в документації", "check_links.py",
+             "кожне відносне посилання й кожен якір мають вести кудись"),
+            ("Формули в документації", "check_math.py",
+             "формули мають дійти до читача в будь-якому переглядачі")):
+        path = os.path.join(root, "scripts", script)
+        if not os.path.exists(path):
+            continue
+        try:
+            r = subprocess.run([_sys.executable, path], capture_output=True,
+                               text=True, cwd=root, timeout=180)
+            tail = [l for l in (r.stdout or "").strip().splitlines() if l.strip()]
+            group(name, f"python scripts/{script}", doc, r.returncode == 0,
+                  1 if r.returncode == 0 else 0, 1,
+                  [] if r.returncode == 0 else tail[:20],
+                  note=tail[-1] if tail else "")
+        except Exception as exc:
+            group(name, f"python scripts/{script}", doc, False, 0, 0,
+                  [f"{type(exc).__name__}: {exc}"])
+
+    return {
+        "kind": "checks",
+        "groups": groups,
+        "all_passed": all(g["ok"] for g in groups),
+        "n_groups": len(groups),
+        "n_groups_passed": sum(1 for g in groups if g["ok"]),
+    }
+
+
+# --------------------------------------------------- stored bench results
+#: Where each bench writes, and what the tab should show from it.
+STORED_LABS: Dict[str, Dict[str, Any]] = {
+    "b2s": {"dir": "results/b2s", "file": "b2s.json", "command": "run.bat subst-lab"},
+    "gf": {"dir": "results/gf_sbox", "file": "gf_sbox.json", "command": "run.bat gf-lab"},
+    "luma": {"dir": "results/luma", "file": "luma.json", "command": "run.bat luma-lab"},
+}
+
+
+def action_stored_lab(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Read a bench result already on disk, without running anything.
+
+    A full bench takes minutes.  The tabs open on the stored run so the page
+    has content immediately, and the run button recomputes it.  Provenance is
+    passed through untouched: the reader sees which commit produced the numbers
+    and whether the tree was clean.
+    """
+    spec = STORED_LABS.get(str(payload.get("which", "")))
+    if spec is None:
+        raise ValueError("unknown bench")
+    path = os.path.join(spec["dir"], spec["file"])
+    if not os.path.exists(path):
+        return {"present": False, "path": path, "command": spec["command"]}
+    with open(path, "r", encoding="utf-8") as fh:
+        data = json.load(fh)
+    data.pop("figures", None)
+    return {"present": True, "path": path, "command": spec["command"],
+            "data": sanitize_json(data)}
+
+
+def action_full_lab(payload: Dict[str, Any], progress) -> Dict[str, Any]:
+    """Run one of the three benches exactly as the command line runs it."""
+    which = str(payload.get("which", ""))
+    cfg = _config(payload)
+    if which == "b2s":
+        from avsec.subst_lab import run_subst_lab
+
+        res = run_subst_lab(cfg, "results/b2s", progress=progress)
+    elif which == "gf":
+        from avsec.galois_lab import run_galois_lab
+
+        res = run_galois_lab(cfg, "results/gf_sbox", progress=progress)
+    elif which == "luma":
+        from avsec.luma_lab import run_luma_lab
+
+        res = run_luma_lab(cfg, "results/luma", progress=progress)
+    else:
+        raise ValueError("unknown bench")
+    res.pop("figures", None)
+    return {"which": which, "data": sanitize_json(res)}
+
+
 ASYNC_ACTIONS: Dict[str, Callable[..., Any]] = {
     "demo": action_demo,
     "scramble": action_scramble,
@@ -554,6 +948,11 @@ ASYNC_ACTIONS: Dict[str, Callable[..., Any]] = {
     "sweep": action_sweep,
     "report": action_report,
     "budget": action_budget,
+    "substitution": action_substitution,
+    "sbox": action_sbox,
+    "luma": action_luma,
+    "checks": action_checks,
+    "full_lab": action_full_lab,
 }
 
 #: The long actions are also reachable synchronously.  The page uses this path
@@ -569,6 +968,7 @@ SYNC_ACTIONS: Dict[str, Callable[[Dict[str, Any]], Any]] = {
     "defaults": action_defaults,
     "runs": action_list_runs,
     "load_config": action_load_config,
+    "stored_lab": action_stored_lab,
     # saved-run explorer
     "explorer_runs": action_explorer_runs,
     "explorer_overview": action_explorer_overview,
@@ -587,6 +987,10 @@ SYNC_ACTIONS: Dict[str, Callable[[Dict[str, Any]], Any]] = {
     "scramble": _sync(action_scramble),
     "attacks": _sync(action_attacks),
     "cvbs": _sync(action_cvbs),
+    "substitution": _sync(action_substitution),
+    "sbox": _sync(action_sbox),
+    "luma": _sync(action_luma),
+    "checks": _sync(action_checks),
 }
 
 

@@ -3,7 +3,7 @@
 Public API is intentionally small and stable; the CLI and the web UI both use it.
 """
 
-__version__ = "0.1.0"
+__version__ = "1.2.0"
 
 from avsec.utils import Stopwatch, StageTimer, sha256_file  # noqa: F401
 
