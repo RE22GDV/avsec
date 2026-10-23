@@ -3,11 +3,13 @@ title: "avsec — secure video over an existing analog composite video path"
 message: "If you use this testbed or its results, please cite it."
 type: software
 authors:
-  - alias: RE22GDV
+  - family-names: Handzuk
+    given-names: Dmytro
+    alias: RE22GDV
 repository-code: "https://github.com/RE22GDV/avsec"
 license: MIT
-version: "1.0.0"
-date-released: "2026-09-12"
+version: "1.2.0"
+date-released: "2026-09-15"
 keywords:
   - UAV video
   - analog composite video
