@@ -1,5 +1,10 @@
 # avsec — звіт за прогоном comparison (канал moderate)
 
+> **Про зображення в цьому звіті.** Рисунки й кадри лежали в каталозі
+> `runs/benchmark/`, який не входить до репозиторію (`.gitignore`), тому нижче
+> наведено лише їхні шляхи, а не самі зображення. Числові таблиці звіту —
+> повні й незмінені.
+
 ## Умови запуску
 
 - конфігурація: `comparison`
@@ -211,9 +216,9 @@
 | harsh | P | 11.990 | 0.000 | 3.000 | 16 |
 
 
-![psnr_vs_channel](../../runs/benchmark/psnr_vs_channel.png)
+`runs/benchmark/psnr_vs_channel.png`
 
-![coverage_vs_channel](../../runs/benchmark/coverage_vs_channel.png)
+`runs/benchmark/coverage_vs_channel.png`
 
 ## Наскрізна демонстрація через модель CVBS (рівень B)
 
@@ -248,53 +253,53 @@
 
 
 ### B0a
-- original: ![B0a-original](../../runs/benchmark/images/B0a/original.png)
-- transmitted: ![B0a-transmitted](../../runs/benchmark/images/B0a/transmitted.png)
-- received: ![B0a-received](../../runs/benchmark/images/B0a/received.png)
-- reconstructed: ![B0a-reconstructed](../../runs/benchmark/images/B0a/reconstructed.png)
-- availability: ![B0a-availability](../../runs/benchmark/images/B0a/availability.png)
+- original: `runs/benchmark/images/B0a/original.png`
+- transmitted: `runs/benchmark/images/B0a/transmitted.png`
+- received: `runs/benchmark/images/B0a/received.png`
+- reconstructed: `runs/benchmark/images/B0a/reconstructed.png`
+- availability: `runs/benchmark/images/B0a/availability.png`
 
 ### B0d
-- original: ![B0d-original](../../runs/benchmark/images/B0d/original.png)
-- transmitted: ![B0d-transmitted](../../runs/benchmark/images/B0d/transmitted.png)
-- received: ![B0d-received](../../runs/benchmark/images/B0d/received.png)
-- reconstructed: ![B0d-reconstructed](../../runs/benchmark/images/B0d/reconstructed.png)
-- availability: ![B0d-availability](../../runs/benchmark/images/B0d/availability.png)
+- original: `runs/benchmark/images/B0d/original.png`
+- transmitted: `runs/benchmark/images/B0d/transmitted.png`
+- received: `runs/benchmark/images/B0d/received.png`
+- reconstructed: `runs/benchmark/images/B0d/reconstructed.png`
+- availability: `runs/benchmark/images/B0d/availability.png`
 
 ### B1
-- original: ![B1-original](../../runs/benchmark/images/B1/original.png)
-- transmitted: ![B1-transmitted](../../runs/benchmark/images/B1/transmitted.png)
-- received: ![B1-received](../../runs/benchmark/images/B1/received.png)
-- reconstructed: ![B1-reconstructed](../../runs/benchmark/images/B1/reconstructed.png)
-- availability: ![B1-availability](../../runs/benchmark/images/B1/availability.png)
+- original: `runs/benchmark/images/B1/original.png`
+- transmitted: `runs/benchmark/images/B1/transmitted.png`
+- received: `runs/benchmark/images/B1/received.png`
+- reconstructed: `runs/benchmark/images/B1/reconstructed.png`
+- availability: `runs/benchmark/images/B1/availability.png`
 
 ### B2
-- original: ![B2-original](../../runs/benchmark/images/B2/original.png)
-- transmitted: ![B2-transmitted](../../runs/benchmark/images/B2/transmitted.png)
-- received: ![B2-received](../../runs/benchmark/images/B2/received.png)
-- reconstructed: ![B2-reconstructed](../../runs/benchmark/images/B2/reconstructed.png)
-- availability: ![B2-availability](../../runs/benchmark/images/B2/availability.png)
+- original: `runs/benchmark/images/B2/original.png`
+- transmitted: `runs/benchmark/images/B2/transmitted.png`
+- received: `runs/benchmark/images/B2/received.png`
+- reconstructed: `runs/benchmark/images/B2/reconstructed.png`
+- availability: `runs/benchmark/images/B2/availability.png`
 
 ### B3
-- original: ![B3-original](../../runs/benchmark/images/B3/original.png)
-- transmitted: ![B3-transmitted](../../runs/benchmark/images/B3/transmitted.png)
-- received: ![B3-received](../../runs/benchmark/images/B3/received.png)
-- reconstructed: ![B3-reconstructed](../../runs/benchmark/images/B3/reconstructed.png)
-- availability: ![B3-availability](../../runs/benchmark/images/B3/availability.png)
+- original: `runs/benchmark/images/B3/original.png`
+- transmitted: `runs/benchmark/images/B3/transmitted.png`
+- received: `runs/benchmark/images/B3/received.png`
+- reconstructed: `runs/benchmark/images/B3/reconstructed.png`
+- availability: `runs/benchmark/images/B3/availability.png`
 
 ### B4
-- original: ![B4-original](../../runs/benchmark/images/B4/original.png)
-- transmitted: ![B4-transmitted](../../runs/benchmark/images/B4/transmitted.png)
-- received: ![B4-received](../../runs/benchmark/images/B4/received.png)
-- reconstructed: ![B4-reconstructed](../../runs/benchmark/images/B4/reconstructed.png)
-- availability: ![B4-availability](../../runs/benchmark/images/B4/availability.png)
+- original: `runs/benchmark/images/B4/original.png`
+- transmitted: `runs/benchmark/images/B4/transmitted.png`
+- received: `runs/benchmark/images/B4/received.png`
+- reconstructed: `runs/benchmark/images/B4/reconstructed.png`
+- availability: `runs/benchmark/images/B4/availability.png`
 
 ### P
-- original: ![P-original](../../runs/benchmark/images/P/original.png)
-- transmitted: ![P-transmitted](../../runs/benchmark/images/P/transmitted.png)
-- received: ![P-received](../../runs/benchmark/images/P/received.png)
-- reconstructed: ![P-reconstructed](../../runs/benchmark/images/P/reconstructed.png)
-- availability: ![P-availability](../../runs/benchmark/images/P/availability.png)
+- original: `runs/benchmark/images/P/original.png`
+- transmitted: `runs/benchmark/images/P/transmitted.png`
+- received: `runs/benchmark/images/P/received.png`
+- reconstructed: `runs/benchmark/images/P/reconstructed.png`
+- availability: `runs/benchmark/images/P/availability.png`
 
 ## Що НЕ підтверджено цим звітом
 
