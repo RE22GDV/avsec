@@ -386,3 +386,22 @@ def test_f13_equivalent_configurations_collapse_to_one():
     other = effective_fingerprint(
         build_candidate(BUDGET, 24, 1, "dct", 8, 320, 128, ("block", 278, 0), (4, 8, 2)))
     assert other not in set(fps.values())
+
+
+def test_the_cli_prints_ukrainian_on_a_legacy_codepage():
+    """Every command prints Ukrainian; a console need not be UTF-8.
+
+    ``avsec dataset`` died with UnicodeEncodeError inside
+    ``json.dumps(..., ensure_ascii=False)`` on a Windows runner, whose console
+    defaults to cp1252, before printing a line of its report.  The guard is in
+    ``main``, so one command exercises it for all of them.
+    """
+    import os
+    import subprocess
+    import sys
+
+    env = dict(os.environ, PYTHONIOENCODING="cp1252")
+    res = subprocess.run([sys.executable, "-m", "avsec.cli", "info"],
+                         capture_output=True, env=env, timeout=180)
+    assert res.returncode == 0, res.stderr.decode("utf-8", "replace")
+    assert b"UnicodeEncodeError" not in res.stderr

@@ -689,7 +689,26 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
+def _utf8_stdio() -> None:
+    """Carry UTF-8 on stdout and stderr whatever the console codepage is.
+
+    Every command of this tool prints Ukrainian, and a Windows console still
+    defaults to a legacy codepage: ``avsec dataset`` died with
+    ``UnicodeEncodeError`` inside ``json.dumps(..., ensure_ascii=False)``
+    before printing a single line of its report.  Reconfiguring the streams
+    here fixes every command at once rather than one call site at a time.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8")
+        except (AttributeError, ValueError, OSError):
+            # a stream that cannot be reconfigured (replaced by a test, or
+            # already wrapped) keeps whatever encoding it has
+            pass
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
+    _utf8_stdio()
     parser = build_parser()
     args = parser.parse_args(argv)
     return int(args.func(args) or 0)
